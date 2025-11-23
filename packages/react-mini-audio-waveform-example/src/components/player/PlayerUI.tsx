@@ -213,6 +213,7 @@ export function PlayerUI() {
   return (
     <div className="flex items-center flex-wrap gap-2">
       {/* Play/Pause Button */}
+      <MiniSpectro size={16} />
       <button
         onClick={handlePlayPause}
         className="flex items-center justify-center text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 p-1"
@@ -243,7 +244,6 @@ export function PlayerUI() {
       <span className="text-xs font-mono text-gray-600 dark:text-gray-400 text-right font-black">
         {formatTime(currentTime)}
       </span>
-      <MiniSpectro />
       <div className="flex-1">
         <HorizontalSlider
           value={progressPercentage}

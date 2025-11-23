@@ -34,11 +34,10 @@ export function DarkModeToggle() {
   return (
     <button
       onClick={cycleMode}
-      className="text-xs font-mono text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 mb-1 flex items-center gap-1 cursor-pointer transition-colors"
+      className="text-xs font-mono text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100  flex items-center gap-1 cursor-pointer transition-colors"
       aria-label={getAriaLabel()}
     >
       {getLabel()}
     </button>
   );
 }
-

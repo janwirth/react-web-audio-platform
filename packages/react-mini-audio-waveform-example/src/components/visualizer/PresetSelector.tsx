@@ -6,6 +6,8 @@ interface PresetSelectorProps {
   onPresetHover?: (preset: any) => void;
   onPresetLeave?: () => void;
   onPresetClick?: (preset: any, presetName: string) => void;
+  onPrevPreset?: () => void;
+  onNextPreset?: () => void;
 }
 
 // Load and sort presets just like in butter.html
@@ -33,19 +35,47 @@ export function PresetSelector({
   onPresetHover,
   onPresetLeave,
   onPresetClick,
+  onPrevPreset,
+  onNextPreset,
 }: PresetSelectorProps) {
   const { presets, presetKeys } = useMemo(() => loadAndSortPresets(), []);
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   return (
     <div className="mt-1">
-      <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="text-xs font-mono text-gray-500 hover:text-gray-900 mb-1 flex items-center gap-1 hover:text-gray-900 cursor-pointer"
-      >
-        <span>{isCollapsed ? "▶" : "▼"}</span>
-        <span>Presets {selectedPresetName && `(${selectedPresetName})`}</span>
-      </button>
+      <div className="flex items-center gap-2 mb-1">
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="text-xs font-mono text-gray-500 hover:text-gray-900 flex items-center gap-1 cursor-pointer"
+        >
+          <span>{isCollapsed ? "▶" : "▼"}</span>
+          <span>Presets {selectedPresetName && `(${selectedPresetName})`}</span>
+        </button>
+        {(onPrevPreset || onNextPreset) && (
+          <div className="flex items-center gap-1">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onPrevPreset?.();
+              }}
+              className="text-xs font-mono text-gray-500 hover:text-gray-900 px-1.5 py-0.5 border border-gray-300 rounded hover:bg-gray-100 cursor-pointer"
+              title="Previous preset"
+            >
+              ◀
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onNextPreset?.();
+              }}
+              className="text-xs font-mono text-gray-500 hover:text-gray-900 px-1.5 py-0.5 border border-gray-300 rounded hover:bg-gray-100 cursor-pointer"
+              title="Next preset"
+            >
+              ▶
+            </button>
+          </div>
+        )}
+      </div>
       {!isCollapsed && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 text-xs font-mono">
           {presetKeys.map((presetName) => {

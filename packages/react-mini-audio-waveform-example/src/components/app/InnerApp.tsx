@@ -104,7 +104,15 @@ export function InnerApp() {
   return (
     <div className="flex flex-col gap-8 relative">
       {/* Header with dark mode and visualizer toggles */}
-      <div className="flex gap-4 items-center mb-1">
+
+      <div className="sticky bg-white dark:bg-black w-full top-0 left-0 z-10 flex gap-1 items-center transition-colors">
+        {/* must take full width */}
+        <div className="flex-1 grow">
+          <PlayerUI />
+        </div>
+      </div>
+
+      <div className="flex gap-4 items-center">
         <DarkModeToggle />
         <button
           onClick={() => setShowVisualizer(!showVisualizer)}
@@ -115,12 +123,6 @@ export function InnerApp() {
         </button>
       </div>
       {showVisualizer && <Visualizer />}
-
-      <div className="sticky bg-white dark:bg-black w-full top-[73px] left-0 z-10 flex gap-1 items-center transition-colors">
-        <div className="flex-1 grow">
-          <PlayerUI />
-        </div>
-      </div>
       <GlobalControls
         onPaletteChange={setCustomPalette}
         onHeightChange={setWaveformHeight}
