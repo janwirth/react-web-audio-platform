@@ -4,9 +4,10 @@ import { GlobalControls } from "./components/GlobalControls";
 import { AudioContextProvider } from "@janwirth/react-web-audio-context";
 import { dequeueAudioBufferRequest } from "@janwirth/react-web-audio-context";
 import type { ColorPalette } from "@janwirth/react-mini-audio-waveform";
-import { Player, usePlayerContext } from "./components/Player";
+import { Player } from "./components/Player";
 import { PlayerUI } from "./components/PlayerUI";
 import { Visualizer } from "./components/Visualizer";
+import { StereoImager } from "./components/StereoImager";
 
 interface AudioItemData {
   title: string;
@@ -20,6 +21,9 @@ function App() {
   const [audioItems, setAudioItems] = useState<AudioItemData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Visualizer toggle state (default off)
+  const [showVisualizer, setShowVisualizer] = useState(false);
 
   // Global control values
   const [customPalette, setCustomPalette] = useState<Partial<ColorPalette>>({});
@@ -65,10 +69,22 @@ function App() {
     <AudioContextProvider>
       <Player>
         <div className="flex flex-col gap-8 relative">
-          <div className="sticky bg-gray-100 w-full top-1 left-0 z-10">
-            <PlayerUI />
+          {/* Header with visualizer toggle */}
+          <button
+            onClick={() => setShowVisualizer(!showVisualizer)}
+            className="text-xs font-mono text-gray-500 hover:text-gray-900 mb-1 flex items-center gap-1 cursor-pointer"
+            aria-label={showVisualizer ? "Hide visualizer" : "Show visualizer"}
+          >
+            {showVisualizer ? "Hide Visualizer" : "Show Visualizer"}
+          </button>
+          {showVisualizer && <Visualizer />}
+
+          <div className="sticky bg-gray-100 w-full top-[73px] left-0 z-10 flex gap-1">
+            <div className="flex-1 grow">
+              <PlayerUI />
+            </div>
+            <StereoImager />
           </div>
-          <Visualizer />
           <GlobalControls
             onPaletteChange={setCustomPalette}
             onHeightChange={setWaveformHeight}

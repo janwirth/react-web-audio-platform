@@ -34,7 +34,7 @@ export const Visualizer = () => {
   const visualizerRef = useRef<ReturnType<typeof initVisualizer> | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const resizeTimeoutRef = useRef<number | null>(null);
-  const [canvasWidth, setCanvasWidth] = useState(width);
+  const [canvasWidth, setCanvasWidth] = useState<number | null>(null);
 
   const { presets, presetKeys } = useMemo(() => loadAndSortPresets(), []);
 
@@ -96,6 +96,8 @@ export const Visualizer = () => {
       canvasRef.current &&
       audioNode &&
       initialPreset &&
+      canvasWidth !== null &&
+      canvasWidth > 0 &&
       !visualizerRef.current
     ) {
       // Set initial canvas size
@@ -135,11 +137,16 @@ export const Visualizer = () => {
         visualizerRef.current = null;
       };
     }
-  }, [audioNode, initialPreset, canvasWidth]);
+  }, [audioNode, initialPreset, canvasWidth, initialPresetName]);
 
   // Update visualizer width when canvas width changes
   useEffect(() => {
-    if (visualizerRef.current?.visualizer && canvasRef.current) {
+    if (
+      visualizerRef.current?.visualizer &&
+      canvasRef.current &&
+      canvasWidth !== null &&
+      canvasWidth > 0
+    ) {
       canvasRef.current.width = canvasWidth;
       canvasRef.current.height = height;
 
@@ -153,7 +160,7 @@ export const Visualizer = () => {
   return (
     <div className="flex flex-col gap-1">
       <div ref={wrapperRef} className="bg-gray-100">
-        <canvas ref={canvasRef} width={canvasWidth} height={height} />{" "}
+        <canvas ref={canvasRef} width={canvasWidth ?? width} height={height} />{" "}
       </div>
 
       <PresetSelector
