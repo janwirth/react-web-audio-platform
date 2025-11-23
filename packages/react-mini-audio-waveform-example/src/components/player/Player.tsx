@@ -53,6 +53,38 @@ export const Player: React.FC<PlayerProps> = ({ children }) => {
   );
   const [activeUrl, setActiveUrl] = useAtom(activeUrlAtom);
 
+  // Helper function to play a track by index
+  const playTrackByIndex = useCallback(
+    (index: number) => {
+      const audio = audioRef.current;
+      if (!audio || index < 0 || index >= queue.length) return;
+
+      const item = queue[index];
+      if (item) {
+        setCurrentQueueIndex(index);
+        setActiveUrl(item.audioUrl);
+        audio.src = item.audioUrl;
+        audio.load();
+        audio.play().catch(console.error);
+      }
+    },
+    [queue, setCurrentQueueIndex, setActiveUrl]
+  );
+
+  // Helper function to go to next track
+  const goToNext = useCallback(() => {
+    if (currentQueueIndex >= 0 && currentQueueIndex < queue.length - 1) {
+      playTrackByIndex(currentQueueIndex + 1);
+    }
+  }, [currentQueueIndex, queue.length, playTrackByIndex]);
+
+  // Helper function to go to previous track
+  const goToPrevious = useCallback(() => {
+    if (currentQueueIndex > 0) {
+      playTrackByIndex(currentQueueIndex - 1);
+    }
+  }, [currentQueueIndex, playTrackByIndex]);
+
   // Handle track ending and advance to next in queue
   useEffect(() => {
     const audio = audioRef.current;
@@ -61,17 +93,7 @@ export const Player: React.FC<PlayerProps> = ({ children }) => {
     const handleEnded = () => {
       if (currentQueueIndex >= 0 && currentQueueIndex < queue.length - 1) {
         // Advance to next track in queue
-        const nextIndex = currentQueueIndex + 1;
-        const nextItem = queue[nextIndex];
-        if (nextItem) {
-          setCurrentQueueIndex(nextIndex);
-          // audioUrl should already be a full URL
-          const fullUrl = nextItem.audioUrl;
-          setActiveUrl(fullUrl);
-          audio.src = fullUrl;
-          audio.load();
-          audio.play().catch(console.error);
-        }
+        goToNext();
       } else {
         // Queue finished or no queue
         setCurrentQueueIndex(-1);
@@ -82,7 +104,135 @@ export const Player: React.FC<PlayerProps> = ({ children }) => {
     return () => {
       audio.removeEventListener("ended", handleEnded);
     };
-  }, [queue, currentQueueIndex, setCurrentQueueIndex, setActiveUrl]);
+  }, [queue, currentQueueIndex, setCurrentQueueIndex, goToNext]);
+
+  // Set up Media Session API for device controls
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) {
+      return; // Media Session API not supported
+    }
+
+    const mediaSession = navigator.mediaSession;
+
+    // Set up action handlers
+    mediaSession.setActionHandler("play", () => {
+      const audio = audioRef.current;
+      if (audio) {
+        audio.play().catch(console.error);
+      }
+    });
+
+    mediaSession.setActionHandler("pause", () => {
+      const audio = audioRef.current;
+      if (audio) {
+        audio.pause();
+      }
+    });
+
+    mediaSession.setActionHandler("previoustrack", () => {
+      goToPrevious();
+    });
+
+    mediaSession.setActionHandler("nexttrack", () => {
+      goToNext();
+    });
+
+    // Cleanup: remove action handlers
+    return () => {
+      try {
+        mediaSession.setActionHandler("play", null);
+        mediaSession.setActionHandler("pause", null);
+        mediaSession.setActionHandler("previoustrack", null);
+        mediaSession.setActionHandler("nexttrack", null);
+      } catch (e) {
+        // Ignore errors during cleanup
+      }
+    };
+  }, [goToNext, goToPrevious]);
+
+  // Update Media Session metadata when active track changes
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) {
+      return; // Media Session API not supported
+    }
+
+    const mediaSession = navigator.mediaSession;
+    const currentItem =
+      currentQueueIndex >= 0 && currentQueueIndex < queue.length
+        ? queue[currentQueueIndex]
+        : null;
+
+    if (currentItem && activeUrl) {
+      mediaSession.metadata = new MediaMetadata({
+        title: currentItem.title,
+        artist: "Audio Player",
+        // You can add more metadata here if available
+        // album: "",
+        // artwork: [{ src: "", sizes: "", type: "" }],
+      });
+
+      // Update playback state
+      const audio = audioRef.current;
+      if (audio) {
+        mediaSession.playbackState = audio.paused ? "paused" : "playing";
+      }
+    } else {
+      // Clear metadata if no track is active
+      mediaSession.metadata = null;
+    }
+  }, [activeUrl, currentQueueIndex, queue]);
+
+  // Update Media Session playback state and position when audio state changes
+  useEffect(() => {
+    if (!("mediaSession" in navigator)) {
+      return;
+    }
+
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const updatePlaybackState = () => {
+      navigator.mediaSession.playbackState = audio.paused
+        ? "paused"
+        : "playing";
+    };
+
+    const updatePositionState = () => {
+      if (audio.duration && isFinite(audio.duration)) {
+        navigator.mediaSession.setPositionState({
+          duration: audio.duration,
+          playbackRate: audio.playbackRate,
+          position: audio.currentTime,
+        });
+      }
+    };
+
+    // Update position state periodically
+    const intervalId = setInterval(() => {
+      if (!audio.paused && audio.duration && isFinite(audio.duration)) {
+        updatePositionState();
+      }
+    }, 1000); // Update every second
+
+    audio.addEventListener("play", updatePlaybackState);
+    audio.addEventListener("pause", updatePlaybackState);
+    audio.addEventListener("ended", updatePlaybackState);
+    audio.addEventListener("timeupdate", updatePositionState);
+    audio.addEventListener("loadedmetadata", updatePositionState);
+
+    // Initial update
+    updatePlaybackState();
+    updatePositionState();
+
+    return () => {
+      clearInterval(intervalId);
+      audio.removeEventListener("play", updatePlaybackState);
+      audio.removeEventListener("pause", updatePlaybackState);
+      audio.removeEventListener("ended", updatePlaybackState);
+      audio.removeEventListener("timeupdate", updatePositionState);
+      audio.removeEventListener("loadedmetadata", updatePositionState);
+    };
+  }, []);
 
   return (
     <PlayerContext.Provider value={{ audioRef }}>
