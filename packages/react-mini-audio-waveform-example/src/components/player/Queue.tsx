@@ -80,10 +80,7 @@ export function Queue() {
         )}
       </div>
       {queue.length === 0 ? (
-        <div>
-          Queue is empty. Click on any track title to create a queue starting
-          from that track.
-        </div>
+        <div className="text-gray-400 dark:text-gray-700">empty.</div>
       ) : (
         <div>
           {queue.map((item, index) => (

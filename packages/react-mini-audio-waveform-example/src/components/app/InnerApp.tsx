@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { AudioItem } from "./AudioItem";
 import { GlobalControls } from "./GlobalControls";
 import { DarkModeToggle } from "./DarkModeToggle";
@@ -36,7 +36,16 @@ export function InnerApp() {
   const { initQueue } = useQueue();
   const [firstTrackUrl, setFirstTrackUrl] = useState<string>("");
   const shouldAutoPlayRef = useRef(false);
-  const { seekAndPlay } = useTrack(firstTrackUrl || "");
+
+  // Convert audioItems to QueueItem format for useTrack
+  const allQueueItems = useMemo<QueueItem[]>(() => {
+    return audioItems.map((item) => ({
+      title: item.title,
+      audioUrl: `${BASE_URL}${item.audioUrl}`,
+    }));
+  }, [audioItems]);
+
+  const { seekAndPlay } = useTrack(firstTrackUrl || "", allQueueItems);
 
   // Auto-play when firstTrackUrl changes and we should auto-play
   useEffect(() => {
@@ -141,6 +150,7 @@ export function InnerApp() {
               waveformHeight={waveformHeight}
               reRenderKey={reRenderKey}
               onQueueClick={() => handleCreateQueue(index)}
+              allItems={allQueueItems}
             />
           ))}
         </div>

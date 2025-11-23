@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { getColorPalette } from "../waveform";
 import { Waveform, WaveformRenderData } from "../waveform";
 import type { ColorPalette } from "../waveform";
-import { useTrack } from "../player/Player";
+import { useTrack, type QueueItem } from "../player/Player";
 
 interface AudioItemProps {
   title: string;
@@ -15,6 +15,7 @@ interface AudioItemProps {
   waveformHeight: number;
   reRenderKey: number;
   onQueueClick?: () => void;
+  allItems?: QueueItem[];
 }
 
 const MONOCHROME_PALETTES = [
@@ -29,12 +30,13 @@ const MONOCHROME_PALETTES = [
 ];
 
 interface WaveformItemProps {
-  label: string;
+  label?: string;
   audioUrl: string;
   colorPalette: Partial<ColorPalette> | ColorPalette;
   cachedRenderData: WaveformRenderData | null;
   waveformHeight: number;
   onGotData?: (data: WaveformRenderData) => void;
+  allItems?: QueueItem[];
 }
 
 function WaveformItem({
@@ -44,8 +46,9 @@ function WaveformItem({
   cachedRenderData,
   waveformHeight,
   onGotData,
+  allItems,
 }: WaveformItemProps) {
-  const player = useTrack(audioUrl);
+  const player = useTrack(audioUrl, allItems);
 
   const handleWaveformClick = (percentage: number) => {
     // console.log("Waveform clicked at", percentage * 100, "%");
@@ -54,9 +57,11 @@ function WaveformItem({
 
   return (
     <div className="flex items-center gap-2 group">
-      <div className="font-medium min-w-[80px] text-right text-xs font-mono text-gray-500 group-hover:text-black">
-        {label}
-      </div>
+      {label && (
+        <div className="font-medium min-w-[80px] text-right text-xs font-mono text-gray-500 group-hover:text-black">
+          {label}
+        </div>
+      )}
       <div className="flex-1 relative">
         {
           <>
@@ -97,6 +102,7 @@ export function AudioItem({
   waveformHeight,
   reRenderKey,
   onQueueClick,
+  allItems,
 }: AudioItemProps) {
   console.log("rendering audio item", audioUrl);
   const fullAudioUrl = `${baseUrl}${audioUrl}`;
@@ -150,40 +156,13 @@ export function AudioItem({
   };
 
   return (
-    <div className="font-mono">
-      <div
-        className="text-sm font-medium text-gray-700 cursor-pointer hover:text-gray-900"
-        onClick={onQueueClick}
-        title="Click to create queue starting from this track"
-      >
-        {title} Add to qeue
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <WaveformItem
-          label="custom"
-          audioUrl={audioUrlWithKey}
-          colorPalette={customPalette}
-          cachedRenderData={cachedRenderData}
-          waveformHeight={waveformHeight}
-          onGotData={onGotData}
-        />
-
-        {/* Other monochrome palettes */}
-        {MONOCHROME_PALETTES.map((paletteName) => {
-          const palette = getColorPalette(paletteName);
-          return (
-            <WaveformItem
-              key={paletteName}
-              label={getPaletteLabel(paletteName)}
-              audioUrl={audioUrlWithKey}
-              colorPalette={palette}
-              cachedRenderData={cachedRenderData}
-              waveformHeight={waveformHeight}
-            />
-          );
-        })}
-      </div>
-    </div>
+    <WaveformItem
+      audioUrl={audioUrlWithKey}
+      colorPalette={customPalette}
+      cachedRenderData={cachedRenderData}
+      waveformHeight={waveformHeight}
+      onGotData={onGotData}
+      allItems={allItems}
+    />
   );
 }

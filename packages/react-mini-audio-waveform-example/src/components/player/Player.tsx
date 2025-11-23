@@ -260,9 +260,14 @@ const normalizeUrl = (url: string): string => {
   }
 };
 
-export const useTrack = (url: string): UseTrackReturn => {
+export const useTrack = (
+  url: string,
+  allItems?: QueueItem[]
+): UseTrackReturn => {
   const { audioRef } = usePlayerContext();
   const [activeUrl, setActiveUrl] = useAtom(activeUrlAtom);
+  const setQueue = useSetAtom(queueAtom);
+  const setCurrentQueueIndex = useSetAtom(currentQueueIndexAtom);
   const playheadPosition = useAtomValue(playheadPositionAtomFamily(url));
   const setPlayheadPosition = useSetAtom(playheadPositionAtomFamily(url));
 
@@ -313,10 +318,26 @@ export const useTrack = (url: string): UseTrackReturn => {
       const audio = audioRef.current;
       if (!audio) return;
 
+      const normalizedUrl = normalizeUrl(url);
+
+      // If allItems is provided, build a queue starting from this track
+      if (allItems && allItems.length > 0) {
+        // Find the index of the current track in allItems
+        const currentIndex = allItems.findIndex((item) => {
+          const normalizedItemUrl = normalizeUrl(item.audioUrl);
+          return normalizedItemUrl === normalizedUrl;
+        });
+
+        // If found, create a queue starting from this track
+        if (currentIndex >= 0) {
+          const queueItems = allItems.slice(currentIndex);
+          setQueue(queueItems);
+          setCurrentQueueIndex(0);
+        }
+      }
+
       // Set this URL as active
       setActiveUrl(url);
-
-      const normalizedUrl = normalizeUrl(url);
       const currentSrc = audio.src;
       const normalizedCurrentSrc = normalizeUrl(currentSrc);
 
@@ -384,13 +405,30 @@ export const useTrack = (url: string): UseTrackReturn => {
         });
       }
     },
-    [audioRef, url, setActiveUrl]
+    [audioRef, url, setActiveUrl, allItems, setQueue, setCurrentQueueIndex]
   );
 
   const play = useCallback(() => {
+    // If allItems is provided, build a queue starting from this track
+    if (allItems && allItems.length > 0) {
+      // Find the index of the current track in allItems
+      const normalizedUrl = normalizeUrl(url);
+      const currentIndex = allItems.findIndex((item) => {
+        const normalizedItemUrl = normalizeUrl(item.audioUrl);
+        return normalizedItemUrl === normalizedUrl;
+      });
+
+      // If found, create a queue starting from this track
+      if (currentIndex >= 0) {
+        const queueItems = allItems.slice(currentIndex);
+        setQueue(queueItems);
+        setCurrentQueueIndex(0);
+      }
+    }
+
     setActiveUrl(url);
     audioRef.current?.play();
-  }, [audioRef, url, setActiveUrl]);
+  }, [audioRef, url, setActiveUrl, allItems, setQueue, setCurrentQueueIndex]);
 
   const pause = useCallback(() => {
     audioRef.current?.pause();

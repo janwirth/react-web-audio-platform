@@ -146,15 +146,15 @@ export function VerticalSlider({
   };
 
   return (
-    <div className="flex flex-col items-center gap-1 group">
+    <div className="flex flex-col items-center gap-1">
       {label && (
-        <span className="text-xs text-gray-300 dark:text-gray-700 group-hover:text-gray-100 dark:group-hover:text-gray-900 font-mono font-bold rotate-90 mb-2 w-1 scale-75 transition-colors">
+        <span className=" text-xs text-gray-300 dark:text-gray-700 font-mono font-bold rotate-90 mb-2 w-1 scale-75">
           {label}
         </span>
       )}
       <div
         ref={barRef}
-        className="relative w-2.5 bg-gray-300 dark:bg-gray-800 group-hover:bg-gray-400 dark:group-hover:bg-gray-700 rounded-sm cursor-pointer select-none overflow-hidden transition-colors"
+        className="relative w-2.5 bg-gray-300 dark:bg-gray-800 rounded-sm cursor-pointer select-none overflow-hidden"
         style={{ height: `${barHeight}px` }}
         onMouseDown={(e) => {
           isDraggingRef.current = true;
@@ -166,7 +166,7 @@ export function VerticalSlider({
       >
         {/* Fill */}
         <div
-          className="absolute w-full bg-gray-500 dark:bg-gray-400 group-hover:bg-gray-600 dark:group-hover:bg-gray-300 transition-colors"
+          className="absolute w-full bg-gray-500 dark:bg-gray-400"
           style={{
             height: `${fillHeight}px`,
             bottom: fillBottom,
@@ -184,7 +184,7 @@ export function VerticalSlider({
         {/* Center indicator - only show for offset */}
         {polarity === "offset" && (
           <div
-            className="absolute w-full h-0.5 bg-gray-300 dark:bg-gray-500 group-hover:bg-gray-200 dark:group-hover:bg-gray-400 opacity-50 group-hover:opacity-75 transition-all"
+            className="absolute w-full h-0.5 bg-gray-300 dark:bg-gray-500 opacity-50"
             style={{ top: "50%", transform: "translateY(-50%)" }}
           />
         )}
