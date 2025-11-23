@@ -61,7 +61,7 @@ export function PresetSelector({
               className="text-xs font-mono text-gray-500 hover:text-gray-900 px-1.5 py-0.5 border border-gray-300 rounded hover:bg-gray-100 cursor-pointer"
               title="Previous preset"
             >
-              ◀
+              prev
             </button>
             <button
               onClick={(e) => {
@@ -71,7 +71,7 @@ export function PresetSelector({
               className="text-xs font-mono text-gray-500 hover:text-gray-900 px-1.5 py-0.5 border border-gray-300 rounded hover:bg-gray-100 cursor-pointer"
               title="Next preset"
             >
-              ▶
+              next
             </button>
           </div>
         )}

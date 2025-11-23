@@ -57,15 +57,16 @@ export const Visualizer = () => {
   // Navigation functions for prev/next preset
   const handlePrevPreset = () => {
     if (!selectedPresetName || presetKeys.length === 0) return;
-    
+
     const currentIndex = presetKeys.indexOf(selectedPresetName);
     if (currentIndex === -1) return;
-    
+
     // Wrap around to the last preset if at the beginning
-    const prevIndex = currentIndex === 0 ? presetKeys.length - 1 : currentIndex - 1;
+    const prevIndex =
+      currentIndex === 0 ? presetKeys.length - 1 : currentIndex - 1;
     const prevPresetName = presetKeys[prevIndex];
     const prevPreset = presets[prevPresetName];
-    
+
     setSelectedPreset(prevPreset);
     setSelectedPresetName(prevPresetName);
     if (visualizerRef.current?.visualizer) {
@@ -75,15 +76,16 @@ export const Visualizer = () => {
 
   const handleNextPreset = () => {
     if (!selectedPresetName || presetKeys.length === 0) return;
-    
+
     const currentIndex = presetKeys.indexOf(selectedPresetName);
     if (currentIndex === -1) return;
-    
+
     // Wrap around to the first preset if at the end
-    const nextIndex = currentIndex === presetKeys.length - 1 ? 0 : currentIndex + 1;
+    const nextIndex =
+      currentIndex === presetKeys.length - 1 ? 0 : currentIndex + 1;
     const nextPresetName = presetKeys[nextIndex];
     const nextPreset = presets[nextPresetName];
-    
+
     setSelectedPreset(nextPreset);
     setSelectedPresetName(nextPresetName);
     if (visualizerRef.current?.visualizer) {
