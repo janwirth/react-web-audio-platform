@@ -1,8 +1,8 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { ColorPicker } from "./ColorPicker";
-import { VerticalSlider } from "./VerticalSlider";
-import { generateOklchPalette } from "@janwirth/react-mini-audio-waveform";
-import type { ColorPalette } from "@janwirth/react-mini-audio-waveform";
+import { ColorPicker } from "../inputs/ColorPicker";
+import { VerticalSlider } from "../inputs/VerticalSlider";
+import { generateOklchPalette } from "../waveform";
+import type { ColorPalette } from "../waveform";
 
 interface GlobalControlsProps {
   onPaletteChange: (palette: Partial<ColorPalette>) => void;

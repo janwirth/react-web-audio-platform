@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { usePlayerContext } from "./Player";
+import { usePlayerContext } from "../player/Player";
 
 const DEFAULT_SIZE = 32;
 

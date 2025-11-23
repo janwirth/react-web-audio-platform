@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { usePlayerContext, useCurrentPlayback } from "./Player";
-import { MiniSpectro } from "./MiniSpectro";
+import { MiniSpectro } from "../visualizer/MiniSpectro";
 
 // Format seconds to MM:SS or HH:MM:SS
 const formatTime = (seconds: number): string => {

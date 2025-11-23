@@ -2,13 +2,10 @@
  * Example file demonstrating Waveform component usage
  */
 import { useMemo } from "react";
-import { getColorPalette } from "@janwirth/react-mini-audio-waveform";
-import {
-  Waveform,
-  WaveformRenderData,
-} from "@janwirth/react-mini-audio-waveform";
-import type { ColorPalette } from "@janwirth/react-mini-audio-waveform";
-import { useTrack } from "./Player";
+import { getColorPalette } from "../waveform";
+import { Waveform, WaveformRenderData } from "../waveform";
+import type { ColorPalette } from "../waveform";
+import { useTrack } from "../player/Player";
 
 interface AudioItemProps {
   title: string;
@@ -72,7 +69,7 @@ function WaveformItem({
             </div> */}
             {player.playheadPosition !== null && (
               <div
-                className="bg-black-500 w-[1%] min-w-0.5 h-full absolute bottom-[-10%] z-10 backdrop-invert"
+                className="bg-black-500 w-[1%] min-w-0.5 h-full absolute bottom-[-10%] z-10 backdrop-invert transition-all"
                 style={{ left: `${player.playheadPosition * 99}%` }}
               ></div>
             )}

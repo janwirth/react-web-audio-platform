@@ -1,5 +1,5 @@
 import { useEffect, useRef, useMemo, useState } from "react";
-import { usePlayerContext } from "./Player";
+import { usePlayerContext } from "../player/Player";
 import { initVisualizer } from "./initVisualizer";
 import { PresetSelector } from "./PresetSelector";
 import butterchurnPresets from "butterchurn-presets";

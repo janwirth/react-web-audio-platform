@@ -3,8 +3,8 @@ import { setupCanvas, renderWaveform } from "./lib/canvas-renderer";
 import type { ColorPalette, NormalizationConfig } from "./lib/canvas-renderer";
 import { getSpectralData, type SpectralData } from "./lib/frequency-split";
 import { getWaveformData } from "./lib/waveform-data";
-import { loadAudioBuffer } from "@janwirth/react-web-audio-context";
-import { useAudioContext } from "@janwirth/react-web-audio-context";
+import { loadAudioBuffer } from "../audio-context";
+import { useAudioContext } from "../audio-context";
 import useResizeObserver from "use-resize-observer";
 import { useDebouncedTrailingHook } from "./hooks/useDebouncedTrailingHook";
 

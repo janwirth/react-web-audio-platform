@@ -261,10 +261,11 @@ const waitForBuffered = (
   return new Promise((resolve, reject) => {
     const check = () => {
       console.log("checkIsBuffered", checkIsBuffered(audio, targetTime));
+      audio.currentTime = targetTime;
       if (checkIsBuffered(audio, targetTime)) {
         resolve();
       } else {
-        setTimeout(check, 100);
+        setTimeout(check, 300);
       }
     };
     check();
