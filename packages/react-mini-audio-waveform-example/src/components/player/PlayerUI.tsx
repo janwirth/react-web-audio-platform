@@ -242,7 +242,7 @@ export function PlayerUI() {
 
       {/* Progress Scrubber */}
       <span className="text-xs font-mono text-gray-600 dark:text-gray-400 text-right font-black">
-        {formatTime(currentTime)}
+        {duration > 0 ? formatTime(currentTime) : "-:--"}
       </span>
       <div className="flex-1">
         <HorizontalSlider
@@ -254,7 +254,7 @@ export function PlayerUI() {
         />
       </div>
       <span className="text-xs font-mono text-gray-600 dark:text-gray-400">
-        {formatTime(duration)}
+        {duration > 0 ? formatTime(duration) : "-:--"}
       </span>
 
       {/* Volume Control */}

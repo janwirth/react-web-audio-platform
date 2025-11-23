@@ -10,11 +10,11 @@
 
     <!-- Dark mode initialization script - runs before React -->
     <script>
-      (function() {
+      (function () {
         // Check localStorage for theme mode preference
         const stored = localStorage.getItem("themeMode");
         let isDark = false;
-        
+
         if (stored === "dark") {
           isDark = true;
         } else if (stored === "light") {
@@ -40,7 +40,7 @@
             }
           }
         }
-        
+
         if (isDark) {
           document.documentElement.classList.add("dark");
         } else {
