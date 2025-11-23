@@ -118,32 +118,56 @@ export function Waveform({
     }
   }, [renderData, onGotData]);
 
+  const { width } = useResizeObserver({
+    ref: wrapperRef as React.RefObject<Element>,
+  });
+
+  // Debounce all render params with 300ms delay
+  const debouncedWidth = useDebouncedTrailingHook(width, 300);
+  const debouncedHeight = useDebouncedTrailingHook(height, 300);
+  const debouncedColorPalette = useDebouncedTrailingHook(colorPalette, 300);
+  const debouncedNormalizationConfig = useDebouncedTrailingHook(
+    normalizationConfig,
+    300
+  );
+
+  // Store the latest render function in a ref to avoid triggering effects when it changes
+  const handleResizeRef = useRef<
+    ((canvasWidth: number, canvasHeight: number) => void) | undefined
+  >(undefined);
+  const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   const handleResize = useCallback(
-    (canvasWidth: number, _canvasHeight: number) => {
-      console.log("handleResize", canvasWidth, _canvasHeight);
+    (canvasWidth: number, canvasHeight: number) => {
+      console.log("handleResize", canvasWidth, canvasHeight);
       const canvas = canvasRef.current;
       if (!canvas || !renderData) return;
 
-      setupCanvas(canvas, canvasWidth, height);
+      setupCanvas(canvas, canvasWidth, canvasHeight);
 
       // Ensure canvas stretches to fill width using CSS
       canvas.style.width = "100%";
-      canvas.style.height = `${height}px`;
+      canvas.style.height = `${canvasHeight}px`;
       canvas.style.objectFit = "fill";
       canvas.style.display = "block";
 
-      // Render with pre-computed data
+      // Render with pre-computed data and debounced params
       // The renderer handles interpolation for different canvas sizes
       renderWaveform(
         canvas,
         renderData.waveformData,
         renderData.spectralData,
-        colorPalette,
-        normalizationConfig
+        debouncedColorPalette,
+        debouncedNormalizationConfig
       );
     },
-    [renderData, colorPalette, normalizationConfig, height]
+    [renderData, debouncedColorPalette, debouncedNormalizationConfig]
   );
+
+  // Keep the ref updated with the latest function
+  useEffect(() => {
+    handleResizeRef.current = handleResize;
+  }, [handleResize]);
 
   const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!onClickAtPercentage) return;
@@ -155,26 +179,40 @@ export function Waveform({
     onClickAtPercentage(percentage);
   };
 
-  const { width } = useResizeObserver({
-    ref: wrapperRef as React.RefObject<Element>,
-  });
-
-  // Debounce width changes with 30ms delay
-  const debouncedWidth = useDebouncedTrailingHook(width, 300);
-
-  // Trigger re-render when debounced width changes
+  // Trigger re-render when debounced params change
+  // Debounce the actual handleResize call to prevent excessive renders
   useEffect(() => {
-    if (debouncedWidth && renderData) {
-      handleResize(debouncedWidth, height);
+    if (!debouncedWidth || !renderData) return;
+
+    // Clear any existing timeout
+    if (resizeTimeoutRef.current) {
+      clearTimeout(resizeTimeoutRef.current);
     }
-  }, [debouncedWidth, height, handleResize, renderData]);
+
+    // Debounce the resize call
+    resizeTimeoutRef.current = setTimeout(() => {
+      handleResizeRef.current?.(debouncedWidth, debouncedHeight);
+    }, 300);
+
+    // Cleanup timeout on unmount or when dependencies change
+    return () => {
+      if (resizeTimeoutRef.current) {
+        clearTimeout(resizeTimeoutRef.current);
+      }
+    };
+  }, [
+    debouncedWidth,
+    debouncedHeight,
+    debouncedColorPalette,
+    debouncedNormalizationConfig,
+    renderData,
+  ]);
 
   if (loading) {
     return (
       <div ref={wrapperRef} style={{ width: "100%" }}>
         <canvas
           ref={canvasRef}
-          className="waveform-container"
           style={{
             width: "100%",
             height: `${height}px`,
@@ -194,7 +232,6 @@ export function Waveform({
       <div ref={wrapperRef} style={{ width: "100%" }}>
         <canvas
           ref={canvasRef}
-          className="waveform-container"
           style={{
             width: "100%",
             height: `${height}px`,

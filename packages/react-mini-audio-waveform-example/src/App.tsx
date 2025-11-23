@@ -1,8 +1,10 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { AudioItem } from "./components/AudioItem";
+import { ColorPicker } from "./components/ColorPicker";
 import { AudioContextProvider } from "@janwirth/react-web-audio-context";
 import { dequeueAudioBufferRequest } from "@janwirth/react-web-audio-context";
 import { generateOklchPalette } from "@janwirth/react-mini-audio-waveform";
+import { VerticalSlider } from "./components/VerticalSlider";
 
 interface AudioItemData {
   title: string;
@@ -71,114 +73,55 @@ function App() {
 
   if (loading) {
     return (
-      <div className="container">
-        <h1>Waveform - Spectral Analysis</h1>
-        <div className="loading">Loading audio items...</div>
+      <div className="mx-auto">
+        <h1 className="mb-8">Waveform - Spectral Analysis</h1>
+        <div className="my-8">Loading audio items...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="container">
-        <h1>Waveform - Spectral Analysis</h1>
-        <div className="error">Error: {error}</div>
+      <div className="mx-auto">
+        <h1 className="mb-8">Waveform - Spectral Analysis</h1>
+        <div className="my-4 text-red-600">Error: {error}</div>
       </div>
     );
   }
 
   return (
     <AudioContextProvider>
-      <div className="container">
-        <h1>Waveform - Spectral Analysis</h1>
+      <div className="mx-auto">
+        <h1 className="mb-8">Waveform - Spectral Analysis</h1>
 
         {/* Global Controls */}
-        <div
-          className="global-controls"
-          style={{
-            marginBottom: "2rem",
-            padding: "1rem",
-            border: "1px solid #ccc",
-            borderRadius: "8px",
-          }}
-        >
-          <button className="render-button" onClick={handleReRender}>
+        <div className="flex flex-row items-end gap-8">
+          {/* <button className="" onClick={handleReRender}>
             Re-render All Waveforms
-          </button>
+          </button> */}
 
           {/* Custom OKLCH Color Controls */}
-          <div className="custom-color-controls" style={{ marginTop: "1rem" }}>
-            <h3 className="custom-color-title">Custom Color Scheme</h3>
-            <div className="color-control-group">
-              <label className="color-control-label">
-                Hue: {Math.round(customHue)}°
-                <input
-                  type="range"
-                  min="0"
-                  max="360"
-                  value={customHue}
-                  onChange={(e) => setCustomHue(Number(e.target.value))}
-                  className="color-slider"
-                />
-              </label>
-              <label className="color-control-label">
-                Saturation: {customSaturation.toFixed(2)}
-                <input
-                  type="range"
-                  min="0"
-                  max="0.4"
-                  step="0.01"
-                  value={customSaturation}
-                  onChange={(e) => setCustomSaturation(Number(e.target.value))}
-                  className="color-slider"
-                />
-              </label>
-              <label className="color-control-label">
-                Hue Spread: {Math.round(hueSpread)}°
-                <input
-                  type="range"
-                  min="0"
-                  max="180"
-                  value={hueSpread}
-                  onChange={(e) => setHueSpread(Number(e.target.value))}
-                  className="color-slider"
-                />
-              </label>
-              <label className="color-control-label">
-                Contrast: {contrast.toFixed(2)}
-                <input
-                  type="range"
-                  min="0"
-                  max="1"
-                  step="0.01"
-                  value={contrast}
-                  onChange={(e) => setContrast(Number(e.target.value))}
-                  className="color-slider"
-                />
-              </label>
-            </div>
-          </div>
-
-          {/* Waveform Height Control */}
-          <div
-            className="waveform-height-controls"
-            style={{ marginTop: "1rem" }}
-          >
-            <label className="waveform-height-label">
-              Waveform Height: {waveformHeight}px
-              <input
-                type="range"
-                min="16"
-                max="128"
-                value={waveformHeight}
-                onChange={(e) => setWaveformHeight(Number(e.target.value))}
-                className="color-slider"
-              />
-            </label>
-          </div>
+          <ColorPicker
+            hue={customHue}
+            saturation={customSaturation}
+            hueSpread={hueSpread}
+            contrast={contrast}
+            onHueChange={setCustomHue}
+            onSaturationChange={setCustomSaturation}
+            onHueSpreadChange={setHueSpread}
+            onContrastChange={setContrast}
+          />
+          <VerticalSlider
+            label="HGT"
+            value={waveformHeight}
+            min={16}
+            max={128}
+            step={1}
+            onChange={setWaveformHeight}
+          />
         </div>
 
-        <div className="audio-list">
+        <div>
           {audioItems.map((item, index) => (
             <AudioItem
               key={index}
@@ -197,4 +140,3 @@ function App() {
 }
 
 export default App;
-

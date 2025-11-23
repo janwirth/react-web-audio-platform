@@ -3,8 +3,9 @@
  */
 import { useMemo } from "react";
 import { getColorPalette } from "@janwirth/react-mini-audio-waveform";
-import { Waveform, WaveformRenderData } from "@janwirth/react-mini-audio-waveform";
+import { WaveformRenderData } from "@janwirth/react-mini-audio-waveform";
 import type { ColorPalette } from "@janwirth/react-mini-audio-waveform";
+import { ThemeExample } from "./ThemeExample";
 
 interface AudioItemProps {
   title: string;
@@ -51,9 +52,9 @@ export function AudioItem({
 
   if (!audioUrlWithKey) {
     return (
-      <div className="audio-item">
-        <h2 className="audio-title">{title}</h2>
-        <div className="error">Invalid audio URL configuration</div>
+      <div className="mb-8">
+        <h2 className="mb-4">{title}</h2>
+        <div className="my-4 text-red-600">Invalid audio URL configuration</div>
       </div>
     );
   }
@@ -90,49 +91,37 @@ export function AudioItem({
   };
 
   return (
-    <div className="audio-item">
-      <h2 className="audio-title">{title}</h2>
+    <div className="mb-8">
+      <h2 className="mb-4">{title}</h2>
 
-      <div className="waveforms-wrapper">
+      <div className="flex flex-row gap-4 mt-4 flex-wrap">
         {/* Custom palette - first waveform */}
-        <div className="waveform-item">
-          <div className="palette-label">custom</div>
-          <div className="waveform-wrapper">
-            <Waveform
-              onGotData={onGotData}
-              onClickAtPercentage={handleWaveformClick}
-              audioUrl={audioUrlWithKey}
-              colorPalette={customPalette}
-              cachedRenderData={cachedRenderData}
-              height={waveformHeight}
-            />
-          </div>
-        </div>
+        <ThemeExample
+          label="custom"
+          audioUrl={audioUrlWithKey}
+          colorPalette={customPalette}
+          cachedRenderData={cachedRenderData}
+          height={waveformHeight}
+          onClickAtPercentage={handleWaveformClick}
+          onGotData={onGotData}
+        />
 
         {/* Other monochrome palettes */}
         {MONOCHROME_PALETTES.map((paletteName) => {
           const palette = getColorPalette(paletteName);
           return (
-            <div key={paletteName} className="waveform-item">
-              <div className="palette-label">
-                {getPaletteLabel(paletteName)}
-              </div>
-              <div className="waveform-wrapper">
-                <Waveform
-                  onClickAtPercentage={handleWaveformClick}
-                  audioUrl={audioUrlWithKey}
-                  colorPalette={palette}
-                  cachedRenderData={cachedRenderData}
-                  className="waveform-container"
-                  style={{ width: "100%" }}
-                  height={waveformHeight}
-                />
-              </div>
-            </div>
+            <ThemeExample
+              key={paletteName}
+              label={getPaletteLabel(paletteName)}
+              audioUrl={audioUrlWithKey}
+              colorPalette={palette}
+              cachedRenderData={cachedRenderData}
+              height={waveformHeight}
+              onClickAtPercentage={handleWaveformClick}
+            />
           );
         })}
       </div>
     </div>
   );
 }
-
