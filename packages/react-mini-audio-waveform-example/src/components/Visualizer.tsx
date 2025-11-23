@@ -5,7 +5,7 @@ import { PresetSelector } from "./PresetSelector";
 import butterchurnPresets from "butterchurn-presets";
 
 const width = 800;
-const defaultHeight = 200;
+const height = 400;
 
 // Load and sort presets just like in butter.html
 function loadAndSortPresets() {
@@ -35,7 +35,6 @@ export const Visualizer = () => {
   const animationFrameRef = useRef<number | null>(null);
   const resizeTimeoutRef = useRef<number | null>(null);
   const [canvasWidth, setCanvasWidth] = useState(width);
-  const [canvasHeight, setCanvasHeight] = useState(defaultHeight);
 
   const { presets, presetKeys } = useMemo(() => loadAndSortPresets(), []);
 
@@ -55,28 +54,25 @@ export const Visualizer = () => {
     null
   );
 
-  // ResizeObserver to update canvas dimensions when wrapper div size changes (debounced by 300ms)
+  // ResizeObserver to update canvas width when wrapper div size changes (debounced by 300ms)
   useEffect(() => {
     if (!wrapperRef.current) return;
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        const { width: newWidth, height: newHeight } = entry.contentRect;
-        if (newWidth > 0 && newHeight > 0) {
+        const { width: newWidth } = entry.contentRect;
+        if (newWidth > 0) {
           // Clear any existing timeout
           if (resizeTimeoutRef.current) {
             window.clearTimeout(resizeTimeoutRef.current);
           }
           // Set new timeout to debounce the resize
           resizeTimeoutRef.current = window.setTimeout(() => {
-            // Reserve some space for the PresetSelector (approximately 40px)
-            const availableHeight = Math.max(newHeight - 40, 100);
             setCanvasWidth(newWidth);
-            setCanvasHeight(availableHeight);
             // Update canvas dimensions immediately when debounced callback fires
             if (canvasRef.current) {
               canvasRef.current.width = newWidth;
-              canvasRef.current.height = availableHeight;
+              canvasRef.current.height = height;
             }
           }, 300);
         }
@@ -104,11 +100,11 @@ export const Visualizer = () => {
     ) {
       // Set initial canvas size
       canvasRef.current.width = canvasWidth;
-      canvasRef.current.height = canvasHeight;
+      canvasRef.current.height = height;
 
       const result = initVisualizer(
         canvasWidth,
-        canvasHeight,
+        height,
         initialPreset,
         canvasRef.current,
         audioNode
@@ -139,30 +135,25 @@ export const Visualizer = () => {
         visualizerRef.current = null;
       };
     }
-  }, [audioNode, initialPreset, canvasWidth, canvasHeight]);
+  }, [audioNode, initialPreset, canvasWidth]);
 
-  // Update visualizer dimensions when canvas size changes
+  // Update visualizer width when canvas width changes
   useEffect(() => {
     if (visualizerRef.current?.visualizer && canvasRef.current) {
       canvasRef.current.width = canvasWidth;
-      canvasRef.current.height = canvasHeight;
+      canvasRef.current.height = height;
 
       // Resize the visualizer if it has a resize method
       if (typeof visualizerRef.current.visualizer.resize === "function") {
-        visualizerRef.current.visualizer.resize(canvasWidth, canvasHeight);
+        visualizerRef.current.visualizer.resize(canvasWidth, height);
       }
     }
-  }, [canvasWidth, canvasHeight]);
+  }, [canvasWidth]);
 
   return (
-    <div className="flex flex-col gap-1 h-full">
-      <div ref={wrapperRef} className="bg-gray-100 flex-1 min-h-0">
-        <canvas
-          ref={canvasRef}
-          width={canvasWidth}
-          height={canvasHeight}
-          className="w-full h-full"
-        />
+    <div className="flex flex-col gap-1">
+      <div ref={wrapperRef} className="bg-gray-100">
+        <canvas ref={canvasRef} width={canvasWidth} height={height} />{" "}
       </div>
 
       <PresetSelector
