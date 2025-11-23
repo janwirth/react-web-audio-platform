@@ -69,7 +69,10 @@ export function GlobalControls({
           onChange={handleHeightChange}
         />
       </div>
-      <button className="mb-8 font-mono" onClick={onReRender}>
+      <button
+        className="mb-8 font-mono self-start text-xs text-gray-500"
+        onClick={onReRender}
+      >
         Re-render All Waveforms
       </button>
     </div>

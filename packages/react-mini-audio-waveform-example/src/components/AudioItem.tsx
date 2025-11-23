@@ -29,6 +29,50 @@ const MONOCHROME_PALETTES = [
   "monochrome-charcoal",
 ];
 
+interface WaveformItemProps {
+  label: string;
+  audioUrl: string;
+  colorPalette: Partial<ColorPalette> | ColorPalette;
+  cachedRenderData: WaveformRenderData | null;
+  waveformHeight: number;
+  onGotData?: (data: WaveformRenderData) => void;
+  onClickAtPercentage: (percentage: number) => void;
+  showClassName?: boolean;
+}
+
+function WaveformItem({
+  label,
+  audioUrl,
+  colorPalette,
+  cachedRenderData,
+  waveformHeight,
+  onGotData,
+  onClickAtPercentage,
+  showClassName = false,
+}: WaveformItemProps) {
+  return (
+    <div className="flex items-center gap-2 group">
+      <div className="font-medium min-w-[80px] text-right text-xs font-mono text-gray-500 group-hover:text-black">
+        {label}
+      </div>
+      <div className="flex-1">
+        <Waveform
+          {...(onGotData && { onGotData })}
+          onClickAtPercentage={onClickAtPercentage}
+          audioUrl={audioUrl}
+          colorPalette={colorPalette}
+          cachedRenderData={cachedRenderData}
+          {...(showClassName && {
+            className: "waveform-container",
+            style: { width: "100%" },
+          })}
+          height={waveformHeight}
+        />
+      </div>
+    </div>
+  );
+}
+
 export function AudioItem({
   title,
   audioUrl,
@@ -94,46 +138,34 @@ export function AudioItem({
 
   return (
     <div className="font-mono">
-      <h2 className="font-bold">{title}</h2>
+      <div className="text-sm font-medium text-gray-700">{title}</div>
 
       <div>
         {/* Custom palette - first waveform */}
-        <div className="flex items-center gap-2">
-          <div className="font-medium text-gray-700 min-w-[80px] text-right">
-            custom
-          </div>
-          <div className="flex-1">
-            <Waveform
-              onGotData={onGotData}
-              onClickAtPercentage={handleWaveformClick}
-              audioUrl={audioUrlWithKey}
-              colorPalette={customPalette}
-              cachedRenderData={cachedRenderData}
-              height={waveformHeight}
-            />
-          </div>
-        </div>
+        <WaveformItem
+          label="custom"
+          audioUrl={audioUrlWithKey}
+          colorPalette={customPalette}
+          cachedRenderData={cachedRenderData}
+          waveformHeight={waveformHeight}
+          onGotData={onGotData}
+          onClickAtPercentage={handleWaveformClick}
+        />
 
         {/* Other monochrome palettes */}
         {MONOCHROME_PALETTES.map((paletteName) => {
           const palette = getColorPalette(paletteName);
           return (
-            <div key={paletteName} className="flex items-center gap-2">
-              <div className="font-medium text-gray-700 min-w-[80px] text-right">
-                {getPaletteLabel(paletteName)}
-              </div>
-              <div className="flex-1">
-                <Waveform
-                  onClickAtPercentage={handleWaveformClick}
-                  audioUrl={audioUrlWithKey}
-                  colorPalette={palette}
-                  cachedRenderData={cachedRenderData}
-                  className="waveform-container"
-                  style={{ width: "100%" }}
-                  height={waveformHeight}
-                />
-              </div>
-            </div>
+            <WaveformItem
+              key={paletteName}
+              label={getPaletteLabel(paletteName)}
+              audioUrl={audioUrlWithKey}
+              colorPalette={palette}
+              cachedRenderData={cachedRenderData}
+              waveformHeight={waveformHeight}
+              onClickAtPercentage={handleWaveformClick}
+              showClassName={true}
+            />
           );
         })}
       </div>

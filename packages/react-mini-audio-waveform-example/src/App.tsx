@@ -60,23 +60,25 @@ function App() {
 
   return (
     <AudioContextProvider>
-      <GlobalControls
-        onPaletteChange={setCustomPalette}
-        onHeightChange={setWaveformHeight}
-        onReRender={handleReRender}
-      />
-
-      {audioItems.map((item, index) => (
-        <AudioItem
-          key={index}
-          title={item.title}
-          audioUrl={item.audioUrl}
-          baseUrl={BASE_URL}
-          customPalette={customPalette}
-          waveformHeight={waveformHeight}
-          reRenderKey={reRenderKey}
+      <div className="flex flex-col gap-8">
+        <GlobalControls
+          onPaletteChange={setCustomPalette}
+          onHeightChange={setWaveformHeight}
+          onReRender={handleReRender}
         />
-      ))}
+
+        {audioItems.map((item, index) => (
+          <AudioItem
+            key={index}
+            title={item.title}
+            audioUrl={item.audioUrl}
+            baseUrl={BASE_URL}
+            customPalette={customPalette}
+            waveformHeight={waveformHeight}
+            reRenderKey={reRenderKey}
+          />
+        ))}
+      </div>
     </AudioContextProvider>
   );
 }
