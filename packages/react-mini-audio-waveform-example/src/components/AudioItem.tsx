@@ -8,7 +8,6 @@ import {
   WaveformRenderData,
 } from "@janwirth/react-mini-audio-waveform";
 import type { ColorPalette } from "@janwirth/react-mini-audio-waveform";
-import { useTrack } from "../player";
 
 interface AudioItemProps {
   title: string;
@@ -83,9 +82,6 @@ export function AudioItem({
   reRenderKey,
 }: AudioItemProps) {
   const fullAudioUrl = `${baseUrl}${audioUrl}`;
-  const { play, pause, stop, seek, status, playbackPosition, duration, error } =
-    useTrack(audioUrl);
-
   // Use the audio buffer hook with reload key to force re-fetch when needed
   const audioUrlWithKey = useMemo(() => {
     return reRenderKey > 0
@@ -136,29 +132,8 @@ export function AudioItem({
   };
 
   const handleWaveformClick = (percentage: number) => {
-    const seekPosition = percentage * duration;
-    console.log(
-      `[${title}] Waveform clicked at ${
-        percentage * 100
-      }% (${seekPosition.toFixed(2)}s)`
-    );
-    seek(seekPosition);
-    play();
-
-    if (status === "error") {
-      console.error(`[${title}] Playback error:`, {
-        status,
-        error: error || "Unknown error",
-        audioUrl: audioUrlWithKey,
-        seekPosition: seekPosition.toFixed(2),
-        duration: duration.toFixed(2),
-      });
-    } else {
-      console.log(`[${title}] Status: ${status}`, {
-        playbackPosition: playbackPosition.toFixed(2),
-        duration: duration.toFixed(2),
-      });
-    }
+    console.log("Waveform clicked at", percentage * 100, "%");
+    console.log("Status:", status);
   };
 
   return (
