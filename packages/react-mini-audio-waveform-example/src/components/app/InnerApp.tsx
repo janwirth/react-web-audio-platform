@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import { AudioItem } from "./AudioItem";
 import { GlobalControls } from "./GlobalControls";
+import { DarkModeToggle } from "./DarkModeToggle";
 import { type QueueItem, useTrack } from "../player/Player";
 import { PlayerUI } from "../player/PlayerUI";
 import { Visualizer } from "../visualizer/Visualizer";
@@ -102,17 +103,20 @@ export function InnerApp() {
 
   return (
     <div className="flex flex-col gap-8 relative">
-      {/* Header with visualizer toggle */}
-      <button
-        onClick={() => setShowVisualizer(!showVisualizer)}
-        className="text-xs font-mono text-gray-500 hover:text-gray-900 mb-1 flex items-center gap-1 cursor-pointer"
-        aria-label={showVisualizer ? "Hide visualizer" : "Show visualizer"}
-      >
-        {showVisualizer ? "Hide Visualizer" : "Show Visualizer"}
-      </button>
+      {/* Header with dark mode and visualizer toggles */}
+      <div className="flex gap-4 items-center mb-1">
+        <DarkModeToggle />
+        <button
+          onClick={() => setShowVisualizer(!showVisualizer)}
+          className="text-xs font-mono text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 flex items-center gap-1 cursor-pointer transition-colors"
+          aria-label={showVisualizer ? "Hide visualizer" : "Show visualizer"}
+        >
+          {showVisualizer ? "Hide Visualizer" : "Show Visualizer"}
+        </button>
+      </div>
       {showVisualizer && <Visualizer />}
 
-      <div className="sticky bg-gray-100 w-full top-[73px] left-0 z-10 flex gap-1 items-center ">
+      <div className="sticky bg-gray-100 dark:bg-gray-800 w-full top-[73px] left-0 z-10 flex gap-1 items-center transition-colors">
         <div className="flex-1 grow">
           <PlayerUI />
         </div>
