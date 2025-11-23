@@ -8,7 +8,7 @@ import {
   WaveformRenderData,
 } from "@janwirth/react-mini-audio-waveform";
 import type { ColorPalette } from "@janwirth/react-mini-audio-waveform";
-import { useTrack } from "src/player";
+import { useTrack } from "../player";
 
 interface AudioItemProps {
   title: string;
@@ -136,7 +136,29 @@ export function AudioItem({
   };
 
   const handleWaveformClick = (percentage: number) => {
-    console.log("Waveform clicked at", percentage * 100, "%");
+    const seekPosition = percentage * duration;
+    console.log(
+      `[${title}] Waveform clicked at ${
+        percentage * 100
+      }% (${seekPosition.toFixed(2)}s)`
+    );
+    seek(seekPosition);
+    play();
+
+    if (status === "error") {
+      console.error(`[${title}] Playback error:`, {
+        status,
+        error: error || "Unknown error",
+        audioUrl: audioUrlWithKey,
+        seekPosition: seekPosition.toFixed(2),
+        duration: duration.toFixed(2),
+      });
+    } else {
+      console.log(`[${title}] Status: ${status}`, {
+        playbackPosition: playbackPosition.toFixed(2),
+        duration: duration.toFixed(2),
+      });
+    }
   };
 
   return (
