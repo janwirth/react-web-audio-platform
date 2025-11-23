@@ -31,7 +31,12 @@ export const ButterchurnVisualizer = () => {
 
     // Clean up previous visualizer if it exists
     if (visualizerRef.current) {
-      visualizerRef.current.disconnectAudio();
+      try {
+        visualizerRef.current.disconnectAudio();
+      } catch (error) {
+        // Ignore errors if audio was never connected or node is undefined
+        console.warn("Error disconnecting audio from visualizer:", error);
+      }
     }
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
@@ -101,7 +106,12 @@ export const ButterchurnVisualizer = () => {
       }
       // Disconnect visualizer
       if (visualizerRef.current) {
-        visualizerRef.current.disconnectAudio();
+        try {
+          visualizerRef.current.disconnectAudio();
+        } catch (error) {
+          // Ignore errors if audio was never connected or node is undefined
+          console.warn("Error disconnecting audio from visualizer:", error);
+        }
       }
       // Note: We don't disconnect the source node here because it's tied to the audio element
       // and might be reused. The audio element will handle its own cleanup.
