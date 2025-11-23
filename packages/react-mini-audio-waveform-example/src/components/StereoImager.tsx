@@ -72,18 +72,27 @@ export const StereoImager = ({ size = DEFAULT_SIZE }: StereoImagerProps) => {
   // Initialize stereo imager
   useEffect(() => {
     if (canvasRef.current && audioNode && !imagerRef.current) {
-      // Set initial canvas size (always square)
-      canvasRef.current.width = size;
-      canvasRef.current.height = size;
+      const canvas = canvasRef.current;
+      const dpr = window.devicePixelRatio || 1;
+
+      // Set canvas internal resolution based on DPI
+      canvas.width = size * dpr;
+      canvas.height = size * dpr;
+
+      // Set canvas CSS size (display size)
+      canvas.style.width = `${size}px`;
+      canvas.style.height = `${size}px`;
 
       const state = initStereoImager(audioNode);
       if (!state) return; // Failed to initialize
 
       imagerRef.current = state;
 
-      const canvas = canvasRef.current;
       const ctx = canvas.getContext("2d");
       if (!ctx) return;
+
+      // Scale context to match device pixel ratio
+      ctx.scale(dpr, dpr);
 
       // Resume audio context if suspended
       if (state.audioContext.state === "suspended") {
@@ -113,14 +122,14 @@ export const StereoImager = ({ size = DEFAULT_SIZE }: StereoImagerProps) => {
         leftAnalyser.getByteFrequencyData(leftDataArray);
         rightAnalyser.getByteFrequencyData(rightDataArray);
 
-        // Clear canvas before drawing
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Clear canvas before drawing (use logical size, not physical)
+        ctx.clearRect(0, 0, size, size);
 
         // Use exactly 32 frequency bands
         const bandCount = 32;
         const dataStep = Math.floor(leftDataArray.length / bandCount);
-        const barWidth = canvas.width / bandCount;
-        const barHeight = canvas.height;
+        const barWidth = size / bandCount;
+        const barHeight = size;
 
         // Draw level meter bars
         ctx.fillStyle = "#6b7280"; // Tailwind gray-500 (mid gray)
@@ -167,15 +176,29 @@ export const StereoImager = ({ size = DEFAULT_SIZE }: StereoImagerProps) => {
 
   // Update canvas size when size prop changes
   useEffect(() => {
-    if (imagerRef.current && canvasRef.current) {
-      canvasRef.current.width = size;
-      canvasRef.current.height = size;
+    if (canvasRef.current) {
+      const canvas = canvasRef.current;
+      const dpr = window.devicePixelRatio || 1;
+
+      // Set canvas internal resolution based on DPI
+      canvas.width = size * dpr;
+      canvas.height = size * dpr;
+
+      // Set canvas CSS size (display size)
+      canvas.style.width = `${size}px`;
+      canvas.style.height = `${size}px`;
+
+      // Re-scale context if it exists
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.scale(dpr, dpr);
+      }
     }
   }, [size]);
 
   return (
-    <div className="bg-white inline-block">
-      <canvas ref={canvasRef} width={size} height={size} />
+    <div className="inline-block">
+      <canvas ref={canvasRef} />
     </div>
   );
 };
