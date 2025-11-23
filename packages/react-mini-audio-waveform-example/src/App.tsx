@@ -4,6 +4,7 @@ import { GlobalControls } from "./components/GlobalControls";
 import { AudioContextProvider } from "@janwirth/react-web-audio-context";
 import { dequeueAudioBufferRequest } from "@janwirth/react-web-audio-context";
 import type { ColorPalette } from "@janwirth/react-mini-audio-waveform";
+import { Player } from "./components/Player";
 
 interface AudioItemData {
   title: string;
@@ -60,25 +61,27 @@ function App() {
 
   return (
     <AudioContextProvider>
-      <div className="flex flex-col gap-8">
-        <GlobalControls
-          onPaletteChange={setCustomPalette}
-          onHeightChange={setWaveformHeight}
-          onReRender={handleReRender}
-        />
-
-        {audioItems.map((item, index) => (
-          <AudioItem
-            key={index}
-            title={item.title}
-            audioUrl={item.audioUrl}
-            baseUrl={BASE_URL}
-            customPalette={customPalette}
-            waveformHeight={waveformHeight}
-            reRenderKey={reRenderKey}
+      <Player>
+        <div className="flex flex-col gap-8">
+          <GlobalControls
+            onPaletteChange={setCustomPalette}
+            onHeightChange={setWaveformHeight}
+            onReRender={handleReRender}
           />
-        ))}
-      </div>
+
+          {audioItems.map((item, index) => (
+            <AudioItem
+              key={index}
+              title={item.title}
+              audioUrl={item.audioUrl}
+              baseUrl={BASE_URL}
+              customPalette={customPalette}
+              waveformHeight={waveformHeight}
+              reRenderKey={reRenderKey}
+            />
+          ))}
+        </div>
+      </Player>
     </AudioContextProvider>
   );
 }

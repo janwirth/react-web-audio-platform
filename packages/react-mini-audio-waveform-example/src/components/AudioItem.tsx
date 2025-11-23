@@ -8,6 +8,8 @@ import {
   WaveformRenderData,
 } from "@janwirth/react-mini-audio-waveform";
 import type { ColorPalette } from "@janwirth/react-mini-audio-waveform";
+import { useAudioContext } from "@janwirth/react-web-audio-context";
+import { useTrack } from "./Player";
 
 interface AudioItemProps {
   title: string;
@@ -81,7 +83,10 @@ export function AudioItem({
   waveformHeight,
   reRenderKey,
 }: AudioItemProps) {
+  const audioContext = useAudioContext();
+  console.log(audioContext);
   const fullAudioUrl = `${baseUrl}${audioUrl}`;
+  const player = useTrack(fullAudioUrl);
   // Use the audio buffer hook with reload key to force re-fetch when needed
   const audioUrlWithKey = useMemo(() => {
     return reRenderKey > 0
@@ -134,6 +139,7 @@ export function AudioItem({
   const handleWaveformClick = (percentage: number) => {
     console.log("Waveform clicked at", percentage * 100, "%");
     console.log("Status:", status);
+    player.seekAndPlay(percentage);
   };
 
   return (
