@@ -123,11 +123,10 @@ function App() {
           </button>
           {showVisualizer && <Visualizer />}
 
-          <div className="sticky bg-gray-100 w-full top-[73px] left-0 z-10 flex gap-1">
+          <div className="sticky bg-gray-100 w-full top-[73px] left-0 z-10 flex gap-1 items-center ">
             <div className="flex-1 grow">
               <PlayerUI />
             </div>
-            <MiniSpectro />
           </div>
           <GlobalControls
             onPaletteChange={setCustomPalette}

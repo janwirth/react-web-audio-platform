@@ -57,7 +57,15 @@ function initMiniSpectro(audioElement: HTMLAudioElement): MiniSpectro | null {
   }
 }
 
-export const MiniSpectro = ({ size = DEFAULT_SIZE }) => {
+interface MiniSpectroProps {
+  size?: number;
+  growFromCenter?: boolean;
+}
+
+export const MiniSpectro = ({
+  size = DEFAULT_SIZE,
+  growFromCenter = true,
+}: MiniSpectroProps) => {
   const audioNode = usePlayerContext().audioRef.current;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagerRef = useRef<MiniSpectro | null>(null);
@@ -121,15 +129,17 @@ export const MiniSpectro = ({ size = DEFAULT_SIZE }) => {
 
         // Use exactly 32 frequency bands
         const bandCount = 32;
-        // Cut out the highest 15% of frequencies
-        const usableLength = Math.floor(leftDataArray.length * 0.8);
+        // Crop away bottom 5% and top 20% of frequencies
+        const startOffset = Math.floor(leftDataArray.length * 0.05);
+        const endOffset = Math.floor(leftDataArray.length * 0.25);
+        const usableLength = leftDataArray.length - startOffset - endOffset;
         const dataStep = Math.floor(usableLength / bandCount);
         const barWidth = size / bandCount;
         const barHeight = size;
 
         // Draw level meter bars
         for (let i = 0; i < bandCount; i++) {
-          const dataIndex = i * dataStep;
+          const dataIndex = startOffset + i * dataStep;
 
           // Combine both channels (average or max)
           const leftValue = leftDataArray[dataIndex] / 255;
@@ -138,7 +148,7 @@ export const MiniSpectro = ({ size = DEFAULT_SIZE }) => {
 
           // Amplify higher frequencies: apply exponential gain curve
           // Higher frequency bands (higher i) get more amplification
-          const frequencyGain = 1 + (i / bandCount) * 2; // Linear gain from 1x to 3x
+          const frequencyGain = 1 + i / bandCount; // Linear gain from 1x to 3x
           combinedValue = Math.min(1, combinedValue * frequencyGain); // Clamp to 1.0
 
           // Make bars with higher amplitude darker
@@ -151,13 +161,26 @@ export const MiniSpectro = ({ size = DEFAULT_SIZE }) => {
           const x = i * barWidth;
           const barWidthWithSpacing = barWidth * 0.95;
 
-          // Draw bar from bottom
-          ctx.fillRect(
-            x,
-            barHeight - barHeightValue,
-            barWidthWithSpacing,
-            barHeightValue
-          );
+          // Draw bar based on growFromCenter option
+          if (growFromCenter) {
+            // Draw bar centered, growing up and down from center
+            const centerY = barHeight / 2;
+            const halfHeight = barHeightValue / 2;
+            ctx.fillRect(
+              x,
+              centerY - halfHeight,
+              barWidthWithSpacing,
+              barHeightValue
+            );
+          } else {
+            // Draw bar from bottom
+            ctx.fillRect(
+              x,
+              barHeight - barHeightValue,
+              barWidthWithSpacing,
+              barHeightValue
+            );
+          }
         }
 
         animationFrameRef.current = requestAnimationFrame(render);
@@ -178,7 +201,7 @@ export const MiniSpectro = ({ size = DEFAULT_SIZE }) => {
         imagerRef.current = null;
       };
     }
-  }, [audioNode, size]);
+  }, [audioNode, size, growFromCenter]);
 
   // Update canvas size when size prop changes
   useEffect(() => {

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { usePlayerContext, useCurrentPlayback } from "./Player";
+import { MiniSpectro } from "./MiniSpectro";
 
 // Format seconds to MM:SS or HH:MM:SS
 const formatTime = (seconds: number): string => {
@@ -242,6 +243,7 @@ export function PlayerUI() {
       <span className="text-xs font-mono text-gray-600  text-right font-black ">
         {formatTime(currentTime)}
       </span>
+      <MiniSpectro />
       <div className="flex-1">
         <HorizontalSlider
           value={progressPercentage}
