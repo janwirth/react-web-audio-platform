@@ -8,7 +8,7 @@ export function initVisualizer(
   canvas: HTMLCanvasElement,
   audioElement: HTMLAudioElement
 ) {
-  console.log("initVisualizer", audioElement, canvas);
+  console.log("initVisualizer", audioElement, canvas, preset);
   const audioContext = new AudioContext();
   const analyserNode = audioContext.createAnalyser();
 
