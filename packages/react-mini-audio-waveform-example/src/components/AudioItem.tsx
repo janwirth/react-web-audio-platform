@@ -159,7 +159,7 @@ export function AudioItem({
         onClick={onQueueClick}
         title="Click to create queue starting from this track"
       >
-        {title}
+        {title} Add to qeue
       </div>
 
       <div className="flex flex-col gap-1">

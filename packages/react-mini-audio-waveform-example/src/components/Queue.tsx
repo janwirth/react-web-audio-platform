@@ -1,6 +1,18 @@
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
-import { queueAtom, currentQueueIndexAtom, activeUrlAtom } from "./Player";
+import { queueAtom, currentQueueIndexAtom, activeUrlAtom, type QueueItem } from "./Player";
 import { usePlayerContext } from "./Player";
+
+export function useQueue() {
+  const setQueue = useSetAtom(queueAtom);
+  const setCurrentQueueIndex = useSetAtom(currentQueueIndexAtom);
+
+  const initQueue = (items: QueueItem[]) => {
+    setQueue(items);
+    setCurrentQueueIndex(items.length > 0 ? 0 : -1);
+  };
+
+  return { initQueue };
+}
 
 export function Queue() {
   const queue = useAtomValue(queueAtom);

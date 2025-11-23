@@ -1,21 +1,14 @@
-import { useEffect, useState, useCallback } from "react";
-import { useSetAtom } from "jotai";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { AudioItem } from "./components/AudioItem";
 import { GlobalControls } from "./components/GlobalControls";
 import { AudioContextProvider } from "@janwirth/react-web-audio-context";
 import { dequeueAudioBufferRequest } from "@janwirth/react-web-audio-context";
 import type { ColorPalette } from "@janwirth/react-mini-audio-waveform";
-import {
-  Player,
-  queueAtom,
-  currentQueueIndexAtom,
-  type QueueItem,
-  activeUrlAtom,
-} from "./components/Player";
+import { Player, type QueueItem, useTrack } from "./components/Player";
 import { PlayerUI } from "./components/PlayerUI";
 import { Visualizer } from "./components/Visualizer";
 import { MiniSpectro } from "./components/MiniSpectro";
-import { Queue } from "./components/Queue";
+import { Queue, useQueue } from "./components/Queue";
 
 interface AudioItemData {
   title: string;
@@ -41,9 +34,18 @@ function App() {
   const [reRenderKey, setReRenderKey] = useState(0);
 
   // Queue management
-  const setQueue = useSetAtom(queueAtom);
-  const setCurrentQueueIndex = useSetAtom(currentQueueIndexAtom);
-  const setActiveUrl = useSetAtom(activeUrlAtom);
+  const { initQueue } = useQueue();
+  const [firstTrackUrl, setFirstTrackUrl] = useState<string>("");
+  const shouldAutoPlayRef = useRef(false);
+  const { seekAndPlay } = useTrack(firstTrackUrl || "");
+
+  // Auto-play when firstTrackUrl changes and we should auto-play
+  useEffect(() => {
+    if (firstTrackUrl && shouldAutoPlayRef.current) {
+      seekAndPlay(0);
+      shouldAutoPlayRef.current = false;
+    }
+  }, [firstTrackUrl, seekAndPlay]);
 
   const handleReRender = useCallback(() => {
     // Clear cache for all audio items
@@ -69,25 +71,16 @@ function App() {
           audioUrl: `${BASE_URL}${item.audioUrl}`, // Store full URL
         }));
 
-      setQueue(queueItems);
-      setCurrentQueueIndex(0);
+      initQueue(queueItems);
 
-      // Start playing the first track in the queue
+      // Start playing the first track in the queue at position 0
       if (queueItems.length > 0) {
         const firstTrackUrl = queueItems[0].audioUrl;
-        setActiveUrl(firstTrackUrl);
-        // Use the audio element to start playback
-        const audioElement = document.querySelector(
-          "audio"
-        ) as HTMLAudioElement;
-        if (audioElement) {
-          audioElement.src = firstTrackUrl;
-          audioElement.load();
-          audioElement.play().catch(console.error);
-        }
+        shouldAutoPlayRef.current = true;
+        setFirstTrackUrl(firstTrackUrl);
       }
     },
-    [audioItems, setQueue, setCurrentQueueIndex, setActiveUrl]
+    [audioItems, initQueue]
   );
 
   useEffect(() => {

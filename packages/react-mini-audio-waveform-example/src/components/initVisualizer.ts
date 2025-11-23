@@ -12,12 +12,25 @@ export function initVisualizer(
   const audioContext = new AudioContext();
   const analyserNode = audioContext.createAnalyser();
 
-  // Create media element source from the audio element
-  const sourceNode = audioContext.createMediaElementSource(audioElement);
-
-  // Connect source -> analyser -> destination for audio playback
-  sourceNode.connect(analyserNode);
-  analyserNode.connect(audioContext.destination);
+  // Try to create media element source from the audio element
+  // Note: Only one MediaElementAudioSourceNode can exist per audio element
+  // If another component (like MiniSpectro) already created one, this will fail
+  let sourceNode: MediaElementAudioSourceNode | null = null;
+  try {
+    sourceNode = audioContext.createMediaElementSource(audioElement);
+    // Connect source -> analyser for analysis
+    sourceNode.connect(analyserNode);
+    // DO NOT connect analyser to destination - this would create a parallel audio path
+    // and increase volume. The audio element's output is handled by other components
+    // (e.g., MiniSpectro) or the audio element's default output if no other component
+    // has created a source node yet.
+  } catch (error) {
+    // Another component already created a source node from this audio element
+    // We can't create another one, so visualization won't work
+    console.warn("Could not create MediaElementAudioSourceNode (may already exist):", error);
+    // Return early - we can't visualize without a source node
+    return null;
+  }
 
   const visualizer = butterchurn.createVisualizer(audioContext, canvas, {
     width: w,

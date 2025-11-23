@@ -111,6 +111,15 @@ export const Visualizer = () => {
         canvasRef.current,
         audioNode
       );
+
+      // If initialization failed (e.g., source node already exists), skip visualization
+      if (!result) {
+        console.warn(
+          "Visualizer initialization failed - another component may have already created a source node"
+        );
+        return;
+      }
+
       visualizerRef.current = result;
 
       // Set initial preset as selected
