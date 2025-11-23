@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ResizeObserver Canvas Demo</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        padding: 20px;
+        background: #1a1a1a;
+        color: #fff;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin-bottom: 10px;
+        font-size: 24px;
+      }
+
+      .info {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #2a2a2a;
+        border-radius: 8px;
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .info code {
+        background: #3a3a3a;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-family: "Monaco", "Courier New", monospace;
+      }
+
+      .canvas-wrapper {
+        position: relative;
+        width: 100%;
+        height: 400px;
+        background: #2a2a2a;
+        border-radius: 8px;
+        overflow: hidden;
+        resize: both;
+        border: 2px solid #444;
+        margin-bottom: 20px;
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      .stats {
+        padding: 15px;
+        background: #2a2a2a;
+        border-radius: 8px;
+        font-family: "Monaco", "Courier New", monospace;
+        font-size: 12px;
+      }
+
+      .stats div {
+        margin: 5px 0;
+      }
+
+      .resize-hint {
+        position: absolute;
+        bottom: 5px;
+        right: 5px;
+        font-size: 11px;
+        color: #888;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>ResizeObserver Canvas Demo</h1>
+
+      <div class="info">
+        <p>
+          This demo shows how to use <code>ResizeObserver</code> to properly
+          handle canvas resizing. The canvas automatically updates its internal
+          resolution when the container is resized.
+        </p>
+        <p style="margin-top: 10px">
+          <strong>Try it:</strong> Drag the bottom-right corner of the canvas
+          container to resize it.
+        </p>
+      </div>
+
+      <div class="canvas-wrapper">
+        <canvas id="canvas"></canvas>
+        <div class="resize-hint">↘ Drag to resize</div>
+      </div>
+
+      <div class="stats">
+        <div>Container Size: <span id="containerSize">-</span></div>
+        <div>Canvas Resolution: <span id="canvasResolution">-</span></div>
+        <div>Device Pixel Ratio: <span id="dpr">-</span></div>
+        <div>Resize Count: <span id="resizeCount">0</span></div>
+      </div>
+    </div>
+
+    <script type="module">
+      const canvas = document.getElementById("canvas");
+      const ctx = canvas.getContext("2d");
+
+      // Stats elements
+      const containerSizeEl = document.getElementById("containerSize");
+      const canvasResolutionEl = document.getElementById("canvasResolution");
+      const dprEl = document.getElementById("dpr");
+      const resizeCountEl = document.getElementById("resizeCount");
+
+      let resizeCount = 0;
+      let animationFrameId = null;
+
+      // Update stats display
+      function updateStats(width, height) {
+        containerSizeEl.textContent = `${width}px × ${height}px`;
+        canvasResolutionEl.textContent = `${canvas.width}px × ${canvas.height}px`;
+        dprEl.textContent = window.devicePixelRatio;
+        resizeCount++;
+        resizeCountEl.textContent = resizeCount;
+      }
+
+      // Resize canvas to match container with proper DPI handling
+      function resizeCanvas(entries) {
+        for (const entry of entries) {
+          const { width, height } = entry.contentRect;
+
+          // Get device pixel ratio for crisp rendering on high-DPI displays
+          const dpr = window.devicePixelRatio || 1;
+
+          // Set canvas internal resolution (actual pixels)
+          canvas.width = width * dpr;
+          canvas.height = height * dpr;
+
+          // Scale context to match DPI
+          ctx.scale(dpr, dpr);
+
+          // Update stats
+          updateStats(Math.round(width), Math.round(height));
+
+          // Redraw after resize
+          draw();
+        }
+      }
+
+      // Create ResizeObserver
+      const resizeObserver = new ResizeObserver(resizeCanvas);
+
+      // Start observing the canvas element
+      resizeObserver.observe(canvas);
+
+      // Draw function - creates an animated visualization
+      let hue = 0;
+
+      function draw() {
+        // Get logical size (CSS pixels)
+        const width = canvas.width / (window.devicePixelRatio || 1);
+        const height = canvas.height / (window.devicePixelRatio || 1);
+
+        // Clear canvas
+        ctx.fillStyle = "#1a1a1a";
+        ctx.fillRect(0, 0, width, height);
+
+        // Draw grid
+        ctx.strokeStyle = "#333";
+        ctx.lineWidth = 1;
+
+        const gridSize = 50;
+        for (let x = 0; x < width; x += gridSize) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, height);
+          ctx.stroke();
+        }
+
+        for (let y = 0; y < height; y += gridSize) {
+          ctx.beginPath();
+          ctx.moveTo(0, y);
+          ctx.lineTo(width, y);
+          ctx.stroke();
+        }
+
+        // Draw animated circles
+        const time = Date.now() / 1000;
+        const centerX = width / 2;
+        const centerY = height / 2;
+
+        for (let i = 0; i < 5; i++) {
+          const radius = 30 + i * 20;
+          const angle = time + i * 0.5;
+          const x = centerX + Math.cos(angle) * (Math.min(width, height) / 4);
+          const y = centerY + Math.sin(angle) * (Math.min(width, height) / 4);
+
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${(hue + i * 60) % 360}, 70%, 60%, 0.5)`;
+          ctx.fill();
+          ctx.strokeStyle = `hsla(${(hue + i * 60) % 360}, 70%, 70%, 0.8)`;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+
+        // Draw size info on canvas
+        ctx.font = "14px Monaco, monospace";
+        ctx.fillStyle = "#fff";
+        ctx.textAlign = "left";
+        ctx.fillText(`Canvas: ${canvas.width}×${canvas.height}px`, 10, 20);
+        ctx.fillText(
+          `Display: ${Math.round(width)}×${Math.round(height)}px`,
+          10,
+          40
+        );
+
+        hue = (hue + 0.5) % 360;
+      }
+
+      // Animation loop
+      function animate() {
+        draw();
+        animationFrameId = requestAnimationFrame(animate);
+      }
+
+      // Start animation
+      animate();
+
+      // Cleanup on page unload
+      window.addEventListener("beforeunload", () => {
+        resizeObserver.disconnect();
+        if (animationFrameId) {
+          cancelAnimationFrame(animationFrameId);
+        }
+      });
+
+      // Log to console
+      console.log("ResizeObserver demo started");
+      console.log("Canvas element:", canvas);
+      console.log("Initial size:", canvas.width, "x", canvas.height);
+    </script>
+  </body>
+</html>
