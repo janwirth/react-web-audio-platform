@@ -39,10 +39,20 @@ export const Visualizer = () => {
   const { presets, presetKeys } = useMemo(() => loadAndSortPresets(), []);
 
   // Randomly select initial preset index just like in butter.html
-  const initialPreset = useMemo(() => {
+  const { initialPreset, initialPresetName } = useMemo(() => {
     const initialPresetIndex = Math.floor(Math.random() * presetKeys.length);
-    return presets[presetKeys[initialPresetIndex]];
+    const presetName = presetKeys[initialPresetIndex];
+    return {
+      initialPreset: presets[presetName],
+      initialPresetName: presetName,
+    };
   }, [presets, presetKeys]);
+
+  // Track the currently selected preset (final selection)
+  const [selectedPreset, setSelectedPreset] = useState<any>(null);
+  const [selectedPresetName, setSelectedPresetName] = useState<string | null>(
+    null
+  );
 
   // ResizeObserver to update canvas width when wrapper div size changes (debounced by 300ms)
   useEffect(() => {
@@ -101,6 +111,10 @@ export const Visualizer = () => {
       );
       visualizerRef.current = result;
 
+      // Set initial preset as selected
+      setSelectedPresetName(initialPresetName);
+      setSelectedPreset(initialPreset);
+
       // Start render loop
       let rendering = true;
       const render = () => {
@@ -137,12 +151,29 @@ export const Visualizer = () => {
   }, [canvasWidth]);
 
   return (
-    <div ref={wrapperRef}>
-      <canvas ref={canvasRef} width={canvasWidth} height={height} />
+    <div className="flex flex-col gap-1">
+      <div ref={wrapperRef} className="bg-gray-100">
+        <canvas ref={canvasRef} width={canvasWidth} height={height} />{" "}
+      </div>
+
       <PresetSelector
+        selectedPresetName={selectedPresetName}
         onPresetHover={(preset) => {
-          console.log("preset", preset);
-          // Load the clicked preset - this is the exact preset that would be passed to initVisualizer
+          // Preview the preset on hover
+          if (visualizerRef.current?.visualizer) {
+            visualizerRef.current.visualizer.loadPreset(preset, 0);
+          }
+        }}
+        onPresetLeave={() => {
+          // Restore to the selected preset when leaving
+          if (visualizerRef.current?.visualizer && selectedPreset) {
+            visualizerRef.current.visualizer.loadPreset(selectedPreset, 0);
+          }
+        }}
+        onPresetClick={(preset, presetName) => {
+          // Final selection on click
+          setSelectedPreset(preset);
+          setSelectedPresetName(presetName);
           if (visualizerRef.current?.visualizer) {
             visualizerRef.current.visualizer.loadPreset(preset, 0);
           }
