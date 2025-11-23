@@ -123,7 +123,7 @@ export function Waveform({
   });
   const debounceDelay = 10;
 
-  // Debounce all render params with 300ms delay
+  // Debounce all render params with delay
   const debouncedWidth = useDebouncedTrailingHook(width, debounceDelay);
   const debouncedHeight = useDebouncedTrailingHook(height, debounceDelay);
   const debouncedColorPalette = useDebouncedTrailingHook(
@@ -197,7 +197,7 @@ export function Waveform({
     // Debounce the resize call
     resizeTimeoutRef.current = setTimeout(() => {
       handleResizeRef.current?.(debouncedWidth, debouncedHeight);
-    }, 300);
+    }, debounceDelay);
 
     // Cleanup timeout on unmount or when dependencies change
     return () => {
