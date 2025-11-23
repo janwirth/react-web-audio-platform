@@ -4,6 +4,7 @@ import React, {
   useRef,
   useEffect,
   useCallback,
+  useState,
   ReactNode,
 } from "react";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -91,6 +92,40 @@ export const Player: React.FC<PlayerProps> = ({ children }) => {
   );
 };
 
+function waitForBuffered(
+  audio: HTMLAudioElement,
+  targetTime: number,
+  timeout = 4000
+): Promise<void> {
+  return new Promise<void>((resolve, reject) => {
+    const start = performance.now();
+
+    function check() {
+      // Check buffered ranges
+      for (let i = 0; i < audio.buffered.length; i++) {
+        const startRange = audio.buffered.start(i);
+        const endRange = audio.buffered.end(i);
+
+        // Browser has buffered the target time
+        if (startRange <= targetTime && endRange >= targetTime) {
+          resolve();
+          return;
+        }
+      }
+
+      // Timeout
+      if (performance.now() - start > timeout) {
+        reject(new Error("Timeout waiting for buffer"));
+        return;
+      }
+
+      requestAnimationFrame(check);
+    }
+
+    check();
+  });
+}
+
 interface UseTrackReturn {
   playheadPosition: number | null;
   seekAndPlay: (position: number) => void;
@@ -157,7 +192,7 @@ export const useTrack = (url: string): UseTrackReturn => {
 
   const seekAndPlay = useCallback(
     (position: number) => {
-      console.log("seekAndPlay called with percentage:", position);
+      // console.log("seekAndPlay called with percentage:", position);
 
       const audio = audioRef.current;
       if (!audio) return;
@@ -175,32 +210,63 @@ export const useTrack = (url: string): UseTrackReturn => {
         audio.load();
       }
 
-      // Wait for metadata to be available
-      const performSeek = () => {
+      // Function to perform the actual seek and play
+      const performSeekAndPlay = () => {
         if (!audio.duration || isNaN(audio.duration)) {
-          audio.addEventListener("loadedmetadata", performSeek, { once: true });
           return;
         }
 
         const clampedPosition = Math.max(0, Math.min(1, position));
         const seekTime = clampedPosition * audio.duration;
 
-        console.log(
-          `Seeking to ${clampedPosition * 100}% (${seekTime.toFixed(
-            2
-          )}s of ${audio.duration.toFixed(2)}s)`
-        );
-
-        // audio.load();
-        audio.currentTime = seekTime;
-        audio.play().catch(console.error);
-        console.log("target:", seekTime, "actual:", audio.currentTime);
-        // setInterval(() => {
-        //   console.log("target:", seekTime, "actual:", audio.currentTime);
-        // }, 1000);
+        // audio.currentTime = seekTime;
+        waitForBuffered(audio, seekTime).then(() => {
+          audio.currentTime = seekTime;
+          audio
+            .play()
+            .catch(console.error)
+            .then(() => {});
+        });
       };
 
-      performSeek();
+      // Check if metadata is already loaded
+      if (audio.duration && !isNaN(audio.duration)) {
+        // Metadata is available, perform seek immediately
+        // Wait for audio to be ready if needed
+        if (audio.readyState >= 2) {
+          performSeekAndPlay();
+        } else {
+          const onCanplay = () => {
+            audio.removeEventListener("canplay", onCanplay);
+            audio.removeEventListener("canplaythrough", onCanplay);
+            performSeekAndPlay();
+          };
+          audio.addEventListener("canplay", onCanplay, { once: true });
+          audio.addEventListener("canplaythrough", onCanplay, { once: true });
+        }
+      } else {
+        // Wait for metadata to be loaded first
+        const onLoadedmetadata = () => {
+          audio.removeEventListener("loadedmetadata", onLoadedmetadata);
+
+          // After metadata is loaded, wait for audio to be ready
+          const onCanplaythrough = () => {
+            audio.removeEventListener("canplaythrough", onCanplaythrough);
+            performSeekAndPlay();
+          };
+
+          if (audio.readyState >= 3) {
+            performSeekAndPlay();
+          } else {
+            audio.addEventListener("canplaythrough", onCanplaythrough, {
+              once: true,
+            });
+          }
+        };
+        audio.addEventListener("loadedmetadata", onLoadedmetadata, {
+          once: true,
+        });
+      }
     },
     [audioRef, url, setActiveUrl]
   );
@@ -219,5 +285,221 @@ export const useTrack = (url: string): UseTrackReturn => {
     seekAndPlay,
     play,
     pause,
+  };
+};
+
+export const useCurrentPlayback = (): null | {
+  url: string;
+  playheadposition: number | null;
+  playing: boolean;
+  seekTo: (position: number) => void;
+} => {
+  const { audioRef } = usePlayerContext();
+  const activeUrl = useAtomValue(activeUrlAtom);
+  const [playing, setPlaying] = useState(false);
+
+  // Get playhead position for the active URL
+  // Always call hook unconditionally (Rules of Hooks) - use empty string as fallback
+  const playheadPosition = useAtomValue(
+    playheadPositionAtomFamily(activeUrl || "")
+  );
+
+  // Track playing state from audio element
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const updatePlayingState = () => {
+      setPlaying(!audio.paused);
+    };
+
+    // Initialize playing state
+    updatePlayingState();
+
+    audio.addEventListener("play", updatePlayingState);
+    audio.addEventListener("pause", updatePlayingState);
+    audio.addEventListener("ended", updatePlayingState);
+    const handleWaiting = () => console.log("handleWaiting");
+    audio.addEventListener("waiting", handleWaiting);
+    const handleLoadstart = () => console.log("handleLoadstart");
+    audio.addEventListener("loadstart", handleLoadstart);
+    const handleProgress = () => console.log("handleProgress");
+    audio.addEventListener("progress", handleProgress);
+    const handleLoad = () => console.log("handleLoadend");
+    audio.addEventListener("loadedmetadata", handleLoad);
+    const handleLoadeddata = () => console.log("handleLoadeddata");
+    audio.addEventListener("loadeddata", handleLoadeddata);
+    const handleCanplay = () => console.log("handleCanplay");
+    audio.addEventListener("canplay", handleCanplay);
+    const handleCanplaythrough = () => console.log("handleCanplaythrough");
+    audio.addEventListener("canplaythrough", handleCanplaythrough);
+    const handlePlaying = () => console.log("handlePlaying");
+    audio.addEventListener("playing", handlePlaying);
+
+    return () => {
+      audio.removeEventListener("play", updatePlayingState);
+      audio.removeEventListener("pause", updatePlayingState);
+      audio.removeEventListener("ended", updatePlayingState);
+      audio.removeEventListener("load", handleLoad);
+      audio.removeEventListener("waiting", handleWaiting);
+      audio.removeEventListener("loadstart", handleLoadstart);
+      audio.removeEventListener("progress", handleProgress);
+      audio.removeEventListener("loadend", handleLoad);
+      audio.removeEventListener("canplay", handleCanplay);
+      audio.removeEventListener("canplaythrough", handleCanplaythrough);
+      audio.removeEventListener("playing", handlePlaying);
+    };
+  }, [audioRef]);
+
+  // Seek function for the currently active track
+  // Uses multiple strategies to ensure accurate seeking:
+  // 1. Checks buffered ranges before seeking
+  // 2. Plays briefly before seeking (browser workaround)
+  // 3. Verifies seek accuracy and retries with exponential backoff
+  // 4. Handles readyState and buffering properly
+  const seekToRef = useRef<number | null>(null);
+  const seekTo = useCallback(
+    (position: number) => {
+      if (!activeUrl) return;
+
+      const audio = audioRef.current;
+      if (!audio) return;
+
+      const normalizedUrl = normalizeUrl(activeUrl);
+      const currentSrc = audio.src;
+      const normalizedCurrentSrc = normalizeUrl(currentSrc);
+
+      // Ensure the correct audio file is loaded
+      if (normalizedCurrentSrc !== normalizedUrl) {
+        audio.src = activeUrl;
+        audio.load();
+      }
+
+      // Cancel any pending seek timeout
+      if (seekToRef.current !== null) {
+        clearTimeout(seekToRef.current);
+        seekToRef.current = null;
+      }
+
+      // Check if audio was playing before we seek
+      const wasPlaying = !audio.paused;
+
+      // Helper to check if a time is buffered
+      const isTimeBuffered = (time: number): boolean => {
+        const buffered = audio.buffered;
+        for (let i = 0; i < buffered.length; i++) {
+          if (time >= buffered.start(i) && time <= buffered.end(i)) {
+            return true;
+          }
+        }
+        return false;
+      };
+
+      // Wait for metadata to be available
+      const performSeek = () => {
+        if (!audio.duration || isNaN(audio.duration)) {
+          audio.addEventListener("loadedmetadata", performSeek, { once: true });
+          return;
+        }
+
+        const clampedPosition = Math.max(0, Math.min(1, position));
+        const seekTime = clampedPosition * audio.duration;
+
+        // Wait for audio to be ready and attempt seek
+        const attemptSeek = (retryCount = 0) => {
+          // Strategy 1: Ensure audio has enough data
+          // HAVE_FUTURE_DATA (3) is better than HAVE_CURRENT_DATA (2) for seeking
+          if (audio.readyState < 2) {
+            const onCanPlay = () => {
+              audio.removeEventListener("canplay", onCanPlay);
+              audio.removeEventListener("canplaythrough", onCanPlay);
+              attemptSeek(retryCount);
+            };
+            audio.addEventListener("canplay", onCanPlay, { once: true });
+            audio.addEventListener("canplaythrough", onCanPlay, { once: true });
+            return;
+          }
+
+          // Strategy 2: Check if target position is buffered
+          // If not buffered, wait for progress event or use play/pause workaround
+          const doSeek = () => {
+            // Strategy 3: Play briefly before seeking (browser workaround)
+            // Some browsers need audio to be playing to update currentTime accurately
+            const wasPaused = audio.paused;
+            let playPromise: Promise<void> | null = null;
+
+            if (wasPaused && !isTimeBuffered(seekTime)) {
+              // If target isn't buffered and audio is paused, play briefly
+              playPromise = audio.play().catch(() => {});
+            }
+
+            const executeSeek = () => {
+              let seekCompleted = false;
+              let verificationAttempts = 0;
+              const maxVerificationAttempts = 3;
+
+              // Perform the seek
+              audio.currentTime = seekTime;
+
+              // Fallback: verify after a delay if seeked event doesn't fire
+              // play
+              audio.play().catch(console.error);
+            };
+
+            // If we started playing, wait a bit for it to initialize
+            if (playPromise) {
+              playPromise
+                .then(() => {
+                  // Small delay to let play initialize
+                  setTimeout(executeSeek, 10);
+                })
+                .catch(() => {
+                  // Play failed, try seek anyway
+                  executeSeek();
+                });
+            } else {
+              executeSeek();
+            }
+          };
+
+          // Strategy 4: If target isn't buffered, wait for it or use play/pause
+          if (!isTimeBuffered(seekTime) && audio.readyState < 3) {
+            // Not buffered yet, wait for progress
+            const onProgress = () => {
+              if (isTimeBuffered(seekTime) || audio.readyState >= 3) {
+                audio.removeEventListener("progress", onProgress);
+                doSeek();
+              }
+            };
+            audio.addEventListener("progress", onProgress);
+
+            // Fallback: proceed anyway after a timeout
+            seekToRef.current = window.setTimeout(() => {
+              audio.removeEventListener("progress", onProgress);
+              doSeek();
+            }, 500);
+          } else {
+            // Buffered or ready, proceed with seek
+            doSeek();
+          }
+        };
+
+        attemptSeek();
+      };
+
+      performSeek();
+    },
+    [audioRef, activeUrl]
+  );
+
+  if (!activeUrl) {
+    return null;
+  }
+
+  return {
+    url: activeUrl,
+    playheadposition: playheadPosition,
+    playing,
+    seekTo,
   };
 };

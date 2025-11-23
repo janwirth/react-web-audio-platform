@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
-import { usePlayerContext, useTrack, activeUrlAtom } from "./Player";
-import { useAtomValue } from "jotai";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { usePlayerContext, useCurrentPlayback } from "./Player";
 
 // Format seconds to MM:SS or HH:MM:SS
 const formatTime = (seconds: number): string => {
@@ -118,16 +117,12 @@ function HorizontalSlider({
 
 export function PlayerUI() {
   const { audioRef } = usePlayerContext();
-  const activeUrl = useAtomValue(activeUrlAtom);
+  const playback = useCurrentPlayback();
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isSeeking, setIsSeeking] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-
-  // Get seekAndPlay from useTrack - always call hook unconditionally
-  // Use empty string as fallback if no active URL
-  const trackHook = useTrack(activeUrl || "");
 
   // Update current time and playing state
   useEffect(() => {
@@ -173,21 +168,21 @@ export function PlayerUI() {
 
   const handleProgressChange = useCallback(
     (value: number) => {
-      if (!activeUrl || !duration) return;
+      if (!playback || !duration) return;
 
       setIsSeeking(true);
       const percentage = value / 100; // Convert 0-100 to 0-1
       setCurrentTime(percentage * duration);
 
-      // Use seekAndPlay instead of directly setting currentTime
-      trackHook.seekAndPlay(percentage);
+      // Use seekTo from useCurrentPlayback
+      playback.seekTo(percentage);
 
       // Reset seeking flag after a short delay
       setTimeout(() => {
         setIsSeeking(false);
       }, 100);
     },
-    [activeUrl, trackHook, duration]
+    [playback, duration]
   );
 
   const handleVolumeChange = useCallback(

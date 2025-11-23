@@ -121,7 +121,9 @@ export const MiniSpectro = ({ size = DEFAULT_SIZE }) => {
 
         // Use exactly 32 frequency bands
         const bandCount = 32;
-        const dataStep = Math.floor(leftDataArray.length / bandCount);
+        // Cut out the highest 15% of frequencies
+        const usableLength = Math.floor(leftDataArray.length * 0.8);
+        const dataStep = Math.floor(usableLength / bandCount);
         const barWidth = size / bandCount;
         const barHeight = size;
 
@@ -133,7 +135,12 @@ export const MiniSpectro = ({ size = DEFAULT_SIZE }) => {
           // Combine both channels (average or max)
           const leftValue = leftDataArray[dataIndex] / 255;
           const rightValue = rightDataArray[dataIndex] / 255;
-          const combinedValue = Math.max(leftValue, rightValue); // Use max for visibility
+          let combinedValue = Math.max(leftValue, rightValue); // Use max for visibility
+
+          // Amplify higher frequencies: apply exponential gain curve
+          // Higher frequency bands (higher i) get more amplification
+          const frequencyGain = 1 + (i / bandCount) * 2; // Linear gain from 1x to 3x
+          combinedValue = Math.min(1, combinedValue * frequencyGain); // Clamp to 1.0
 
           const barHeightValue = combinedValue * barHeight;
           const x = i * barWidth;

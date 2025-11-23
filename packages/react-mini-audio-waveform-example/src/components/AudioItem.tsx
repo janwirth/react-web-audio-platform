@@ -78,6 +78,7 @@ function WaveformItem({
             )}
           </>
         }
+        {/* <div onClick={() => handleWaveformClick(0.5)}>Click me</div> */}
         <Waveform
           {...(onGotData && { onGotData })}
           onClickAtPercentage={handleWaveformClick}
