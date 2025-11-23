@@ -4,10 +4,6 @@ import { usePlayerContext } from "./Player";
 const DEFAULT_SIZE = 32;
 
 interface MiniSpectro {
-  size?: number;
-}
-
-interface MiniSpectro {
   audioContext: AudioContext;
   sourceNode: MediaElementAudioSourceNode;
   splitterNode: ChannelSplitterNode;
@@ -61,7 +57,7 @@ function initMiniSpectro(audioElement: HTMLAudioElement): MiniSpectro | null {
   }
 }
 
-export const MiniSpectro = ({ size = DEFAULT_SIZE }: MiniSpectro) => {
+export const MiniSpectro = ({ size = DEFAULT_SIZE }) => {
   const audioNode = usePlayerContext().audioRef.current;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagerRef = useRef<MiniSpectro | null>(null);

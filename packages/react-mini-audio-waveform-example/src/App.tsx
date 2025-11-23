@@ -1,13 +1,21 @@
 import { useEffect, useState, useCallback } from "react";
+import { useSetAtom } from "jotai";
 import { AudioItem } from "./components/AudioItem";
 import { GlobalControls } from "./components/GlobalControls";
 import { AudioContextProvider } from "@janwirth/react-web-audio-context";
 import { dequeueAudioBufferRequest } from "@janwirth/react-web-audio-context";
 import type { ColorPalette } from "@janwirth/react-mini-audio-waveform";
-import { Player } from "./components/Player";
+import {
+  Player,
+  queueAtom,
+  currentQueueIndexAtom,
+  type QueueItem,
+  activeUrlAtom,
+} from "./components/Player";
 import { PlayerUI } from "./components/PlayerUI";
 import { Visualizer } from "./components/Visualizer";
 import { MiniSpectro } from "./components/MiniSpectro";
+import { Queue } from "./components/Queue";
 
 interface AudioItemData {
   title: string;
@@ -32,6 +40,11 @@ function App() {
   // Re-render key to force reload
   const [reRenderKey, setReRenderKey] = useState(0);
 
+  // Queue management
+  const setQueue = useSetAtom(queueAtom);
+  const setCurrentQueueIndex = useSetAtom(currentQueueIndexAtom);
+  const setActiveUrl = useSetAtom(activeUrlAtom);
+
   const handleReRender = useCallback(() => {
     // Clear cache for all audio items
     audioItems.forEach((item) => {
@@ -45,6 +58,37 @@ function App() {
     // Increment the key to trigger a reload with a new URL
     setReRenderKey((prev) => prev + 1);
   }, [audioItems, reRenderKey]);
+
+  const handleCreateQueue = useCallback(
+    (startIndex: number) => {
+      // Create queue starting from the clicked track, including all subsequent tracks
+      const queueItems: QueueItem[] = audioItems
+        .slice(startIndex)
+        .map((item) => ({
+          title: item.title,
+          audioUrl: `${BASE_URL}${item.audioUrl}`, // Store full URL
+        }));
+
+      setQueue(queueItems);
+      setCurrentQueueIndex(0);
+
+      // Start playing the first track in the queue
+      if (queueItems.length > 0) {
+        const firstTrackUrl = queueItems[0].audioUrl;
+        setActiveUrl(firstTrackUrl);
+        // Use the audio element to start playback
+        const audioElement = document.querySelector(
+          "audio"
+        ) as HTMLAudioElement;
+        if (audioElement) {
+          audioElement.src = firstTrackUrl;
+          audioElement.load();
+          audioElement.play().catch(console.error);
+        }
+      }
+    },
+    [audioItems, setQueue, setCurrentQueueIndex, setActiveUrl]
+  );
 
   useEffect(() => {
     const fetchAudioItems = async () => {
@@ -91,6 +135,8 @@ function App() {
             onReRender={handleReRender}
           />
 
+          <Queue />
+
           {audioItems.map((item, index) => (
             <AudioItem
               key={index}
@@ -100,6 +146,7 @@ function App() {
               customPalette={customPalette}
               waveformHeight={waveformHeight}
               reRenderKey={reRenderKey}
+              onQueueClick={() => handleCreateQueue(index)}
             />
           ))}
         </div>

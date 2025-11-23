@@ -17,6 +17,7 @@ interface AudioItemProps {
   customPalette: Partial<ColorPalette>;
   waveformHeight: number;
   reRenderKey: number;
+  onQueueClick?: () => void;
 }
 
 const MONOCHROME_PALETTES = [
@@ -97,6 +98,7 @@ export function AudioItem({
   customPalette,
   waveformHeight,
   reRenderKey,
+  onQueueClick,
 }: AudioItemProps) {
   console.log("rendering audio item", audioUrl);
   const fullAudioUrl = `${baseUrl}${audioUrl}`;
@@ -151,7 +153,13 @@ export function AudioItem({
 
   return (
     <div className="font-mono">
-      <div className="text-sm font-medium text-gray-700">{title}</div>
+      <div 
+        className="text-sm font-medium text-gray-700 cursor-pointer hover:text-gray-900"
+        onClick={onQueueClick}
+        title="Click to create queue starting from this track"
+      >
+        {title}
+      </div>
 
       <div className="flex flex-col gap-1">
         <WaveformItem

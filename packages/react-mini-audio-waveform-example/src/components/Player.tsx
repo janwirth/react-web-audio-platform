@@ -24,12 +24,21 @@ export const usePlayerContext = () => {
 };
 
 // Atom for tracking the currently active URL
-const activeUrlAtom = atom<string | null>(null);
+export const activeUrlAtom = atom<string | null>(null);
 
 // Atom family for playhead position per URL
 const playheadPositionAtomFamily = atomFamily((url: string) =>
   atom<number | null>(null)
 );
+
+// Queue state atoms
+export interface QueueItem {
+  title: string;
+  audioUrl: string;
+}
+
+export const queueAtom = atom<QueueItem[]>([]);
+export const currentQueueIndexAtom = atom<number>(-1);
 
 interface PlayerProps {
   children: ReactNode;
@@ -37,6 +46,42 @@ interface PlayerProps {
 
 export const Player: React.FC<PlayerProps> = ({ children }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const [queue] = useAtom(queueAtom);
+  const [currentQueueIndex, setCurrentQueueIndex] = useAtom(
+    currentQueueIndexAtom
+  );
+  const [activeUrl, setActiveUrl] = useAtom(activeUrlAtom);
+
+  // Handle track ending and advance to next in queue
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleEnded = () => {
+      if (currentQueueIndex >= 0 && currentQueueIndex < queue.length - 1) {
+        // Advance to next track in queue
+        const nextIndex = currentQueueIndex + 1;
+        const nextItem = queue[nextIndex];
+        if (nextItem) {
+          setCurrentQueueIndex(nextIndex);
+          // audioUrl should already be a full URL
+          const fullUrl = nextItem.audioUrl;
+          setActiveUrl(fullUrl);
+          audio.src = fullUrl;
+          audio.load();
+          audio.play().catch(console.error);
+        }
+      } else {
+        // Queue finished or no queue
+        setCurrentQueueIndex(-1);
+      }
+    };
+
+    audio.addEventListener("ended", handleEnded);
+    return () => {
+      audio.removeEventListener("ended", handleEnded);
+    };
+  }, [queue, currentQueueIndex, setCurrentQueueIndex, setActiveUrl]);
 
   return (
     <PlayerContext.Provider value={{ audioRef }}>
