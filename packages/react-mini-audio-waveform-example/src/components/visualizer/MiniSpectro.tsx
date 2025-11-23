@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { usePlayerContext } from "../player/Player";
+import { useColorScheme } from "../../hooks/useColorScheme";
 
 const DEFAULT_SIZE = 32;
 
@@ -70,6 +71,7 @@ export const MiniSpectro = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagerRef = useRef<MiniSpectro | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const { isDark } = useColorScheme();
 
   // Initialize stereo imager
   useEffect(() => {
@@ -151,10 +153,18 @@ export const MiniSpectro = ({
           const frequencyGain = 1 + i / bandCount; // Linear gain from 1x to 3x
           combinedValue = Math.min(1, combinedValue * frequencyGain); // Clamp to 1.0
 
-          // Make bars with higher amplitude darker
-          // Map amplitude (0-1) to grayscale (lighter to darker)
-          // Higher amplitude = darker color (lower RGB values)
-          const grayValue = Math.floor(255 - combinedValue * 180); // Range from 255 (light) to 75 (dark)
+          // Make bars with higher amplitude darker in light mode, lighter in dark mode
+          // Map amplitude (0-1) to grayscale
+          // Light mode: Higher amplitude = darker color (lower RGB values)
+          // Dark mode: Higher amplitude = lighter color (higher RGB values)
+          let grayValue: number;
+          if (isDark) {
+            // Dark mode: range from 30 (dark) to 210 (light)
+            grayValue = Math.floor(30 + combinedValue * 180);
+          } else {
+            // Light mode: range from 255 (light) to 75 (dark)
+            grayValue = Math.floor(255 - combinedValue * 180);
+          }
           ctx.fillStyle = `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
 
           const barHeightValue = combinedValue * barHeight;
@@ -201,7 +211,7 @@ export const MiniSpectro = ({
         imagerRef.current = null;
       };
     }
-  }, [audioNode, size, growFromCenter]);
+  }, [audioNode, size, growFromCenter, isDark]);
 
   // Update canvas size when size prop changes
   useEffect(() => {

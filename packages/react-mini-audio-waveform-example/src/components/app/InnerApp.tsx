@@ -116,7 +116,7 @@ export function InnerApp() {
       </div>
       {showVisualizer && <Visualizer />}
 
-      <div className="sticky bg-gray-100 dark:bg-gray-800 w-full top-[73px] left-0 z-10 flex gap-1 items-center transition-colors">
+      <div className="sticky bg-white dark:bg-black w-full top-[73px] left-0 z-10 flex gap-1 items-center transition-colors">
         <div className="flex-1 grow">
           <PlayerUI />
         </div>
@@ -127,20 +127,25 @@ export function InnerApp() {
         onReRender={handleReRender}
       />
 
-      <Queue />
-
-      {audioItems.map((item, index) => (
-        <AudioItem
-          key={index}
-          title={item.title}
-          audioUrl={item.audioUrl}
-          baseUrl={BASE_URL}
-          customPalette={customPalette}
-          waveformHeight={waveformHeight}
-          reRenderKey={reRenderKey}
-          onQueueClick={() => handleCreateQueue(index)}
-        />
-      ))}
+      <div className="flex gap-8 items-start">
+        <div className="flex-1">
+          {audioItems.map((item, index) => (
+            <AudioItem
+              key={index}
+              title={item.title}
+              audioUrl={item.audioUrl}
+              baseUrl={BASE_URL}
+              customPalette={customPalette}
+              waveformHeight={waveformHeight}
+              reRenderKey={reRenderKey}
+              onQueueClick={() => handleCreateQueue(index)}
+            />
+          ))}
+        </div>
+        <div className="w-80 shrink-0">
+          <Queue />
+        </div>
+      </div>
     </div>
   );
 }

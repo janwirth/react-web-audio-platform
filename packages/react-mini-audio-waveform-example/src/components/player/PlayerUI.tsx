@@ -215,7 +215,7 @@ export function PlayerUI() {
       {/* Play/Pause Button */}
       <button
         onClick={handlePlayPause}
-        className="flex items-center justify-center  text-gray-600 hover:text-gray-800 transition-colors hover:bg-gray-200 p-1"
+        className="flex items-center justify-center text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 p-1"
         aria-label={isPlaying ? "Pause" : "Play"}
       >
         {isPlaying ? (
@@ -240,7 +240,7 @@ export function PlayerUI() {
       </button>
 
       {/* Progress Scrubber */}
-      <span className="text-xs font-mono text-gray-600  text-right font-black ">
+      <span className="text-xs font-mono text-gray-600 dark:text-gray-400 text-right font-black">
         {formatTime(currentTime)}
       </span>
       <MiniSpectro />
@@ -253,7 +253,7 @@ export function PlayerUI() {
           className="h-3"
         />
       </div>
-      <span className="text-xs font-mono text-gray-600 ">
+      <span className="text-xs font-mono text-gray-600 dark:text-gray-400">
         {formatTime(duration)}
       </span>
 
