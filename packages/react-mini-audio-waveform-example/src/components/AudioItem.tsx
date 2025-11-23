@@ -8,6 +8,7 @@ import {
   WaveformRenderData,
 } from "@janwirth/react-mini-audio-waveform";
 import type { ColorPalette } from "@janwirth/react-mini-audio-waveform";
+import { useTrack } from "src/player";
 
 interface AudioItemProps {
   title: string;
@@ -82,6 +83,8 @@ export function AudioItem({
   reRenderKey,
 }: AudioItemProps) {
   const fullAudioUrl = `${baseUrl}${audioUrl}`;
+  const { play, pause, stop, seek, status, playbackPosition, duration, error } =
+    useTrack(audioUrl);
 
   // Use the audio buffer hook with reload key to force re-fetch when needed
   const audioUrlWithKey = useMemo(() => {

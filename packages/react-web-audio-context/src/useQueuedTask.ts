@@ -48,9 +48,9 @@ export function getQueue(queueId?: string): PQueue {
 }
 
 // Shared default queue instance for backward compatibility
-export const defaultQueue = getQueue("default");
+export const defaultQueue: PQueue = getQueue("default");
 // Export as 'queue' for backward compatibility
-export const queue = defaultQueue;
+export const queue: PQueue = defaultQueue;
 
 type LoadingStatus = {
   type: "loading";

@@ -4,34 +4,62 @@ import {
   useEffect,
   ReactNode,
   useState,
+  useRef,
 } from "react";
 import { getQueue } from "./useQueuedTask";
 
-const AudioContextContext = createContext<AudioContext>(
-  null as unknown as AudioContext
-);
+interface AudioContextValue {
+  audioContext: AudioContext;
+  audioElement: HTMLAudioElement;
+}
+
+const AudioContextContext = createContext<AudioContextValue | null>(null);
 
 export const AudioContextProvider = ({ children }: { children: ReactNode }) => {
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const audioElementRef = useRef<HTMLAudioElement | null>(null);
+  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
 
   useEffect(() => {
-    // Initialize AudioContext
+    // Create audio element
+    const audioElement = document.createElement("audio");
+    audioElement.style.display = "none";
+    document.body.appendChild(audioElement);
+    audioElementRef.current = audioElement;
+
+    // Create AudioContext from the audio element's media element source
     const ctx = new AudioContext();
+
+    // Connect audio element to AudioContext
+    const source = ctx.createMediaElementSource(audioElement);
+    source.connect(ctx.destination);
+    sourceNodeRef.current = source; // Keep reference to prevent garbage collection
+
     setAudioContext(ctx);
 
     // Cleanup on unmount
     return () => {
+      sourceNodeRef.current = null;
       ctx.close();
+      if (audioElementRef.current && audioElementRef.current.parentNode) {
+        audioElementRef.current.parentNode.removeChild(audioElementRef.current);
+      }
+      audioElementRef.current = null;
       setAudioContext(null);
     };
   }, []);
 
-  if (!audioContext) {
+  if (!audioContext || !audioElementRef.current) {
     return null;
   }
 
   return (
-    <AudioContextContext.Provider value={audioContext}>
+    <AudioContextContext.Provider
+      value={{
+        audioContext,
+        audioElement: audioElementRef.current,
+      }}
+    >
       {children}
     </AudioContextContext.Provider>
   );
@@ -44,11 +72,15 @@ export const useAudioContext = () => {
       "useAudioContext must be used within an AudioContextProvider"
     );
   }
-  return context;
+  return context.audioContext;
 };
 
 export const useElement = () => {
-  return useAudioContext();
+  const context = useContext(AudioContextContext);
+  if (!context) {
+    throw new Error("useElement must be used within an AudioContextProvider");
+  }
+  return context.audioElement;
 };
 
 /**
@@ -74,7 +106,7 @@ export function queueAudioTask<T>(
 
   const startTime = performance.now();
 
-  return queue.add(async () => {
+  return queue.add(async (): Promise<T> => {
     console.log(`[AudioQueue] Starting task: ${taskId}`);
 
     if (!audioContext) {
@@ -100,6 +132,5 @@ export function queueAudioTask<T>(
       );
       throw error;
     }
-  });
+  }) as Promise<T>;
 }
-
