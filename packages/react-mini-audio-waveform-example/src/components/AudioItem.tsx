@@ -71,7 +71,7 @@ function WaveformItem({
             </div> */}
             {player.playheadPosition !== null && (
               <div
-                className="bg-black-500 w-[1%] h-full absolute top-0 z-10 backdrop-invert"
+                className="bg-black-500 w-[1%] min-w-0.5 h-full absolute bottom-[-10%] z-10 backdrop-invert"
                 style={{ left: `${player.playheadPosition * 99}%` }}
               ></div>
             )}
@@ -153,7 +153,7 @@ export function AudioItem({
     <div className="font-mono">
       <div className="text-sm font-medium text-gray-700">{title}</div>
 
-      <div>
+      <div className="flex flex-col gap-1">
         <WaveformItem
           label="custom"
           audioUrl={audioUrlWithKey}

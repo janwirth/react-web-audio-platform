@@ -40,7 +40,7 @@ export const Player: React.FC<PlayerProps> = ({ children }) => {
 
   return (
     <PlayerContext.Provider value={{ audioRef }}>
-      <audio controls ref={audioRef} />
+      <audio ref={audioRef} />
       {children}
     </PlayerContext.Provider>
   );
