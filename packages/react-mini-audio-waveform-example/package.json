@@ -1,0 +1,30 @@
+{
+  "name": "@janwirth/react-mini-audio-waveform-example",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"bun run dev:server\" \"bun run dev:client\"",
+    "dev:client": "vite",
+    "dev:server": "cd server && bun run dev",
+    "build": "tsc && vite build",
+    "prebuild": "bun run --filter @janwirth/react-web-audio-context build && bun run --filter @janwirth/react-mini-audio-waveform build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@janwirth/react-mini-audio-waveform": "workspace:*",
+    "@janwirth/react-web-audio-context": "workspace:*",
+    "@uidotdev/usehooks": "^2.4.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.4",
+    "@types/react-dom": "^19.1.5",
+    "@vitejs/plugin-react": "^4.4.1",
+    "concurrently": "^8.2.2",
+    "typescript": "~5.0.0",
+    "vite": "^5.4.19"
+  }
+}
+
