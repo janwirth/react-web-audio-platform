@@ -44,14 +44,14 @@
   <link rel="stylesheet" href="https://unpkg.com/normalize.css/normalize.css" />
 
   <script type="module">
-    import butterchurn from 'https://unpkg.com/butterchurn@3.0.0-beta.5/dist/butterchurn.js';
+    import { initVisualizer } from './src/initVisualizer.ts';
 
     $(function() {
       var visualizer = null;
       var rendering = false;
       var audioContext = null;
       var sourceNode = null;
-      var delayedAudible = null;
+      var analyserNode = null;
       var cycleInterval = null;
       var presets = {};
       var presetKeys = [];
@@ -61,79 +61,51 @@
       var presetCycleLength = 15000;
       var presetRandom = true;
       var canvas = document.getElementById('canvas');
+      var audioElement = document.getElementById('audioElement');
 
       function connectToAudioAnalyzer(sourceNode) {
-        if(delayedAudible) {
-          delayedAudible.disconnect();
+        if (!analyserNode) {
+          analyserNode = audioContext.createAnalyser();
+          
+          // Connect source -> analyser -> destination for audio playback
+          sourceNode.connect(analyserNode);
+          analyserNode.connect(audioContext.destination);
+
+          // Connect visualizer to the analyser node
+          visualizer.connectAudio(analyserNode);
         }
-
-        delayedAudible = audioContext.createDelay();
-        delayedAudible.delayTime.value = 0.26;
-
-        sourceNode.connect(delayedAudible)
-        delayedAudible.connect(audioContext.destination);
-
-        visualizer.connectAudio(delayedAudible);
       }
 
       function startRenderer() {
-        requestAnimationFrame(() => startRenderer());
-        visualizer.render();
-      }
-
-      function playBufferSource(buffer) {
         if (!rendering) {
           rendering = true;
+        }
+        if (rendering && visualizer) {
+          visualizer.render();
+          requestAnimationFrame(startRenderer);
+        }
+      }
+
+      function connectAudioElement() {
+        if (!audioElement || !audioContext) return;
+
+        audioContext.resume();
+
+        // Create media element source (can only be called once per audio element)
+        if (!sourceNode) {
+          try {
+            sourceNode = audioContext.createMediaElementSource(audioElement);
+            connectToAudioAnalyzer(sourceNode);
+          } catch (error) {
+            console.error("Failed to create media element source:", error);
+            return;
+          }
+        }
+
+        // Start renderer if not already running
+        if (!rendering) {
           startRenderer();
         }
-
-        if (sourceNode) {
-          sourceNode.disconnect();
-        }
-
-        sourceNode = audioContext.createBufferSource();
-        sourceNode.buffer = buffer;
-        connectToAudioAnalyzer(sourceNode);
-
-        sourceNode.start(0);
-      }
-
-      function loadLocalFiles(files, index = 0) {
-        audioContext.resume();
-
-        var reader = new FileReader();
-        reader.onload = (event) => {
-          audioContext.decodeAudioData(
-            event.target.result,
-            (buf) => {
-              playBufferSource(buf);
-
-              setTimeout(() => {
-                if (files.length > index + 1) {
-                  loadLocalFiles(files, index + 1);
-                } else {
-                  sourceNode.disconnect();
-                  sourceNode = null;
-                  $("#audioSelectWrapper").css('display', 'block');
-                }
-              }, buf.duration * 1000);
-            }
-          );
-        };
-
-        var file = files[index];
-        reader.readAsArrayBuffer(file);
-      }
-
-      function connectMicAudio(sourceNode, audioContext) {
-        audioContext.resume();
-
-        var gainNode = audioContext.createGain();
-        gainNode.gain.value = 1.25;
-        sourceNode.connect(gainNode);
-
-        visualizer.connectAudio(gainNode);
-        startRenderer();
       }
 
       function nextPreset(blendTime = 5.7) {
@@ -203,31 +175,9 @@
         presetRandom = $('#presetRandom').is(':checked');
       });
 
-      $("#localFileBut").click(function() {
-        $("#audioSelectWrapper").css('display', 'none');
-
-        var fileSelector = $('<input type="file" accept="audio/*" multiple />');
-
-        fileSelector[0].onchange = function(event) {
-          loadLocalFiles(fileSelector[0].files);
-        }
-
-        fileSelector.click();
-      });
-
-      $("#micSelect").click(() => {
-        $("#audioSelectWrapper").css('display', 'none');
-
-        navigator.getUserMedia({ audio: true }, (stream) => {
-          var micSourceNode = audioContext.createMediaStreamSource(stream);
-          connectMicAudio(micSourceNode, audioContext);
-        }, (err) => {
-          console.log('Error getting audio stream from getUserMedia');
-        });
-      });
-
       function initPlayer() {
         audioContext = new AudioContext();
+        analyserNode = audioContext.createAnalyser();
 
         presets = {};
         if (window.base && window.base.default) {
@@ -248,14 +198,22 @@
             presetSelect.appendChild(opt);
         }
 
-        visualizer = butterchurn.createVisualizer(audioContext, canvas , {
-          width: 800,
-          height: 600,
-          pixelRatio: window.devicePixelRatio || 1,
-          textureRatio: 1,
-        });
-        nextPreset(0);
+        const result = initVisualizer(300, 300, presets[presetKeys[presetIndex]], canvas, analyserNode);
+        visualizer = result.visualizer;
         cycleInterval = setInterval(() => nextPreset(2.7), presetCycleLength);
+        
+        // Connect audio element after visualizer is initialized
+        if (audioElement) {
+          // Connect when audio metadata is loaded
+          audioElement.addEventListener('loadedmetadata', () => {
+            connectAudioElement();
+          });
+          
+          // Also connect if audio element is already loaded
+          if (audioElement.readyState >= 1) {
+            connectAudioElement();
+          }
+        }
       }
 
       initPlayer();
@@ -265,12 +223,10 @@
 <body>
   <div id="mainWrapper">
     <div id="audioSelectWrapper">
-      <div id="localFileBut">
-        <span>Load local files</span>
-      </div>
-      <div id="micSelect">
-        <span>Use Mic</span>
-      </div>
+      <audio id="audioElement" controls>
+        <source src="server/public/audio/track1.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+      </audio>
     </div>
     <div id="presetControls">
       <div>Preset: <select id="presetSelect"></select></div>
