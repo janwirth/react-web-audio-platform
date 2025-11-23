@@ -92,40 +92,6 @@ export const Player: React.FC<PlayerProps> = ({ children }) => {
   );
 };
 
-function waitForBuffered(
-  audio: HTMLAudioElement,
-  targetTime: number,
-  timeout = 4000
-): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    const start = performance.now();
-
-    function check() {
-      // Check buffered ranges
-      for (let i = 0; i < audio.buffered.length; i++) {
-        const startRange = audio.buffered.start(i);
-        const endRange = audio.buffered.end(i);
-
-        // Browser has buffered the target time
-        if (startRange <= targetTime && endRange >= targetTime) {
-          resolve();
-          return;
-        }
-      }
-
-      // Timeout
-      if (performance.now() - start > timeout) {
-        reject(new Error("Timeout waiting for buffer"));
-        return;
-      }
-
-      requestAnimationFrame(check);
-    }
-
-    check();
-  });
-}
-
 interface UseTrackReturn {
   playheadPosition: number | null;
   seekAndPlay: (position: number) => void;
@@ -288,6 +254,36 @@ export const useTrack = (url: string): UseTrackReturn => {
   };
 };
 
+const waitForBuffered = (
+  audio: HTMLAudioElement,
+  targetTime: number
+): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const check = () => {
+      console.log("checkIsBuffered", checkIsBuffered(audio, targetTime));
+      if (checkIsBuffered(audio, targetTime)) {
+        resolve();
+      } else {
+        setTimeout(check, 100);
+      }
+    };
+    check();
+  });
+};
+
+const checkIsBuffered = (
+  audio: HTMLAudioElement,
+  targetTime: number
+): boolean => {
+  const buffered = audio.buffered;
+  for (let i = 0; i < buffered.length; i++) {
+    if (targetTime >= buffered.start(i) && targetTime <= buffered.end(i)) {
+      return true;
+    }
+  }
+  return false;
+};
+
 export const useCurrentPlayback = (): null | {
   url: string;
   playheadposition: number | null;
@@ -319,35 +315,35 @@ export const useCurrentPlayback = (): null | {
     audio.addEventListener("play", updatePlayingState);
     audio.addEventListener("pause", updatePlayingState);
     audio.addEventListener("ended", updatePlayingState);
-    const handleWaiting = () => console.log("handleWaiting");
-    audio.addEventListener("waiting", handleWaiting);
-    const handleLoadstart = () => console.log("handleLoadstart");
-    audio.addEventListener("loadstart", handleLoadstart);
-    const handleProgress = () => console.log("handleProgress");
-    audio.addEventListener("progress", handleProgress);
-    const handleLoad = () => console.log("handleLoadend");
-    audio.addEventListener("loadedmetadata", handleLoad);
-    const handleLoadeddata = () => console.log("handleLoadeddata");
-    audio.addEventListener("loadeddata", handleLoadeddata);
-    const handleCanplay = () => console.log("handleCanplay");
-    audio.addEventListener("canplay", handleCanplay);
-    const handleCanplaythrough = () => console.log("handleCanplaythrough");
-    audio.addEventListener("canplaythrough", handleCanplaythrough);
-    const handlePlaying = () => console.log("handlePlaying");
-    audio.addEventListener("playing", handlePlaying);
+    // const handleWaiting = () => console.log("handleWaiting");
+    // audio.addEventListener("waiting", handleWaiting);
+    // const handleLoadstart = () => console.log("handleLoadstart");
+    // audio.addEventListener("loadstart", handleLoadstart);
+    // const handleProgress = () => console.log("handleProgress");
+    // audio.addEventListener("progress", handleProgress);
+    // const handleLoad = () => console.log("handleLoadend");
+    // audio.addEventListener("loadedmetadata", handleLoad);
+    // const handleLoadeddata = () => console.log("handleLoadeddata");
+    // audio.addEventListener("loadeddata", handleLoadeddata);
+    // const handleCanplay = () => console.log("handleCanplay");
+    // audio.addEventListener("canplay", handleCanplay);
+    // const handleCanplaythrough = () => console.log("handleCanplaythrough");
+    // audio.addEventListener("canplaythrough", handleCanplaythrough);
+    // const handlePlaying = () => console.log("handlePlaying");
+    // audio.addEventListener("playing", handlePlaying);
 
     return () => {
       audio.removeEventListener("play", updatePlayingState);
       audio.removeEventListener("pause", updatePlayingState);
       audio.removeEventListener("ended", updatePlayingState);
-      audio.removeEventListener("load", handleLoad);
-      audio.removeEventListener("waiting", handleWaiting);
-      audio.removeEventListener("loadstart", handleLoadstart);
-      audio.removeEventListener("progress", handleProgress);
-      audio.removeEventListener("loadend", handleLoad);
-      audio.removeEventListener("canplay", handleCanplay);
-      audio.removeEventListener("canplaythrough", handleCanplaythrough);
-      audio.removeEventListener("playing", handlePlaying);
+      // audio.removeEventListener("load", handleLoad);
+      // audio.removeEventListener("waiting", handleWaiting);
+      // audio.removeEventListener("loadstart", handleLoadstart);
+      // audio.removeEventListener("progress", handleProgress);
+      // audio.removeEventListener("loadend", handleLoad);
+      // audio.removeEventListener("canplay", handleCanplay);
+      // audio.removeEventListener("canplaythrough", handleCanplaythrough);
+      // audio.removeEventListener("playing", handlePlaying);
     };
   }, [audioRef]);
 

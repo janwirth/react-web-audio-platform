@@ -128,7 +128,6 @@ export const MiniSpectro = ({ size = DEFAULT_SIZE }) => {
         const barHeight = size;
 
         // Draw level meter bars
-        ctx.fillStyle = "#6b7280"; // Tailwind gray-500 (mid gray)
         for (let i = 0; i < bandCount; i++) {
           const dataIndex = i * dataStep;
 
@@ -141,6 +140,12 @@ export const MiniSpectro = ({ size = DEFAULT_SIZE }) => {
           // Higher frequency bands (higher i) get more amplification
           const frequencyGain = 1 + (i / bandCount) * 2; // Linear gain from 1x to 3x
           combinedValue = Math.min(1, combinedValue * frequencyGain); // Clamp to 1.0
+
+          // Make bars with higher amplitude darker
+          // Map amplitude (0-1) to grayscale (lighter to darker)
+          // Higher amplitude = darker color (lower RGB values)
+          const grayValue = Math.floor(255 - combinedValue * 180); // Range from 255 (light) to 75 (dark)
+          ctx.fillStyle = `rgb(${grayValue}, ${grayValue}, ${grayValue})`;
 
           const barHeightValue = combinedValue * barHeight;
           const x = i * barWidth;
