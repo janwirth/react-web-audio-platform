@@ -1,8 +1,54 @@
 # @janwirth/react-web-audio-platform
 
-Monorepo for React Web Audio libraries and components.
+Collection of packages for building music player.
 
-## Workspaces
+## Platform
+
+**Audio Context & Queues:**
+
+- AudioContextProvider for managing AudioContext lifecycle
+- useAudioContext hook
+- useAudioBuffer hook with caching
+- Audio task queuing to prevent browser overload
+
+## Features
+
+### Already Implemented
+
+**Waveform:**
+
+- Spectral audio waveform visualization
+- Customizable color palettes (including OKLCH support)
+- Frequency-based visualization
+- Click interaction support
+- Render data caching
+- Responsive and resizable
+
+### Roadmap
+
+**Visualizer:**
+
+- Butterchurn integration (TODO)
+  -> Visualizes current audio context output
+
+**Playback Controls:**
+
+- Play/pause functionality
+- Seek controls (over waveform)
+- Volume controls
+
+**Queue Controls:**
+
+- Queue management
+- Track reordering
+- Add/remove tracks
+
+**Playback State:**
+
+- Atomic updates for playback state
+- useProgress hook (only currently playing track has its playhead location updated)
+
+## Packages
 
 This monorepo contains the following packages:
 
@@ -10,22 +56,9 @@ This monorepo contains the following packages:
 
 React hooks and utilities for managing Web Audio API context and audio buffer loading.
 
-**Features:**
-- AudioContextProvider for managing AudioContext lifecycle
-- useAudioContext hook
-- useAudioBuffer hook with caching
-- Audio task queuing to prevent browser overload
-
 ### [@janwirth/react-mini-audio-waveform](./packages/react-mini-audio-waveform)
 
 A React component for rendering beautiful, spectral audio waveforms with customizable color palettes.
-
-**Features:**
-- Customizable color palettes (including OKLCH support)
-- Spectral frequency visualization
-- Click interaction support
-- Render data caching
-- Responsive and resizable
 
 ### [@janwirth/react-mini-audio-waveform-example](./packages/react-mini-audio-waveform-example)
 
@@ -48,6 +81,7 @@ bun run dev
 ```
 
 This will start:
+
 - API server on `http://localhost:3001`
 - Vite dev server on `http://localhost:3002`
 
@@ -60,6 +94,7 @@ bun run build
 ```
 
 This will:
+
 1. Run `prebuild` scripts (clean dist folders)
 2. Build all packages in dependency order
 
