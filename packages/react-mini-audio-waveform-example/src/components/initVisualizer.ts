@@ -6,9 +6,18 @@ export function initVisualizer(
   h: number,
   preset: any,
   canvas: HTMLCanvasElement,
-  audioNode: AnalyserNode
+  audioElement: HTMLAudioElement
 ) {
-  const audioContext = audioNode.context;
+  console.log("initVisualizer", audioElement, canvas);
+  const audioContext = new AudioContext();
+  const analyserNode = audioContext.createAnalyser();
+
+  // Create media element source from the audio element
+  const sourceNode = audioContext.createMediaElementSource(audioElement);
+
+  // Connect source -> analyser -> destination for audio playback
+  sourceNode.connect(analyserNode);
+  analyserNode.connect(audioContext.destination);
 
   const visualizer = butterchurn.createVisualizer(audioContext, canvas, {
     width: w,
@@ -18,7 +27,7 @@ export function initVisualizer(
   });
 
   visualizer.loadPreset(preset, 0);
-  visualizer.connectAudio(audioNode);
+  visualizer.connectAudio(analyserNode);
 
-  return { visualizer, audioContext };
+  return { visualizer, audioContext, analyserNode, sourceNode };
 }

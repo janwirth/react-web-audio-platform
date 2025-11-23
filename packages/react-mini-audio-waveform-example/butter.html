@@ -44,7 +44,7 @@
   <link rel="stylesheet" href="https://unpkg.com/normalize.css/normalize.css" />
 
   <script type="module">
-    import { initVisualizer } from './src/initVisualizer.ts';
+    import { initVisualizer } from './src/components/initVisualizer.ts';
 
     $(function() {
       var visualizer = null;
@@ -63,19 +63,6 @@
       var canvas = document.getElementById('canvas');
       var audioElement = document.getElementById('audioElement');
 
-      function connectToAudioAnalyzer(sourceNode) {
-        if (!analyserNode) {
-          analyserNode = audioContext.createAnalyser();
-          
-          // Connect source -> analyser -> destination for audio playback
-          sourceNode.connect(analyserNode);
-          analyserNode.connect(audioContext.destination);
-
-          // Connect visualizer to the analyser node
-          visualizer.connectAudio(analyserNode);
-        }
-      }
-
       function startRenderer() {
         if (!rendering) {
           rendering = true;
@@ -83,28 +70,6 @@
         if (rendering && visualizer) {
           visualizer.render();
           requestAnimationFrame(startRenderer);
-        }
-      }
-
-      function connectAudioElement() {
-        if (!audioElement || !audioContext) return;
-
-        audioContext.resume();
-
-        // Create media element source (can only be called once per audio element)
-        if (!sourceNode) {
-          try {
-            sourceNode = audioContext.createMediaElementSource(audioElement);
-            connectToAudioAnalyzer(sourceNode);
-          } catch (error) {
-            console.error("Failed to create media element source:", error);
-            return;
-          }
-        }
-
-        // Start renderer if not already running
-        if (!rendering) {
-          startRenderer();
         }
       }
 
@@ -176,9 +141,6 @@
       });
 
       function initPlayer() {
-        audioContext = new AudioContext();
-        analyserNode = audioContext.createAnalyser();
-
         presets = {};
         if (window.base && window.base.default) {
           Object.assign(presets, window.base.default);
@@ -198,20 +160,29 @@
             presetSelect.appendChild(opt);
         }
 
-        const result = initVisualizer(300, 300, presets[presetKeys[presetIndex]], canvas, analyserNode);
+        const result = initVisualizer(300, 300, presets[presetKeys[presetIndex]], canvas, audioElement);
         visualizer = result.visualizer;
+        audioContext = result.audioContext;
+        analyserNode = result.analyserNode;
+        sourceNode = result.sourceNode;
         cycleInterval = setInterval(() => nextPreset(2.7), presetCycleLength);
         
-        // Connect audio element after visualizer is initialized
+        // Resume audio context and start renderer
         if (audioElement) {
-          // Connect when audio metadata is loaded
+          // Resume audio context when audio metadata is loaded
           audioElement.addEventListener('loadedmetadata', () => {
-            connectAudioElement();
+            audioContext.resume();
+            if (!rendering) {
+              startRenderer();
+            }
           });
           
-          // Also connect if audio element is already loaded
+          // Also resume if audio element is already loaded
           if (audioElement.readyState >= 1) {
-            connectAudioElement();
+            audioContext.resume();
+            if (!rendering) {
+              startRenderer();
+            }
           }
         }
       }

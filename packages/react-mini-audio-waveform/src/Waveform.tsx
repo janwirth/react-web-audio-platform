@@ -143,7 +143,7 @@ export function Waveform({
 
   const handleResize = useCallback(
     (canvasWidth: number, canvasHeight: number) => {
-      console.log("handleResize", canvasWidth, canvasHeight);
+      // console.log("handleResize", canvasWidth, canvasHeight);
       const canvas = canvasRef.current;
       if (!canvas || !renderData) return;
 
@@ -157,7 +157,7 @@ export function Waveform({
 
       // Render with pre-computed data and debounced params
       // The renderer handles interpolation for different canvas sizes
-      console.log("rendering waveform", audioUrl);
+      // console.log("rendering waveform", audioUrl);
       renderWaveform(
         canvas,
         renderData.waveformData,
