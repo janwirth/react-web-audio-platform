@@ -120,30 +120,38 @@ export function getPaletteNames(): string[] {
  * @param hue - Hue in degrees (0-360)
  * @param saturation - Chroma/saturation (0-0.4, typically 0.1-0.3 works well)
  * @param hueSpread - Maximum hue spread in degrees (0-180), controls color variation
- * @param contrast - Lightness contrast (0-1), controls lightness differences between frequencies
+ * @param contrast - Lightness contrast (-1 to 1), controls lightness differences between frequencies. Negative values invert the relationship.
+ * @param lightness - Base lightness (0-1), controls overall lightness of the palette
  * @returns A ColorPalette with OKLCH colors
  */
 export function generateOklchPalette(
   hue: number,
   saturation: number,
   hueSpread: number = 60,
-  contrast: number = 0.4
+  contrast: number = 0,
+  lightness: number = 0.5
 ): ColorPalette {
   // Clamp values to valid ranges
   const clampedHue = Math.max(0, Math.min(360, hue));
   const clampedSaturation = Math.max(0, Math.min(0.4, saturation));
   const clampedHueSpread = Math.max(0, Math.min(180, hueSpread));
-  const clampedContrast = Math.max(0, Math.min(1, contrast));
+  const clampedContrast = Math.max(-1, Math.min(1, contrast));
+  const clampedLightness = Math.max(0.1, Math.min(0.9, lightness));
 
   // Base lightness for mid frequency
-  const baseLightness = 0.5;
+  const baseLightness = clampedLightness;
 
   // Calculate lightness differences based on contrast
-  // Contrast 0 = all same lightness, Contrast 1 = maximum difference
-  const lightnessRange = clampedContrast * 0.4; // Max range of 0.4 (from 0.3 to 0.7)
-  const lowLightness = baseLightness - lightnessRange; // Darker for low frequency
+  // Contrast 0 = all same lightness
+  // Contrast > 0: low darker, high lighter (normal)
+  // Contrast < 0: low lighter, high darker (inverted)
+  const lightnessRange = Math.abs(clampedContrast) * 0.4; // Max range of 0.4
+  const isInverted = clampedContrast < 0;
+  
+  // Calculate lightness values and clamp to valid OKLCH range (0-1)
+  const lowLightness = Math.max(0, Math.min(1, baseLightness + (isInverted ? lightnessRange : -lightnessRange)));
   const midLightness = baseLightness; // Medium for mid frequency
-  const highLightness = baseLightness + lightnessRange; // Lighter for high frequency
+  const highLightness = Math.max(0, Math.min(1, baseLightness + (isInverted ? -lightnessRange : lightnessRange)));
 
   // Calculate hue shifts based on hue spread
   // Hue spread 0 = all same hue, Hue spread 180 = maximum variation

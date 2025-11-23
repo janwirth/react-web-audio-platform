@@ -5,10 +5,12 @@ interface ColorPickerProps {
   saturation: number;
   hueSpread: number;
   contrast: number;
+  lightness: number;
   onHueChange: (value: number) => void;
   onSaturationChange: (value: number) => void;
   onHueSpreadChange: (value: number) => void;
   onContrastChange: (value: number) => void;
+  onLightnessChange: (value: number) => void;
 }
 
 export function ColorPicker({
@@ -16,10 +18,12 @@ export function ColorPicker({
   saturation,
   hueSpread,
   contrast,
+  lightness,
   onHueChange,
   onSaturationChange,
   onHueSpreadChange,
   onContrastChange,
+  onLightnessChange,
 }: ColorPickerProps) {
   // Fade out hue and spread when saturation is very low
   const isLowSaturation = saturation < 0.1;
@@ -30,11 +34,20 @@ export function ColorPicker({
       <VerticalSlider
         label="CTR"
         value={contrast}
-        min={0}
+        min={-1}
         max={1}
         step={0.01}
-        polarity="normal"
+        polarity="offset"
         onChange={onContrastChange}
+      />
+      <VerticalSlider
+        label="LGT"
+        value={lightness}
+        min={0.1}
+        max={0.9}
+        step={0.01}
+        polarity="normal"
+        onChange={onLightnessChange}
       />
       <VerticalSlider
         label="SAT"
