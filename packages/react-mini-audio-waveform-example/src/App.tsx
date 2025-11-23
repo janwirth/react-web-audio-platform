@@ -7,7 +7,7 @@ import type { ColorPalette } from "@janwirth/react-mini-audio-waveform";
 import { Player } from "./components/Player";
 import { PlayerUI } from "./components/PlayerUI";
 import { Visualizer } from "./components/Visualizer";
-import { StereoImager } from "./components/StereoImager";
+import { MiniSpectro } from "./components/MiniSpectro";
 
 interface AudioItemData {
   title: string;
@@ -83,7 +83,7 @@ function App() {
             <div className="flex-1 grow">
               <PlayerUI />
             </div>
-            <StereoImager />
+            <MiniSpectro />
           </div>
           <GlobalControls
             onPaletteChange={setCustomPalette}

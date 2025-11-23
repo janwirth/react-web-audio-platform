@@ -3,11 +3,11 @@ import { usePlayerContext } from "./Player";
 
 const DEFAULT_SIZE = 32;
 
-interface StereoImagerProps {
+interface MiniSpectro {
   size?: number;
 }
 
-interface StereoImagerState {
+interface MiniSpectro {
   audioContext: AudioContext;
   sourceNode: MediaElementAudioSourceNode;
   splitterNode: ChannelSplitterNode;
@@ -16,9 +16,7 @@ interface StereoImagerState {
   gainNode: GainNode;
 }
 
-function initStereoImager(
-  audioElement: HTMLAudioElement
-): StereoImagerState | null {
+function initMiniSpectro(audioElement: HTMLAudioElement): MiniSpectro | null {
   try {
     const audioContext = new AudioContext();
     const sourceNode = audioContext.createMediaElementSource(audioElement);
@@ -63,10 +61,10 @@ function initStereoImager(
   }
 }
 
-export const StereoImager = ({ size = DEFAULT_SIZE }: StereoImagerProps) => {
+export const MiniSpectro = ({ size = DEFAULT_SIZE }: MiniSpectro) => {
   const audioNode = usePlayerContext().audioRef.current;
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imagerRef = useRef<StereoImagerState | null>(null);
+  const imagerRef = useRef<MiniSpectro | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
   // Initialize stereo imager
@@ -83,7 +81,7 @@ export const StereoImager = ({ size = DEFAULT_SIZE }: StereoImagerProps) => {
       canvas.style.width = `${size}px`;
       canvas.style.height = `${size}px`;
 
-      const state = initStereoImager(audioNode);
+      const state = initMiniSpectro(audioNode);
       if (!state) return; // Failed to initialize
 
       imagerRef.current = state;
