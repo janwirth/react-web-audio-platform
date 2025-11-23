@@ -17,6 +17,7 @@ export const ButterchurnVisualizer = () => {
   > | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const analyserNodeRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -69,8 +70,6 @@ export const ButterchurnVisualizer = () => {
       try {
         sourceNode = audioContext.createMediaElementSource(audioElement);
         sourceNodeRef.current = sourceNode;
-        // Connect source to destination for audio output (only once)
-        sourceNode.connect(audioContext.destination);
       } catch (error) {
         // If createMediaElementSource fails, the audio element might already have a source
         // In this case, we need to find another way to connect
@@ -79,8 +78,22 @@ export const ButterchurnVisualizer = () => {
       }
     }
 
-    // Connect visualizer to the audio source
-    visualizer.connectAudio(sourceNode);
+    // Create or reuse analyser node to split the audio signal
+    // This allows us to connect to both destination (for playback) and visualizer
+    // without disconnecting one affecting the other
+    let analyserNode = analyserNodeRef.current;
+    if (!analyserNode) {
+      analyserNode = audioContext.createAnalyser();
+      analyserNodeRef.current = analyserNode;
+      // Connect source -> analyser -> destination for audio playback
+      // This connection is permanent and won't be affected by visualizer connect/disconnect
+      sourceNode.connect(analyserNode);
+      analyserNode.connect(audioContext.destination);
+    }
+
+    // Connect visualizer to the analyser node
+    // Disconnecting the visualizer won't affect the audio playback path
+    visualizer.connectAudio(analyserNode);
 
     // Resume audio context if suspended (required for user interaction)
     if (audioContext.state === "suspended") {
@@ -105,6 +118,8 @@ export const ButterchurnVisualizer = () => {
         animationFrameRef.current = null;
       }
       // Disconnect visualizer
+      // This won't affect audio playback because the analyser node remains connected
+      // to the destination independently
       if (visualizerRef.current) {
         try {
           visualizerRef.current.disconnectAudio();
@@ -113,8 +128,10 @@ export const ButterchurnVisualizer = () => {
           console.warn("Error disconnecting audio from visualizer:", error);
         }
       }
-      // Note: We don't disconnect the source node here because it's tied to the audio element
-      // and might be reused. The audio element will handle its own cleanup.
+      // Note: We don't disconnect the source node or analyser node here because:
+      // 1. The source node is tied to the audio element and might be reused
+      // 2. The analyser node maintains the connection to destination for audio playback
+      // 3. The audio element will handle its own cleanup
     };
   }, [playerContext.audioRef]);
 

@@ -4,9 +4,9 @@ import { GlobalControls } from "./components/GlobalControls";
 import { AudioContextProvider } from "@janwirth/react-web-audio-context";
 import { dequeueAudioBufferRequest } from "@janwirth/react-web-audio-context";
 import type { ColorPalette } from "@janwirth/react-mini-audio-waveform";
-import { Player } from "./components/Player";
+import { Player, usePlayerContext } from "./components/Player";
 import { PlayerUI } from "./components/PlayerUI";
-import { ButterchurnVisualizer } from "./components/ButterchurnVisualizer";
+import { Butterchurn } from "./components/Butterchurn";
 
 interface AudioItemData {
   title: string;
@@ -68,13 +68,6 @@ function App() {
           <div className="sticky bg-gray-100 w-full top-1 left-0 z-10">
             <PlayerUI />
           </div>
-          <div className="w-full" style={{ height: "400px" }}>
-            <ButterchurnVisualizer
-              width={800}
-              height={400}
-              className="w-full h-full"
-            />
-          </div>
           <GlobalControls
             onPaletteChange={setCustomPalette}
             onHeightChange={setWaveformHeight}
@@ -97,5 +90,19 @@ function App() {
     </AudioContextProvider>
   );
 }
+const ButterchurnWrapper = () => {
+  const audioNode = usePlayerContext();
+  if (!audioNode.audioRef.current) return null;
+  const context = new AudioContext(); // this is a global context, so we don't need to create a new one for each instance
+  return (
+    <Butterchurn
+      audioNode={audioNode.audioRef.current}
+      audioContext={context}
+      preset={preset}
+      width={800}
+      height={400}
+    />
+  );
+};
 
 export default App;
