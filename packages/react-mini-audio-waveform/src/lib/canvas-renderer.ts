@@ -502,6 +502,16 @@ export function renderWaveform(
         "waveform-render-start",
         "waveform-render-end"
       );
+
+      // Log performance metrics
+      const measures = performance.getEntriesByType("measure");
+      const waveformMeasures = measures.filter((m) =>
+        m.name.startsWith("waveform-")
+      );
+      console.log("Waveform Performance Metrics:");
+      waveformMeasures.forEach((measure) => {
+        console.log(`  ${measure.name}: ${measure.duration.toFixed(2)}ms`);
+      });
     } catch (e) {
       // Ignore errors if marks don't exist (shouldn't happen, but safe fallback)
     }
@@ -510,4 +520,3 @@ export function renderWaveform(
   // Restore context state
   ctx.restore();
 }
-

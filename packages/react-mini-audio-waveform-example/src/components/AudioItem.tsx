@@ -3,9 +3,11 @@
  */
 import { useMemo } from "react";
 import { getColorPalette } from "@janwirth/react-mini-audio-waveform";
-import { WaveformRenderData } from "@janwirth/react-mini-audio-waveform";
+import {
+  Waveform,
+  WaveformRenderData,
+} from "@janwirth/react-mini-audio-waveform";
 import type { ColorPalette } from "@janwirth/react-mini-audio-waveform";
-import { ThemeExample } from "./ThemeExample";
 
 interface AudioItemProps {
   title: string;
@@ -52,9 +54,9 @@ export function AudioItem({
 
   if (!audioUrlWithKey) {
     return (
-      <div className="mb-8">
-        <h2 className="mb-4">{title}</h2>
-        <div className="my-4 text-red-600">Invalid audio URL configuration</div>
+      <div className="font-mono">
+        <h2 className="font-bold">{title}</h2>
+        <div className="text-red-600">Invalid audio URL configuration</div>
       </div>
     );
   }
@@ -91,34 +93,47 @@ export function AudioItem({
   };
 
   return (
-    <div className="mb-8">
-      <h2 className="mb-4">{title}</h2>
+    <div className="font-mono">
+      <h2 className="font-bold">{title}</h2>
 
-      <div className="flex flex-row gap-4 mt-4 flex-wrap">
+      <div>
         {/* Custom palette - first waveform */}
-        <ThemeExample
-          label="custom"
-          audioUrl={audioUrlWithKey}
-          colorPalette={customPalette}
-          cachedRenderData={cachedRenderData}
-          height={waveformHeight}
-          onClickAtPercentage={handleWaveformClick}
-          onGotData={onGotData}
-        />
+        <div className="flex items-center gap-2">
+          <div className="font-medium text-gray-700 min-w-[80px] text-right">
+            custom
+          </div>
+          <div className="flex-1">
+            <Waveform
+              onGotData={onGotData}
+              onClickAtPercentage={handleWaveformClick}
+              audioUrl={audioUrlWithKey}
+              colorPalette={customPalette}
+              cachedRenderData={cachedRenderData}
+              height={waveformHeight}
+            />
+          </div>
+        </div>
 
         {/* Other monochrome palettes */}
         {MONOCHROME_PALETTES.map((paletteName) => {
           const palette = getColorPalette(paletteName);
           return (
-            <ThemeExample
-              key={paletteName}
-              label={getPaletteLabel(paletteName)}
-              audioUrl={audioUrlWithKey}
-              colorPalette={palette}
-              cachedRenderData={cachedRenderData}
-              height={waveformHeight}
-              onClickAtPercentage={handleWaveformClick}
-            />
+            <div key={paletteName} className="flex items-center gap-2">
+              <div className="font-medium text-gray-700 min-w-[80px] text-right">
+                {getPaletteLabel(paletteName)}
+              </div>
+              <div className="flex-1">
+                <Waveform
+                  onClickAtPercentage={handleWaveformClick}
+                  audioUrl={audioUrlWithKey}
+                  colorPalette={palette}
+                  cachedRenderData={cachedRenderData}
+                  className="waveform-container"
+                  style={{ width: "100%" }}
+                  height={waveformHeight}
+                />
+              </div>
+            </div>
           );
         })}
       </div>

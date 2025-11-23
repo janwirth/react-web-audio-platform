@@ -121,14 +121,18 @@ export function Waveform({
   const { width } = useResizeObserver({
     ref: wrapperRef as React.RefObject<Element>,
   });
+  const debounceDelay = 10;
 
   // Debounce all render params with 300ms delay
-  const debouncedWidth = useDebouncedTrailingHook(width, 300);
-  const debouncedHeight = useDebouncedTrailingHook(height, 300);
-  const debouncedColorPalette = useDebouncedTrailingHook(colorPalette, 300);
+  const debouncedWidth = useDebouncedTrailingHook(width, debounceDelay);
+  const debouncedHeight = useDebouncedTrailingHook(height, debounceDelay);
+  const debouncedColorPalette = useDebouncedTrailingHook(
+    colorPalette,
+    debounceDelay
+  );
   const debouncedNormalizationConfig = useDebouncedTrailingHook(
     normalizationConfig,
-    300
+    debounceDelay
   );
 
   // Store the latest render function in a ref to avoid triggering effects when it changes

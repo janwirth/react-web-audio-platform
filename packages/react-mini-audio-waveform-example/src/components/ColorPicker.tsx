@@ -26,46 +26,44 @@ export function ColorPicker({
   const fadeOpacity = isLowSaturation ? 0.3 : 1;
 
   return (
-    <div className="mt-4">
-      <div className="flex flex-row items-end gap-2.5">
+    <div className="flex flex-row items-end gap-2.5">
+      <VerticalSlider
+        label="CTR"
+        value={contrast}
+        min={0}
+        max={1}
+        step={0.01}
+        polarity="normal"
+        onChange={onContrastChange}
+      />
+      <VerticalSlider
+        label="SAT"
+        value={saturation}
+        min={0}
+        max={0.4}
+        step={0.01}
+        polarity="normal"
+        onChange={onSaturationChange}
+      />
+      <div style={{ opacity: fadeOpacity }}>
         <VerticalSlider
-          label="CTR"
-          value={contrast}
+          label="HUE"
+          value={hue}
           min={0}
-          max={1}
-          step={0.01}
-          polarity="normal"
-          onChange={onContrastChange}
+          max={360}
+          polarity="offset"
+          onChange={onHueChange}
         />
+      </div>
+      <div style={{ opacity: fadeOpacity }}>
         <VerticalSlider
-          label="SAT"
-          value={saturation}
+          label="SPR"
+          value={hueSpread}
           min={0}
-          max={0.4}
-          step={0.01}
+          max={180}
           polarity="normal"
-          onChange={onSaturationChange}
+          onChange={onHueSpreadChange}
         />
-        <div style={{ opacity: fadeOpacity }}>
-          <VerticalSlider
-            label="HUE"
-            value={hue}
-            min={0}
-            max={360}
-            polarity="offset"
-            onChange={onHueChange}
-          />
-        </div>
-        <div style={{ opacity: fadeOpacity }}>
-          <VerticalSlider
-            label="SPR"
-            value={hueSpread}
-            min={0}
-            max={180}
-            polarity="normal"
-            onChange={onHueSpreadChange}
-          />
-        </div>
       </div>
     </div>
   );
