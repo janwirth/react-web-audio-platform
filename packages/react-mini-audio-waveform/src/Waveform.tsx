@@ -157,6 +157,7 @@ export function Waveform({
 
       // Render with pre-computed data and debounced params
       // The renderer handles interpolation for different canvas sizes
+      console.log("rendering waveform", audioUrl);
       renderWaveform(
         canvas,
         renderData.waveformData,

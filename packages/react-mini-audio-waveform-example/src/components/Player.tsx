@@ -2,11 +2,12 @@ import React, {
   createContext,
   useContext,
   useRef,
-  useState,
   useEffect,
   useCallback,
   ReactNode,
 } from "react";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { atomFamily } from "jotai/utils";
 
 interface PlayerContextValue {
   audioRef: React.RefObject<HTMLAudioElement | null>;
@@ -21,6 +22,14 @@ export const usePlayerContext = () => {
   }
   return context;
 };
+
+// Atom for tracking the currently active URL
+const activeUrlAtom = atom<string | null>(null);
+
+// Atom family for playhead position per URL
+const playheadPositionAtomFamily = atomFamily((url: string) =>
+  atom<number | null>(null)
+);
 
 interface PlayerProps {
   children: ReactNode;
@@ -44,24 +53,43 @@ interface UseTrackReturn {
   pause: () => void;
 }
 
+// Helper function to normalize URLs for comparison (remove query params)
+const normalizeUrl = (url: string): string => {
+  try {
+    const urlObj = new URL(url);
+    return urlObj.origin + urlObj.pathname;
+  } catch {
+    // If URL parsing fails, try to remove query string manually
+    return url.split("?")[0];
+  }
+};
+
 export const useTrack = (url: string): UseTrackReturn => {
   const { audioRef } = usePlayerContext();
-  const [playheadPosition, setPlayheadPosition] = useState<number | null>(null);
+  const [activeUrl, setActiveUrl] = useAtom(activeUrlAtom);
+  const playheadPosition = useAtomValue(playheadPositionAtomFamily(url));
+  const setPlayheadPosition = useSetAtom(playheadPositionAtomFamily(url));
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // Set the audio source
-    audio.src = url;
-    audio.load();
+    const normalizedUrl = normalizeUrl(url);
 
-    // Update playhead position
+    // Update playhead position for this URL only when it's active
     const updatePlayhead = () => {
-      if (audio.duration && !isNaN(audio.duration)) {
-        setPlayheadPosition(audio.currentTime / audio.duration);
-      } else {
-        setPlayheadPosition(null);
+      // Only update if this URL is currently active and matches the audio source
+      const currentSrc = audio.src;
+      const normalizedCurrentSrc = normalizeUrl(currentSrc);
+      const isThisUrlActive = activeUrl === url;
+      const isAudioSourceThisUrl = normalizedCurrentSrc === normalizedUrl;
+
+      if (isThisUrlActive && isAudioSourceThisUrl) {
+        if (audio.duration && !isNaN(audio.duration)) {
+          setPlayheadPosition(audio.currentTime / audio.duration);
+        } else {
+          setPlayheadPosition(null);
+        }
       }
     };
 
@@ -70,23 +98,32 @@ export const useTrack = (url: string): UseTrackReturn => {
     audio.addEventListener("loadedmetadata", updatePlayhead);
     audio.addEventListener("loadeddata", updatePlayhead);
 
-    // Reset playhead when source changes
-    setPlayheadPosition(null);
+    // Reset playhead when URL changes
+    if (activeUrl !== url) {
+      setPlayheadPosition(null);
+    }
 
     return () => {
       audio.removeEventListener("timeupdate", updatePlayhead);
       audio.removeEventListener("loadedmetadata", updatePlayhead);
       audio.removeEventListener("loadeddata", updatePlayhead);
     };
-  }, [url, audioRef]);
+  }, [url, audioRef, activeUrl, setPlayheadPosition]);
 
   const seekAndPlay = useCallback(
     (position: number) => {
       const audio = audioRef.current;
       if (!audio) return;
 
+      // Set this URL as active
+      setActiveUrl(url);
+
+      const normalizedUrl = normalizeUrl(url);
+      const currentSrc = audio.src;
+      const normalizedCurrentSrc = normalizeUrl(currentSrc);
+
       // Ensure the correct audio file is loaded before seeking
-      if (audio.src !== url) {
+      if (normalizedCurrentSrc !== normalizedUrl) {
         audio.src = url;
         audio.load();
         // Wait for metadata to be loaded before seeking
@@ -107,12 +144,13 @@ export const useTrack = (url: string): UseTrackReturn => {
         audio.play();
       }
     },
-    [audioRef, url]
+    [audioRef, url, setActiveUrl]
   );
 
   const play = useCallback(() => {
+    setActiveUrl(url);
     audioRef.current?.play();
-  }, [audioRef]);
+  }, [audioRef, url, setActiveUrl]);
 
   const pause = useCallback(() => {
     audioRef.current?.pause();

@@ -8,7 +8,6 @@ import {
   WaveformRenderData,
 } from "@janwirth/react-mini-audio-waveform";
 import type { ColorPalette } from "@janwirth/react-mini-audio-waveform";
-import { useAudioContext } from "@janwirth/react-web-audio-context";
 import { useTrack } from "./Player";
 
 interface AudioItemProps {
@@ -38,8 +37,6 @@ interface WaveformItemProps {
   cachedRenderData: WaveformRenderData | null;
   waveformHeight: number;
   onGotData?: (data: WaveformRenderData) => void;
-  onClickAtPercentage: (percentage: number) => void;
-  showClassName?: boolean;
 }
 
 function WaveformItem({
@@ -49,25 +46,43 @@ function WaveformItem({
   cachedRenderData,
   waveformHeight,
   onGotData,
-  onClickAtPercentage,
-  showClassName = false,
 }: WaveformItemProps) {
+  const player = useTrack(audioUrl);
+
+  const handleWaveformClick = (percentage: number) => {
+    console.log("Waveform clicked at", percentage * 100, "%");
+    player.seekAndPlay(percentage);
+  };
+
   return (
     <div className="flex items-center gap-2 group">
       <div className="font-medium min-w-[80px] text-right text-xs font-mono text-gray-500 group-hover:text-black">
         {label}
       </div>
-      <div className="flex-1">
+      <div className="flex-1 relative">
+        {
+          <>
+            {/* <div className="text-sm text-gray-500 mb-1">
+              Playhead position:{" "}
+              {player.playheadPosition !== null
+                ? (player.playheadPosition * 100).toFixed(2)
+                : "0.00"}
+              %
+            </div> */}
+            {player.playheadPosition !== null && (
+              <div
+                className="bg-black-500 w-[1%] h-full absolute top-0 z-10 backdrop-invert"
+                style={{ left: `${player.playheadPosition * 99}%` }}
+              ></div>
+            )}
+          </>
+        }
         <Waveform
           {...(onGotData && { onGotData })}
-          onClickAtPercentage={onClickAtPercentage}
+          onClickAtPercentage={handleWaveformClick}
           audioUrl={audioUrl}
           colorPalette={colorPalette}
           cachedRenderData={cachedRenderData}
-          {...(showClassName && {
-            className: "waveform-container",
-            style: { width: "100%" },
-          })}
           height={waveformHeight}
         />
       </div>
@@ -83,10 +98,8 @@ export function AudioItem({
   waveformHeight,
   reRenderKey,
 }: AudioItemProps) {
-  const audioContext = useAudioContext();
-  console.log(audioContext);
+  console.log("rendering audio item", audioUrl);
   const fullAudioUrl = `${baseUrl}${audioUrl}`;
-  const player = useTrack(fullAudioUrl);
   // Use the audio buffer hook with reload key to force re-fetch when needed
   const audioUrlWithKey = useMemo(() => {
     return reRenderKey > 0
@@ -136,39 +149,18 @@ export function AudioItem({
     );
   };
 
-  const handleWaveformClick = (percentage: number) => {
-    console.log("Waveform clicked at", percentage * 100, "%");
-    console.log("Status:", status);
-    player.seekAndPlay(percentage);
-  };
-
   return (
     <div className="font-mono">
       <div className="text-sm font-medium text-gray-700">{title}</div>
 
       <div>
-        {player.playheadPosition && (
-          <div>
-            <div className="text-sm text-gray-500">
-              Playhead position: {player.playheadPosition * 100}%
-            </div>
-            <div
-              className={`text-sm text-gray-500 left-[${
-                player.playheadPosition * 100
-              }%]`}
-            ></div>
-          </div>
-        )}
-        {/* Custom palette - first waveform */}
         <WaveformItem
           label="custom"
           audioUrl={audioUrlWithKey}
-          player={player}
           colorPalette={customPalette}
           cachedRenderData={cachedRenderData}
           waveformHeight={waveformHeight}
           onGotData={onGotData}
-          onClickAtPercentage={handleWaveformClick}
         />
 
         {/* Other monochrome palettes */}
@@ -182,8 +174,6 @@ export function AudioItem({
               colorPalette={palette}
               cachedRenderData={cachedRenderData}
               waveformHeight={waveformHeight}
-              onClickAtPercentage={handleWaveformClick}
-              showClassName={true}
             />
           );
         })}

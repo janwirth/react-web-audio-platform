@@ -15,6 +15,7 @@
     "@janwirth/react-mini-audio-waveform": "workspace:*",
     "@janwirth/react-web-audio-context": "workspace:*",
     "@uidotdev/usehooks": "^2.4.1",
+    "jotai": "^2.15.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },
