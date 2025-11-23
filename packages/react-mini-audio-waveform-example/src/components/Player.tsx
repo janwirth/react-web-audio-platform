@@ -40,7 +40,7 @@ export const Player: React.FC<PlayerProps> = ({ children }) => {
 
   return (
     <PlayerContext.Provider value={{ audioRef }}>
-      <audio ref={audioRef} />
+      <audio ref={audioRef} crossOrigin="anonymous" />
       {children}
     </PlayerContext.Provider>
   );

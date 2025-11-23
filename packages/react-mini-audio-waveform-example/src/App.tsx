@@ -6,6 +6,7 @@ import { dequeueAudioBufferRequest } from "@janwirth/react-web-audio-context";
 import type { ColorPalette } from "@janwirth/react-mini-audio-waveform";
 import { Player } from "./components/Player";
 import { PlayerUI } from "./components/PlayerUI";
+import { ButterchurnVisualizer } from "./components/ButterchurnVisualizer";
 
 interface AudioItemData {
   title: string;
@@ -66,6 +67,13 @@ function App() {
         <div className="flex flex-col gap-8 relative">
           <div className="sticky bg-gray-100 w-full top-1 left-0 z-10">
             <PlayerUI />
+          </div>
+          <div className="w-full" style={{ height: "400px" }}>
+            <ButterchurnVisualizer
+              width={800}
+              height={400}
+              className="w-full h-full"
+            />
           </div>
           <GlobalControls
             onPaletteChange={setCustomPalette}
