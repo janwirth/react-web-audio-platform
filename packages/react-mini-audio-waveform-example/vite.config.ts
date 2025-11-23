@@ -1,5 +1,9 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { resolve } from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 export default defineConfig({
   plugins: [react()],
@@ -8,6 +12,18 @@ export default defineConfig({
   },
   worker: {
     format: "es",
+  },
+  resolve: {
+    alias: {
+      "@janwirth/react-web-audio-context": resolve(
+        __dirname,
+        "../react-web-audio-context/src/index.ts"
+      ),
+      "@janwirth/react-mini-audio-waveform": resolve(
+        __dirname,
+        "../react-mini-audio-waveform/src/index.ts"
+      ),
+    },
   },
 });
 
