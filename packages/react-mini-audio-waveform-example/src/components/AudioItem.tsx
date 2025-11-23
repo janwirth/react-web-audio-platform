@@ -147,10 +147,23 @@ export function AudioItem({
       <div className="text-sm font-medium text-gray-700">{title}</div>
 
       <div>
+        {player.playheadPosition && (
+          <div>
+            <div className="text-sm text-gray-500">
+              Playhead position: {player.playheadPosition * 100}%
+            </div>
+            <div
+              className={`text-sm text-gray-500 left-[${
+                player.playheadPosition * 100
+              }%]`}
+            ></div>
+          </div>
+        )}
         {/* Custom palette - first waveform */}
         <WaveformItem
           label="custom"
           audioUrl={audioUrlWithKey}
+          player={player}
           colorPalette={customPalette}
           cachedRenderData={cachedRenderData}
           waveformHeight={waveformHeight}

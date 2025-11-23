@@ -9,7 +9,7 @@ import React, {
 } from "react";
 
 interface PlayerContextValue {
-  audioRef: React.RefObject<HTMLAudioElement>;
+  audioRef: React.RefObject<HTMLAudioElement | null>;
 }
 
 const PlayerContext = createContext<PlayerContextValue | null>(null);
@@ -83,13 +83,31 @@ export const useTrack = (url: string): UseTrackReturn => {
   const seekAndPlay = useCallback(
     (position: number) => {
       const audio = audioRef.current;
-      if (!audio || !audio.duration) return;
+      if (!audio) return;
 
-      const clampedPosition = Math.max(0, Math.min(1, position));
-      audio.currentTime = clampedPosition * audio.duration;
-      audio.play();
+      // Ensure the correct audio file is loaded before seeking
+      if (audio.src !== url) {
+        audio.src = url;
+        audio.load();
+        // Wait for metadata to be loaded before seeking
+        audio.addEventListener(
+          "loadedmetadata",
+          () => {
+            const clampedPosition = Math.max(0, Math.min(1, position));
+            audio.currentTime = clampedPosition * audio.duration;
+            audio.play();
+          },
+          { once: true }
+        );
+      } else {
+        // Audio file is already loaded, seek immediately
+        if (!audio.duration) return;
+        const clampedPosition = Math.max(0, Math.min(1, position));
+        audio.currentTime = clampedPosition * audio.duration;
+        audio.play();
+      }
     },
-    [audioRef]
+    [audioRef, url]
   );
 
   const play = useCallback(() => {
