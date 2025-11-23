@@ -44,13 +44,6 @@ export function PresetSelector({
   return (
     <div className="mt-1">
       <div className="flex items-center gap-2 mb-1">
-        <button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="text-xs font-mono text-gray-500 hover:text-gray-900 flex items-center gap-1 cursor-pointer"
-        >
-          <span>{isCollapsed ? "▶" : "▼"}</span>
-          <span>Presets {selectedPresetName && `(${selectedPresetName})`}</span>
-        </button>
         {(onPrevPreset || onNextPreset) && (
           <div className="flex items-center gap-1">
             <button
@@ -58,7 +51,7 @@ export function PresetSelector({
                 e.stopPropagation();
                 onPrevPreset?.();
               }}
-              className="text-xs font-mono text-gray-500 hover:text-gray-900 px-1.5 py-0.5 border border-gray-300 rounded hover:bg-gray-100 cursor-pointer"
+              className="text-xs font-mono text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 px-1.5 py-0.5 rounded hover:opacity-75 cursor-pointer transition-colors"
               title="Previous preset"
             >
               prev
@@ -68,13 +61,21 @@ export function PresetSelector({
                 e.stopPropagation();
                 onNextPreset?.();
               }}
-              className="text-xs font-mono text-gray-500 hover:text-gray-900 px-1.5 py-0.5 border border-gray-300 rounded hover:bg-gray-100 cursor-pointer"
+              className="text-xs font-mono text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 px-1.5 py-0.5 rounded hover:opacity-75 cursor-pointer transition-colors"
               title="Next preset"
             >
               next
             </button>
           </div>
         )}
+
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="text-xs font-mono text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 flex items-center gap-1 cursor-pointer transition-colors"
+        >
+          <span>{isCollapsed ? "▶" : "▼"}</span>
+          <span>Presets {selectedPresetName && `(${selectedPresetName})`}</span>
+        </button>
       </div>
       {!isCollapsed && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-0 text-xs font-mono">
@@ -83,10 +84,10 @@ export function PresetSelector({
             return (
               <span
                 key={presetName}
-                className={`truncate cursor-pointer px-1 py-0.5 ${
+                className={`truncate cursor-pointer px-1 py-0.5 transition-colors ${
                   isSelected
-                    ? "text-blue-600 bg-blue-50 font-semibold"
-                    : "text-gray-500 hover:text-gray-900"
+                    ? "text-blue-600 font-semibold opacity-100 dark:text-blue-400"
+                    : "text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 opacity-60 hover:opacity-100 dark:opacity-60 dark:hover:opacity-100"
                 }`}
                 onClick={() => onPresetClick?.(presets[presetName], presetName)}
                 onMouseEnter={() => onPresetHover?.(presets[presetName])}
