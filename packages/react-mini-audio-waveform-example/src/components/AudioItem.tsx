@@ -51,7 +51,7 @@ function WaveformItem({
   const player = useTrack(audioUrl);
 
   const handleWaveformClick = (percentage: number) => {
-    console.log("Waveform clicked at", percentage * 100, "%");
+    // console.log("Waveform clicked at", percentage * 100, "%");
     player.seekAndPlay(percentage);
   };
 
@@ -153,7 +153,7 @@ export function AudioItem({
 
   return (
     <div className="font-mono">
-      <div 
+      <div
         className="text-sm font-medium text-gray-700 cursor-pointer hover:text-gray-900"
         onClick={onQueueClick}
         title="Click to create queue starting from this track"

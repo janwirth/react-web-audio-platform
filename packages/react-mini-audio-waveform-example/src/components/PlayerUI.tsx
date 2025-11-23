@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { usePlayerContext } from "./Player";
+import { usePlayerContext, useTrack, activeUrlAtom } from "./Player";
+import { useAtomValue } from "jotai";
 
 // Format seconds to MM:SS or HH:MM:SS
 const formatTime = (seconds: number): string => {
@@ -117,11 +118,16 @@ function HorizontalSlider({
 
 export function PlayerUI() {
   const { audioRef } = usePlayerContext();
+  const activeUrl = useAtomValue(activeUrlAtom);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
   const [isSeeking, setIsSeeking] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  // Get seekAndPlay from useTrack - always call hook unconditionally
+  // Use empty string as fallback if no active URL
+  const trackHook = useTrack(activeUrl || "");
 
   // Update current time and playing state
   useEffect(() => {
@@ -167,32 +173,21 @@ export function PlayerUI() {
 
   const handleProgressChange = useCallback(
     (value: number) => {
-      const audio = audioRef.current;
-      if (!audio || !duration) return;
+      if (!activeUrl || !duration) return;
 
       setIsSeeking(true);
-      const newTime = (value / 100) * duration;
-      setCurrentTime(newTime);
+      const percentage = value / 100; // Convert 0-100 to 0-1
+      setCurrentTime(percentage * duration);
 
-      // Update audio position
-      if (audio.readyState >= 2) {
-        // HAVE_CURRENT_DATA or higher
-        audio.currentTime = newTime;
-      } else {
-        // Wait for audio to be ready
-        const onCanPlay = () => {
-          audio.currentTime = newTime;
-          audio.removeEventListener("canplay", onCanPlay);
-        };
-        audio.addEventListener("canplay", onCanPlay);
-      }
+      // Use seekAndPlay instead of directly setting currentTime
+      trackHook.seekAndPlay(percentage);
 
       // Reset seeking flag after a short delay
       setTimeout(() => {
         setIsSeeking(false);
       }, 100);
     },
-    [audioRef, duration]
+    [activeUrl, trackHook, duration]
   );
 
   const handleVolumeChange = useCallback(

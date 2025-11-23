@@ -157,6 +157,8 @@ export const useTrack = (url: string): UseTrackReturn => {
 
   const seekAndPlay = useCallback(
     (position: number) => {
+      console.log("seekAndPlay called with percentage:", position);
+
       const audio = audioRef.current;
       if (!audio) return;
 
@@ -167,27 +169,38 @@ export const useTrack = (url: string): UseTrackReturn => {
       const currentSrc = audio.src;
       const normalizedCurrentSrc = normalizeUrl(currentSrc);
 
-      // Ensure the correct audio file is loaded before seeking
+      // Ensure the correct audio file is loaded
       if (normalizedCurrentSrc !== normalizedUrl) {
         audio.src = url;
         audio.load();
-        // Wait for metadata to be loaded before seeking
-        audio.addEventListener(
-          "loadedmetadata",
-          () => {
-            const clampedPosition = Math.max(0, Math.min(1, position));
-            audio.currentTime = clampedPosition * audio.duration;
-            audio.play();
-          },
-          { once: true }
-        );
-      } else {
-        // Audio file is already loaded, seek immediately
-        if (!audio.duration) return;
-        const clampedPosition = Math.max(0, Math.min(1, position));
-        audio.currentTime = clampedPosition * audio.duration;
-        audio.play();
       }
+
+      // Wait for metadata to be available
+      const performSeek = () => {
+        if (!audio.duration || isNaN(audio.duration)) {
+          audio.addEventListener("loadedmetadata", performSeek, { once: true });
+          return;
+        }
+
+        const clampedPosition = Math.max(0, Math.min(1, position));
+        const seekTime = clampedPosition * audio.duration;
+
+        console.log(
+          `Seeking to ${clampedPosition * 100}% (${seekTime.toFixed(
+            2
+          )}s of ${audio.duration.toFixed(2)}s)`
+        );
+
+        // audio.load();
+        audio.currentTime = seekTime;
+        audio.play().catch(console.error);
+        console.log("target:", seekTime, "actual:", audio.currentTime);
+        // setInterval(() => {
+        //   console.log("target:", seekTime, "actual:", audio.currentTime);
+        // }, 1000);
+      };
+
+      performSeek();
     },
     [audioRef, url, setActiveUrl]
   );
