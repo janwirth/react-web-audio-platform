@@ -1,49 +1,59 @@
-import { useRef, useEffect, useState, useCallback } from "react";
+import {
+  useRef,
+  useEffect,
+  useState,
+  useCallback,
+  useImperativeHandle,
+  forwardRef,
+} from "react";
+import useResizeObserver from "use-resize-observer";
 
 interface TableVirtualizerProps<T> {
   items: T[];
   itemHeight: number;
-  containerHeight: number;
   overscan?: number;
-  renderItem: (item: T, index: number, isSelected: boolean) => React.ReactNode;
+  renderItem: (item: T, index: number) => React.ReactNode;
   onScroll?: (scrollTop: number) => void;
-  onSelectionChange?: (selectedIndex: number | null) => void;
+  onFocus?: () => void;
   className?: string;
 }
 
-export function TableVirtualizer<T>({
-  items,
-  itemHeight,
-  containerHeight,
-  overscan = 3,
-  renderItem,
-  onScroll,
-  onSelectionChange,
-  className = "",
-}: TableVirtualizerProps<T>) {
+export interface TableVirtualizerHandle {
+  scrollByRows: (deltaRows: number) => void;
+  scrollToTop: () => void;
+  scrollToBottom: () => void;
+}
+
+export const TableVirtualizer = forwardRef<
+  TableVirtualizerHandle,
+  TableVirtualizerProps<any>
+>(function TableVirtualizer(
+  {
+    items,
+    itemHeight,
+    overscan = 3,
+    renderItem,
+    onScroll,
+    onFocus,
+    className = "",
+  },
+  ref
+) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollableRef = useRef<HTMLDivElement>(null);
   const [firstVisibleIndex, setFirstVisibleIndex] = useState(0);
-  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [isFocused, setIsFocused] = useState(false);
   const wheelAccumulatorRef = useRef(0);
+
+  // Use useResizeObserver to measure scrollable container height
+  const { height: containerHeight = 0 } = useResizeObserver({
+    ref: scrollableRef as React.RefObject<Element>,
+  });
 
   // Calculate how many rows fit in the container
   const visibleRowCount = Math.floor(containerHeight / itemHeight);
-  
+
   // Calculate scrollTop from firstVisibleIndex (always aligned to row boundaries)
   const scrollTop = firstVisibleIndex * itemHeight;
-  
-  // Calculate which items should be visible
-  const calculateVisibleRange = useCallback(() => {
-    const start = Math.max(0, firstVisibleIndex - overscan);
-    const end = Math.min(
-      items.length - 1,
-      firstVisibleIndex + visibleRowCount + overscan
-    );
-    return { start, end };
-  }, [firstVisibleIndex, visibleRowCount, overscan, items.length]);
-
-  const [visibleRange, setVisibleRange] = useState(() => calculateVisibleRange());
 
   // Scroll by rows (discrete, terminal-like)
   const scrollByRows = useCallback(
@@ -57,59 +67,57 @@ export function TableVirtualizer<T>({
     [items.length, visibleRowCount]
   );
 
-  // Move selection
-  const moveSelection = useCallback(
-    (delta: number) => {
-      setSelectedIndex((prev) => {
-        if (prev === null) {
-          const newIndex = Math.max(0, Math.min(items.length - 1, firstVisibleIndex));
-          return newIndex;
-        }
-        const newIndex = Math.max(0, Math.min(items.length - 1, prev + delta));
-        
-        // Auto-scroll to keep selection visible
-        if (newIndex < firstVisibleIndex) {
-          setFirstVisibleIndex(newIndex);
-        } else if (newIndex >= firstVisibleIndex + visibleRowCount) {
-          setFirstVisibleIndex(Math.max(0, newIndex - visibleRowCount + 1));
-        }
-        
-        return newIndex;
-      });
-    },
-    [items.length, firstVisibleIndex, visibleRowCount]
+  // Expose scroll methods via ref
+  useImperativeHandle(
+    ref,
+    () => ({
+      scrollByRows,
+      scrollToTop: () => setFirstVisibleIndex(0),
+      scrollToBottom: () => {
+        const endIndex = Math.max(0, items.length - visibleRowCount);
+        setFirstVisibleIndex(endIndex);
+      },
+    }),
+    [scrollByRows, items.length, visibleRowCount]
   );
 
-  // Toggle selection at current index
-  const toggleSelection = useCallback(() => {
-    if (selectedIndex !== null) {
-      setSelectedIndex(null);
-      onSelectionChange?.(null);
-    } else {
-      const indexToSelect = firstVisibleIndex;
-      setSelectedIndex(indexToSelect);
-      onSelectionChange?.(indexToSelect);
-    }
-  }, [selectedIndex, firstVisibleIndex, onSelectionChange]);
+  // Calculate which items should be visible
+  const calculateVisibleRange = useCallback(() => {
+    const start = Math.max(0, firstVisibleIndex - overscan);
+    const end = Math.min(
+      items.length - 1,
+      firstVisibleIndex + visibleRowCount + overscan
+    );
+    return { start, end };
+  }, [firstVisibleIndex, visibleRowCount, overscan, items.length]);
+
+  const [visibleRange, setVisibleRange] = useState(() =>
+    calculateVisibleRange()
+  );
 
   // Handle wheel events - accumulate until we have enough for a full row
-  // Only scroll when focused (focus-bounded scrolling)
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    const scrollable = scrollableRef.current;
+    if (!container || !scrollable) return;
 
     const handleWheel = (e: WheelEvent) => {
-      // Only handle wheel when container is focused
-      if (!isFocused) return;
-      
       e.preventDefault();
-      
+
+      // Focus scrollable container on scroll
+      if (onFocus && document.activeElement !== scrollable) {
+        scrollable.focus();
+        onFocus();
+      }
+
       // Accumulate wheel delta
       wheelAccumulatorRef.current += e.deltaY;
-      
+
       // Calculate how many rows to scroll based on accumulated delta
-      const rowsToScroll = Math.floor(Math.abs(wheelAccumulatorRef.current) / itemHeight);
-      
+      const rowsToScroll = Math.floor(
+        Math.abs(wheelAccumulatorRef.current) / itemHeight
+      );
+
       if (rowsToScroll > 0) {
         const direction = wheelAccumulatorRef.current > 0 ? 1 : -1;
         scrollByRows(rowsToScroll * direction);
@@ -123,77 +131,27 @@ export function TableVirtualizer<T>({
     return () => {
       container.removeEventListener("wheel", handleWheel);
     };
-  }, [scrollByRows, itemHeight, isFocused]);
+  }, [scrollByRows, itemHeight, onFocus]);
 
-  // Keyboard navigation with vim hjkl and selection
+  // Handle click to focus
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
+    const scrollable = scrollableRef.current;
+    if (!container || !scrollable) return;
 
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Only handle if container is focused
-      if (document.activeElement !== container && !container.contains(document.activeElement)) {
-        return;
-      }
-
-      switch (e.key) {
-        case "ArrowDown":
-        case "j":
-          e.preventDefault();
-          if (selectedIndex !== null) {
-            moveSelection(1);
-          } else {
-            scrollByRows(1);
-          }
-          break;
-        case "ArrowUp":
-        case "k":
-          e.preventDefault();
-          if (selectedIndex !== null) {
-            moveSelection(-1);
-          } else {
-            scrollByRows(-1);
-          }
-          break;
-        case "PageDown":
-          e.preventDefault();
-          scrollByRows(visibleRowCount);
-          break;
-        case "PageUp":
-          e.preventDefault();
-          scrollByRows(-visibleRowCount);
-          break;
-        case "Home":
-          e.preventDefault();
-          setFirstVisibleIndex(0);
-          if (selectedIndex !== null) {
-            setSelectedIndex(0);
-            onSelectionChange?.(0);
-          }
-          break;
-        case "End":
-          e.preventDefault();
-          const endIndex = Math.max(0, items.length - visibleRowCount);
-          setFirstVisibleIndex(endIndex);
-          if (selectedIndex !== null) {
-            const lastItemIndex = items.length - 1;
-            setSelectedIndex(lastItemIndex);
-            onSelectionChange?.(lastItemIndex);
-          }
-          break;
-        case "x":
-        case "X":
-          e.preventDefault();
-          toggleSelection();
-          break;
+    const handleClick = () => {
+      if (onFocus && document.activeElement !== scrollable) {
+        scrollable.focus();
+        onFocus();
       }
     };
 
-    window.addEventListener("keydown", handleKeyDown);
+    container.addEventListener("click", handleClick);
+
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
+      container.removeEventListener("click", handleClick);
     };
-  }, [scrollByRows, visibleRowCount, items.length, selectedIndex, moveSelection, toggleSelection, onSelectionChange]);
+  }, [onFocus]);
 
   // Handle touch events for mobile - also discrete row scrolling
   const touchStartYRef = useRef(0);
@@ -201,8 +159,8 @@ export function TableVirtualizer<T>({
   const touchRowsAccumulatorRef = useRef(0);
 
   useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
+    const scrollable = scrollableRef.current;
+    if (!scrollable) return;
 
     const handleTouchStart = (e: TouchEvent) => {
       touchStartYRef.current = e.touches[0].clientY;
@@ -214,7 +172,7 @@ export function TableVirtualizer<T>({
       e.preventDefault();
       const deltaY = touchStartYRef.current - e.touches[0].clientY;
       const rowsDelta = Math.floor(deltaY / itemHeight);
-      
+
       if (rowsDelta !== touchRowsAccumulatorRef.current) {
         const deltaRows = rowsDelta - touchRowsAccumulatorRef.current;
         touchRowsAccumulatorRef.current = rowsDelta;
@@ -222,31 +180,18 @@ export function TableVirtualizer<T>({
       }
     };
 
-    container.addEventListener("touchstart", handleTouchStart, { passive: true });
-    container.addEventListener("touchmove", handleTouchMove, { passive: false });
+    scrollable.addEventListener("touchstart", handleTouchStart, {
+      passive: true,
+    });
+    scrollable.addEventListener("touchmove", handleTouchMove, {
+      passive: false,
+    });
 
     return () => {
-      container.removeEventListener("touchstart", handleTouchStart);
-      container.removeEventListener("touchmove", handleTouchMove);
+      scrollable.removeEventListener("touchstart", handleTouchStart);
+      scrollable.removeEventListener("touchmove", handleTouchMove);
     };
   }, [scrollByRows, itemHeight, firstVisibleIndex]);
-
-  // Handle focus events
-  useEffect(() => {
-    const container = containerRef.current;
-    if (!container) return;
-
-    const handleFocus = () => setIsFocused(true);
-    const handleBlur = () => setIsFocused(false);
-
-    container.addEventListener("focus", handleFocus);
-    container.addEventListener("blur", handleBlur);
-
-    return () => {
-      container.removeEventListener("focus", handleFocus);
-      container.removeEventListener("blur", handleBlur);
-    };
-  }, []);
 
   // Update visible range when firstVisibleIndex changes
   useEffect(() => {
@@ -254,11 +199,6 @@ export function TableVirtualizer<T>({
     setVisibleRange(newRange);
     onScroll?.(scrollTop);
   }, [firstVisibleIndex, calculateVisibleRange, scrollTop, onScroll]);
-
-  // Notify selection changes
-  useEffect(() => {
-    onSelectionChange?.(selectedIndex);
-  }, [selectedIndex, onSelectionChange]);
 
   // Recalculate when items change
   useEffect(() => {
@@ -270,44 +210,63 @@ export function TableVirtualizer<T>({
   const totalHeight = items.length * itemHeight;
 
   // Get visible items
-  const visibleItems: Array<{ item: T; index: number }> = [];
+  const visibleItems: Array<{ item: any; index: number }> = [];
   for (let i = visibleRange.start; i <= visibleRange.end; i++) {
     if (i >= 0 && i < items.length) {
       visibleItems.push({ item: items[i], index: i });
     }
   }
 
+  // Calculate visible items count
+  const visibleItemsCount = visibleItems.length;
+
   return (
     <div
       ref={containerRef}
-      tabIndex={0}
-      className={`overflow-hidden outline-none focus:outline-none ${
-        isFocused ? "ring-1 ring-gray-400 dark:ring-gray-600" : ""
-      } ${className}`}
-      style={{ height: containerHeight, position: "relative" }}
+      className={`flex flex-col h-full ${className}`}
+      style={{ position: "relative" }}
     >
+      {/* Header showing scroll info */}
+      <div className="px-4 py-1 text-xs font-mono border-b border-gray-300 dark:border-gray-700 flex items-center gap-4">
+        <span className="opacity-60">Scroll:</span>
+        <span>{scrollTop}px</span>
+        <span className="opacity-60">Offset:</span>
+        <span>{firstVisibleIndex}</span>
+        <span className="opacity-60">Total:</span>
+        <span>{items.length}</span>
+        <span className="opacity-60">Visible:</span>
+        <span>{visibleItemsCount}</span>
+      </div>
+
+      {/* Scrollable content */}
       <div
-        style={{
-          height: totalHeight,
-          position: "relative",
-          transform: `translateY(-${scrollTop}px)`,
-        }}
+        ref={scrollableRef}
+        tabIndex={0}
+        className="flex-1 overflow-hidden outline-none focus:outline-none"
+        style={{ position: "relative", backgroundColor: "pink" }}
       >
-        {visibleItems.map(({ item, index }) => (
-          <div
-            key={index}
-            style={{
-              position: "absolute",
-              top: index * itemHeight,
-              height: itemHeight,
-              width: "100%",
-            }}
-          >
-            {renderItem(item, index, selectedIndex === index)}
-          </div>
-        ))}
+        <div
+          style={{
+            height: totalHeight,
+            position: "relative",
+            transform: `translateY(-${scrollTop}px)`,
+          }}
+        >
+          {visibleItems.map(({ item, index }) => (
+            <div
+              key={index}
+              style={{
+                position: "absolute",
+                top: index * itemHeight,
+                height: itemHeight,
+                width: "100%",
+              }}
+            >
+              {renderItem(item, index)}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
-}
-
+});
