@@ -168,7 +168,7 @@ export const DualViewList = forwardRef<
   };
 
   return (
-    <div className={`h-screen flex flex-col gap-4 p-4 ${className}`}>
+    <div className={`h-full flex flex-col gap-4 p-4 ${className}`}>
       {/* Toggle button */}
       <div className="flex items-center gap-2">
         <button
