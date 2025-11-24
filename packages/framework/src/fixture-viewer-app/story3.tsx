@@ -303,13 +303,31 @@ export default function Story3() {
                     display: "flex",
                     flexDirection: "column",
                     gap: "4px",
-                    background: "white",
                   }}
                 >
-                  <div style={{ fontWeight: "bold", fontSize: "14px" }}>
+                  <div
+                    style={{
+                      fontWeight: "bold",
+                      fontSize: "14px",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
                     {item.title}
                   </div>
-                  <div style={{ fontSize: "12px", color: "#666" }}>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#666",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      lineHeight: "1.4",
+                    }}
+                  >
                     {item.description}
                   </div>
                 </div>

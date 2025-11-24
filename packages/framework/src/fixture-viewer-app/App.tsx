@@ -25,6 +25,11 @@ const fixtures: Fixture[] = [
     name: "Rows/Columns Mosaic",
     src: "/fixture-viewer/story3.html",
   },
+  {
+    id: "story4",
+    name: "TableVirtualizer",
+    src: "/fixture-viewer/story4.html",
+  },
 ];
 
 function App() {
