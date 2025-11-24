@@ -25,10 +25,8 @@ export function viewTrackListItem(
 ) {
   return (
     <div
-      className="dark:border-gray-800 hover:opacity-60 transition-opacity font-mono text-sm relative"
+      className="dark:border-gray-800 hover:opacity-60 transition-opacity font-mono text-sm relative flex items-center gap-2"
       style={{
-        display: "flex",
-        alignItems: "center",
         backgroundColor: isSelected
           ? "rgba(128, 128, 128, 0.15)"
           : "transparent",
@@ -36,7 +34,7 @@ export function viewTrackListItem(
     >
       {isSelected && (
         <div
-          className="w-1.5 h-1.5 rounded-full absolute left-2"
+          className="w-1.5 h-1.5 rounded-full absolute -left-2"
           style={{
             backgroundColor: "currentColor",
           }}
@@ -52,17 +50,29 @@ export function viewTrackListItem(
           />
         </div>
       )}
-      <Waveform audioUrl={"http://localhost:3001/audio/track1.mp3"} />
       {!item.coverUrl && (
         <div className="w-12 h-12 shrink-0 bg-gray-400 dark:bg-gray-600 border border-gray-800 dark:border-gray-400" />
       )}
       <div className="flex-1">
-        <div className="text-black dark:text-white font-medium">
-          {item.name}
+        <div className="flex-1 flex flex gap-2">
+          <div className="text-black dark:text-white font-medium">
+            {item.name}
+          </div>
+          <div className="text-gray-500 dark:text-gray-400 text-sm">
+            {item.description}
+          </div>
         </div>
-        <div className="text-gray-500 dark:text-gray-400 text-xs">
-          {item.description}
-        </div>
+        <Waveform
+          height={12}
+          colorPalette={{
+            background: "#1a1a1a",
+            lowFrequency: "#E74C3C",
+            midFrequency: "#3498DB",
+            highFrequency: "#2ECC71",
+            centerLine: "#ECF0F1",
+          }}
+          audioUrl={"http://localhost:3001/audio/track1.mp3"}
+        />
       </div>
     </div>
   );

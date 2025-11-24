@@ -8,13 +8,14 @@ import { PanelEventBusProvider } from "../hooks/usePanelEvent";
 import {
   defaultTabs,
   leftSidebarItems,
-  rightSidebarItems,
   LeftSidebarContent,
-  RightSidebarContent,
   CenterAreaContent,
 } from "./Data";
 import { DarkModeToggle } from "../components/DarkModeToggle";
 import { AudioContextProvider } from "../components/audio-context";
+import { Queue } from "@/components/player/Queue";
+import { Player } from "@/components/player/Player";
+import { PlayerUI } from "@/components/player/PlayerUI";
 
 const initialState: State = {
   tabs: defaultTabs,
@@ -55,12 +56,7 @@ function LayoutAppContent() {
   return (
     <div className="h-screen flex flex-col font-mono bg-white dark:bg-black text-black dark:text-white">
       <DarkModeToggle />
-      {/* Tabs Bar */}
-      <TabsBar
-        tabs={state.tabs}
-        activeTabIndex={state.activeTabIndex}
-        dispatch={dispatch}
-      />
+      <PlayerUI />
 
       {/* Main Layout */}
       <div className="flex-1 flex overflow-hidden">
@@ -73,8 +69,16 @@ function LayoutAppContent() {
           {state.focusedArea === "left" && (
             <div className="absolute top-2 left-2 w-1.5 h-1.5 bg-red-500 rounded-full" />
           )}
-          <div className="text-sm font-semibold mb-4">Left Sidebar</div>
-          <LeftSidebarContent items={leftSidebarItems} />
+          {/* Tabs Bar */}
+          <TabsBar
+            tabs={state.tabs}
+            activeTabIndex={state.activeTabIndex}
+            dispatch={dispatch}
+          />
+          <div className="mt-6 pt-6 border-t border-gray-300 dark:border-gray-700">
+            <div className="text-sm font-semibold mb-4">Left Sidebar</div>
+            <LeftSidebarContent items={leftSidebarItems} />
+          </div>
         </div>
 
         {/* Center Area */}
@@ -121,7 +125,8 @@ function LayoutAppContent() {
             <div className="absolute top-2 left-2 w-1.5 h-1.5 bg-red-500 rounded-full" />
           )}
           <div className="text-sm font-semibold mb-4">Right Sidebar</div>
-          <RightSidebarContent items={rightSidebarItems} />
+          {/* <RightSidebarContent items={rightSidebarItems} /> */}
+          <Queue />
         </div>
       </div>
 
@@ -135,7 +140,9 @@ function LayoutApp() {
   return (
     <AudioContextProvider>
       <PanelEventBusProvider>
-        <LayoutAppContent />
+        <Player>
+          <LayoutAppContent />
+        </Player>
       </PanelEventBusProvider>
     </AudioContextProvider>
   );

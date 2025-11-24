@@ -1,8 +1,8 @@
-import { useEffect, useState, useCallback, useRef, useMemo } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { AudioItem } from "./AudioItem";
 import { GlobalControls } from "./GlobalControls";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
-import { type QueueItem, useTrack } from "@/components/player/Player";
+import { useTrack } from "@/components/player/Player";
 import { PlayerUI } from "@/components/player/PlayerUI";
 import { Visualizer } from "@/components/visualizer/Visualizer";
 import { Queue, useQueue } from "@/components/player/Queue";
@@ -11,17 +11,11 @@ import { decodeAudioFile } from "@/components/audio-context";
 import { CoverFlow } from "@/components/CoverFlow";
 import { HotkeysBar } from "@/components/HotkeysBar";
 import { TableVirtualizer } from "@/components/TableVirtualizer";
-
-interface AudioItemData {
-  title: string;
-  audioUrl: string;
-}
-
-const API_URL = "http://localhost:3001/api/audio-items";
-const BASE_URL = "http://localhost:3001";
+import { useAudioItems } from "@/hooks";
 
 export function InnerApp() {
-  const [audioItems, setAudioItems] = useState<AudioItemData[]>([]);
+  const { audioItems, allQueueItems, handleCreateQueue, baseUrl } =
+    useAudioItems();
 
   // Visualizer toggle state (default off)
   const [showVisualizer, setShowVisualizer] = useState(false);
@@ -38,14 +32,6 @@ export function InnerApp() {
   const [firstTrackUrl, setFirstTrackUrl] = useState<string>("");
   const shouldAutoPlayRef = useRef(false);
 
-  // Convert audioItems to QueueItem format for useTrack
-  const allQueueItems = useMemo<QueueItem[]>(() => {
-    return audioItems.map((item) => ({
-      title: item.title,
-      audioUrl: `${BASE_URL}${item.audioUrl}`,
-    }));
-  }, [audioItems]);
-
   const { seekAndPlay } = useTrack(firstTrackUrl || "", allQueueItems);
 
   // Auto-play when firstTrackUrl changes and we should auto-play
@@ -59,7 +45,7 @@ export function InnerApp() {
   const handleReRender = useCallback(() => {
     // Clear cache for all audio items
     audioItems.forEach((item) => {
-      const fullAudioUrl = `${BASE_URL}${item.audioUrl}`;
+      const fullAudioUrl = `${baseUrl}${item.audioUrl}`;
       const audioUrlWithKey =
         reRenderKey > 0
           ? `${fullAudioUrl}?reload=${reRenderKey}`
@@ -68,46 +54,17 @@ export function InnerApp() {
     });
     // Increment the key to trigger a reload with a new URL
     setReRenderKey((prev) => prev + 1);
-  }, [audioItems, reRenderKey]);
+  }, [audioItems, baseUrl, reRenderKey]);
 
-  const handleCreateQueue = useCallback(
+  const onCreateQueue = useCallback(
     (startIndex: number) => {
-      // Create queue starting from the clicked track, including all subsequent tracks
-      const queueItems: QueueItem[] = audioItems
-        .slice(startIndex)
-        .map((item) => ({
-          title: item.title,
-          audioUrl: `${BASE_URL}${item.audioUrl}`, // Store full URL
-        }));
-
-      initQueue(queueItems);
-
-      // Start playing the first track in the queue at position 0
-      if (queueItems.length > 0) {
-        const firstTrackUrl = queueItems[0].audioUrl;
+      handleCreateQueue(startIndex, initQueue, (firstTrackUrl) => {
         shouldAutoPlayRef.current = true;
         setFirstTrackUrl(firstTrackUrl);
-      }
+      });
     },
-    [audioItems, initQueue]
+    [handleCreateQueue, initQueue]
   );
-
-  useEffect(() => {
-    const fetchAudioItems = async () => {
-      try {
-        const response = await fetch(API_URL);
-        if (!response.ok) {
-          throw new Error(`API error: ${response.status}`);
-        }
-        const data = await response.json();
-        setAudioItems(data);
-      } catch (err) {
-        console.error("Failed to fetch audio items:", err);
-      }
-    };
-
-    fetchAudioItems();
-  }, []);
 
   return (
     <div className="flex flex-col gap-8 relative">
@@ -146,11 +103,11 @@ export function InnerApp() {
               key={index}
               title={item.title}
               audioUrl={item.audioUrl}
-              baseUrl={BASE_URL}
+              baseUrl={baseUrl}
               customPalette={customPalette}
               waveformHeight={waveformHeight}
               reRenderKey={reRenderKey}
-              onQueueClick={() => handleCreateQueue(index)}
+              onQueueClick={() => onCreateQueue(index)}
               allItems={allQueueItems}
             />
           ))}

@@ -34,18 +34,19 @@ export function TabsBar({ tabs, activeTabIndex, dispatch }: TabsBarProps) {
   };
 
   return (
-    <div className="flex items-center">
-      <div className="flex-1 flex overflow-x-auto">
+    <div className="flex flex-col">
+      <div className="text-sm font-semibold mb-4">Tabs</div>
+      <div className="flex flex-col gap-1">
         {tabs.map((tab, index) => (
           <div
             key={tab.id}
             onClick={() => {
               dispatch({ type: "TabSetActive", index });
             }}
-            className={`flex items-center gap-2 px-4 py-2 cursor-pointer transition-opacity ${
+            className={`flex items-center justify-between gap-2 px-3 py-2 cursor-pointer transition-opacity rounded ${
               index === activeTabIndex
-                ? "opacity-100"
-                : "opacity-60 hover:opacity-100"
+                ? "opacity-100 bg-gray-200 dark:bg-gray-800"
+                : "opacity-60 hover:opacity-100 hover:bg-gray-100 dark:hover:bg-gray-900"
             }`}
           >
             <span className="text-sm whitespace-nowrap">{tab.title}</span>
@@ -60,9 +61,9 @@ export function TabsBar({ tabs, activeTabIndex, dispatch }: TabsBarProps) {
       </div>
       <button
         onClick={addTab}
-        className="px-3 py-2 opacity-60 hover:opacity-100 transition-opacity"
+        className="mt-2 px-3 py-2 opacity-60 hover:opacity-100 transition-opacity text-sm text-left rounded hover:bg-gray-100 dark:hover:bg-gray-900"
       >
-        +
+        + Add Tab
       </button>
     </div>
   );

@@ -2,7 +2,6 @@ import { useState, useCallback, useRef } from "react";
 import { Tab } from "../LayoutState";
 import { usePanelEvent } from "../hooks/usePanelEvent";
 import { DualViewList, DualViewListHandle } from "../components/DualViewList";
-import { tracklist, viewTrackListItem } from "./TrackList";
 
 // Example tabs data
 export const defaultTabs: Tab[] = [
@@ -121,11 +120,7 @@ export function CenterAreaContent({
 
   return (
     <div className="h-full min-h-0 flex flex-col ">
-      <DualViewList
-        ref={dualViewListRef}
-        items={tracklist}
-        renderItem={viewTrackListItem}
-      />
+      <DualViewList ref={dualViewListRef} />
     </div>
   );
 }
