@@ -143,10 +143,13 @@ Before we connect to data
 - adjust title during playback
 - Fix missing covers not rendered
 - Cmd-K
+- fix space button not working
 - tree for tab grouping
   -> Add title to current playback
   -> Put queue to the left
   -> OPFS
+
+Minimum content: tracklist
 
 Qx| Player | global settings
 Q | List
