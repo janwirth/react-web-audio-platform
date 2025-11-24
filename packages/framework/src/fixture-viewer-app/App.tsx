@@ -31,6 +31,11 @@ const fixtures: Fixture[] = [
     name: "TableVirtualizer",
     src: "/fixture-viewer/story4.html",
   },
+  {
+    id: "story5",
+    name: "Waveform Rendering",
+    src: "/fixture-viewer/story5.html",
+  },
 ];
 
 function App() {
