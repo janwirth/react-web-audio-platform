@@ -32,7 +32,7 @@ export function WaveformWithPlayhead({
     <div className="flex-1 relative">
       {player.playheadPosition !== null && (
         <div
-          className="bg-black-500 w-[1%] min-w-0.5 h-full absolute bottom-[-10%] z-10 backdrop-invert transition-all"
+          className="w-[1%] min-w-0.5 h-full absolute bottom-[-10%] z-10 transition-all dark:bg-white/10 backdrop-invert-100 bg-black/10"
           style={{ left: `${player.playheadPosition * 99}%` }}
         ></div>
       )}
@@ -47,4 +47,3 @@ export function WaveformWithPlayhead({
     </div>
   );
 }
-

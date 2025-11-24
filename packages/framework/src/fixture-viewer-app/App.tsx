@@ -12,14 +12,9 @@ interface Fixture {
 
 const fixtures: Fixture[] = [
   {
-    id: "story1",
-    name: "Story 1",
-    src: "/fixture-viewer/stories/story1.html",
-  },
-  {
-    id: "story2",
-    name: "Story 2",
-    src: "/fixture-viewer/stories/story2.html",
+    id: "basic-elements-story",
+    name: "Basic Elements Story",
+    src: "/fixture-viewer/stories/basic-elements-story.html",
   },
   {
     id: "rows-columns-mosaic",
@@ -101,9 +96,9 @@ function App() {
               />
             </div>
           ) : null}
+          <DarkModeToggle />
         </Column>
       </Row>
-      <DarkModeToggle />
     </Column>
   );
 }
