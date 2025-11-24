@@ -36,6 +36,11 @@ const fixtures: Fixture[] = [
     name: "Waveform Rendering",
     src: "/fixture-viewer/stories/waveform-rendering.html",
   },
+  {
+    id: "player-story",
+    name: "Player Story",
+    src: "/fixture-viewer/stories/player-story.html",
+  },
 ];
 
 function App() {
