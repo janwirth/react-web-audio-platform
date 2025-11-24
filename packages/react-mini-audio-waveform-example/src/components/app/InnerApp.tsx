@@ -8,6 +8,7 @@ import { Visualizer } from "../visualizer/Visualizer";
 import { Queue, useQueue } from "../player/Queue";
 import { ColorPalette } from "@janwirth/react-mini-audio-waveform";
 import { decodeAudioFile } from "../audio-context";
+import { CoverFlow } from "../CoverFlow";
 
 interface AudioItemData {
   title: string;
@@ -132,6 +133,7 @@ export function InnerApp() {
         </button>
       </div>
       {showVisualizer && <Visualizer />}
+      <CoverFlow></CoverFlow>
       <GlobalControls
         onPaletteChange={setCustomPalette}
         onHeightChange={setWaveformHeight}
