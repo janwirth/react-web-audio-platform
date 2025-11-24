@@ -60,27 +60,23 @@ export const TableVirtualizer = forwardRef<
   const scrollByRows = useCallback(
     (deltaRows: number) => {
       setFirstVisibleIndex((prev) => {
-        const maxFirstIndex = Math.max(0, items.length - visibleRowCount);
+        // Allow last row to be at top of viewport
+        const maxFirstIndex = Math.max(0, items.length - 1);
         const newIndex = Math.max(0, Math.min(maxFirstIndex, prev + deltaRows));
         return newIndex;
       });
     },
-    [items.length, visibleRowCount]
+    [items.length]
   );
 
-  // Scroll to a specific index
+  // Scroll to a specific index - makes it the first visible row
   const scrollToIndex = useCallback(
     (index: number) => {
       const clampedIndex = Math.max(0, Math.min(items.length - 1, index));
-      const maxFirstIndex = Math.max(0, items.length - visibleRowCount);
-      // Center the item in the viewport if possible
-      const targetFirstIndex = Math.max(
-        0,
-        Math.min(maxFirstIndex, clampedIndex - Math.floor(visibleRowCount / 2))
-      );
-      setFirstVisibleIndex(targetFirstIndex);
+      // Make the focused row the first visible row
+      setFirstVisibleIndex(clampedIndex);
     },
-    [items.length, visibleRowCount]
+    [items.length]
   );
 
   // Expose scroll methods via ref
@@ -90,12 +86,13 @@ export const TableVirtualizer = forwardRef<
       scrollByRows,
       scrollToTop: () => setFirstVisibleIndex(0),
       scrollToBottom: () => {
-        const endIndex = Math.max(0, items.length - visibleRowCount);
+        // Allow last row to be at top of viewport
+        const endIndex = Math.max(0, items.length - 1);
         setFirstVisibleIndex(endIndex);
       },
       scrollToIndex,
     }),
-    [scrollByRows, items.length, visibleRowCount, scrollToIndex]
+    [scrollByRows, items.length, scrollToIndex]
   );
 
   // Calculate which items should be visible
