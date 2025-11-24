@@ -38,11 +38,6 @@ export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
     const scrollContainerRef = useRef<HTMLUListElement>(null);
     const coverRefs = useRef<(HTMLDivElement | null)[]>([]);
     const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
-    const isDraggingRef = useRef(false);
-    const dragStartRef = useRef({ x: 0, scrollLeft: 0 });
-    const clickStartRef = useRef({ x: 0, hasDragged: false, targetIndex: -1 });
-    const velocityRef = useRef({ x: 0, lastX: 0, lastTime: 0 });
-    const momentumAnimationRef = useRef<number | null>(null);
     const hasInitializedRef = useRef(false);
     const centeredIndexRef = useRef<number>(-1);
 
@@ -238,142 +233,6 @@ export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
       }
     }, [items, onFocussedItem]);
 
-    // Drag handlers effect
-    useEffect(() => {
-      const scrollContainer = scrollContainerRef.current;
-      if (!scrollContainer) return;
-
-      const cancelMomentum = () => {
-        if (momentumAnimationRef.current !== null) {
-          cancelAnimationFrame(momentumAnimationRef.current);
-          momentumAnimationRef.current = null;
-        }
-      };
-
-      const applyMomentum = (velocity: number) => {
-        cancelMomentum();
-
-        if (Math.abs(velocity) < 0.1) return;
-
-        const friction = 0.95; // Deceleration factor
-        let currentVelocity = velocity;
-
-        const animate = () => {
-          if (Math.abs(currentVelocity) < 0.1) {
-            momentumAnimationRef.current = null;
-            return;
-          }
-
-          scrollContainer.scrollLeft -= currentVelocity;
-          currentVelocity *= friction;
-          momentumAnimationRef.current = requestAnimationFrame(animate);
-        };
-
-        momentumAnimationRef.current = requestAnimationFrame(animate);
-      };
-
-      const handleMouseDown = (e: MouseEvent) => {
-        const target = e.target as HTMLElement;
-        const listItem = target.closest("li");
-        const targetIndex = listItem
-          ? itemRefs.current.indexOf(listItem as HTMLLIElement)
-          : -1;
-
-        // Cancel any existing momentum
-        cancelMomentum();
-
-        // Track click start for all interactions
-        clickStartRef.current = {
-          x: e.clientX,
-          hasDragged: false,
-          targetIndex,
-        };
-
-        isDraggingRef.current = true;
-        dragStartRef.current = {
-          x: e.clientX,
-          scrollLeft: scrollContainer.scrollLeft,
-        };
-
-        // Reset velocity tracking
-        const now = performance.now();
-        velocityRef.current = {
-          x: 0,
-          lastX: e.clientX,
-          lastTime: now,
-        };
-
-        scrollContainer.style.cursor = "grabbing";
-        scrollContainer.style.userSelect = "none";
-      };
-
-      const handleMouseMove = (e: MouseEvent) => {
-        if (!isDraggingRef.current) return;
-
-        // Cancel momentum during drag
-        cancelMomentum();
-
-        const deltaX = e.clientX - dragStartRef.current.x;
-        if (Math.abs(deltaX) > 5) {
-          clickStartRef.current.hasDragged = true;
-        }
-        scrollContainer.scrollLeft = dragStartRef.current.scrollLeft - deltaX;
-
-        // Track velocity for momentum
-        const now = performance.now();
-        const timeDelta = now - velocityRef.current.lastTime;
-        if (timeDelta > 0) {
-          const distanceDelta = e.clientX - velocityRef.current.lastX;
-          velocityRef.current.x = distanceDelta / timeDelta;
-          velocityRef.current.lastX = e.clientX;
-          velocityRef.current.lastTime = now;
-        }
-      };
-
-      const handleScroll = () => {
-        // Cancel momentum on any scroll event
-        cancelMomentum();
-      };
-
-      const handleMouseUp = () => {
-        const { hasDragged, targetIndex } = clickStartRef.current;
-
-        scrollContainer.style.cursor = "grab";
-        scrollContainer.style.userSelect = "";
-        isDraggingRef.current = false;
-
-        // If we clicked on an item and didn't drag, center it
-        if (!hasDragged && targetIndex >= 0) {
-          cancelMomentum();
-          setTimeout(() => {
-            centerItem(targetIndex);
-          }, 0);
-        } else if (hasDragged) {
-          // Apply momentum based on velocity
-          // Convert velocity from px/ms to px/frame (assuming ~60fps = ~16.67ms per frame)
-          const velocityPerFrame = velocityRef.current.x * 16.67;
-          applyMomentum(velocityPerFrame);
-        }
-
-        clickStartRef.current = { x: 0, hasDragged: false, targetIndex: -1 };
-      };
-
-      scrollContainer.addEventListener("mousedown", handleMouseDown);
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-      scrollContainer.addEventListener("scroll", handleScroll, {
-        passive: true,
-      });
-
-      return () => {
-        scrollContainer.removeEventListener("mousedown", handleMouseDown);
-        document.removeEventListener("mousemove", handleMouseMove);
-        document.removeEventListener("mouseup", handleMouseUp);
-        scrollContainer.removeEventListener("scroll", handleScroll);
-        cancelMomentum();
-      };
-    }, []);
-
     // Function to center an item by index
     const centerItem = useCallback(
       (index: number) => {
@@ -381,17 +240,16 @@ export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
         const itemEl = itemRefs.current[index];
         if (!scrollContainer || !itemEl) return;
 
-        // Get item position relative to scroll container content (includes padding)
-        const itemLeft = itemEl.offsetLeft;
-        const itemWidth = itemEl.offsetWidth;
-        const itemCenterInContent = itemLeft + itemWidth / 2;
+        // Use getBoundingClientRect to get accurate positions relative to viewport
+        const containerRect = scrollContainer.getBoundingClientRect();
+        const itemRect = itemEl.getBoundingClientRect();
+        const containerCenter = containerRect.left + containerRect.width / 2;
+        const itemCenter = itemRect.left + itemRect.width / 2;
 
-        // Calculate target scroll position: item center should align with viewport center
-        // Viewport center in content coordinates = scrollLeft + clientWidth/2
-        // So: itemCenterInContent = targetScrollLeft + clientWidth/2
-        // Therefore: targetScrollLeft = itemCenterInContent - clientWidth/2
-        const containerWidth = scrollContainer.clientWidth;
-        const targetScrollLeft = itemCenterInContent - containerWidth / 2;
+        // Calculate the scroll offset needed to center the item
+        // This accounts for current scroll position and padding
+        const scrollOffset = itemCenter - containerCenter;
+        const targetScrollLeft = scrollContainer.scrollLeft + scrollOffset;
 
         scrollContainer.scrollTo({
           left: Math.max(0, targetScrollLeft),
@@ -506,6 +364,15 @@ export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
           perspective-origin: center center;
         }
 
+        .coverflow-scroll-container {
+          scroll-snap-type: x mandatory;
+          scroll-padding: 0 50%;
+        }
+
+        .coverflow-scroll-container > li {
+          scroll-snap-align: center;
+        }
+
         .coverflow-cover {
           transform-style: preserve-3d;
           will-change: transform;
@@ -571,9 +438,8 @@ export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
         <div className="w-full overflow-y-hidden coverflow-wrapper">
           <ul
             ref={scrollContainerRef}
-            className="list-none flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory m-0 scrollbar-none cursor-grab"
+            className="list-none flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory m-0 scrollbar-none coverflow-scroll-container"
             style={{
-              scrollPadding: "0 50%",
               paddingLeft: "calc(50vw - 100px)",
               paddingRight: "calc(50vw - 100px)",
             }}
