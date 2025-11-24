@@ -2,10 +2,9 @@
  * Example file demonstrating Waveform component usage
  */
 import { useMemo } from "react";
-import { getColorPalette } from "../waveform";
-import { Waveform, WaveformRenderData } from "../waveform";
-import type { ColorPalette } from "../waveform";
-import { useTrack, type QueueItem } from "../player/Player";
+import { Waveform, WaveformRenderData } from "@/components/waveform";
+import type { ColorPalette } from "@/components/waveform";
+import { useTrack, type QueueItem } from "@/components/player/Player";
 
 interface AudioItemProps {
   title: string;

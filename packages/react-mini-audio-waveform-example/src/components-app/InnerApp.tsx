@@ -1,16 +1,16 @@
 import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import { AudioItem } from "./AudioItem";
 import { GlobalControls } from "./GlobalControls";
-import { DarkModeToggle } from "./DarkModeToggle";
-import { type QueueItem, useTrack } from "../player/Player";
-import { PlayerUI } from "../player/PlayerUI";
-import { Visualizer } from "../visualizer/Visualizer";
-import { Queue, useQueue } from "../player/Queue";
-import { ColorPalette } from "../waveform";
-import { decodeAudioFile } from "../audio-context";
-import { CoverFlow } from "../CoverFlow";
-import { HotkeysBar } from "../HotkeysBar";
-import { TableVirtualizer } from "../TableVirtualizer";
+import { DarkModeToggle } from "@/components/DarkModeToggle";
+import { type QueueItem, useTrack } from "@/components/player/Player";
+import { PlayerUI } from "@/components/player/PlayerUI";
+import { Visualizer } from "@/components/visualizer/Visualizer";
+import { Queue, useQueue } from "@/components/player/Queue";
+import { ColorPalette } from "@/components/waveform";
+import { decodeAudioFile } from "@/components/audio-context";
+import { CoverFlow } from "@/components/CoverFlow";
+import { HotkeysBar } from "@/components/HotkeysBar";
+import { TableVirtualizer } from "@/components/TableVirtualizer";
 
 interface AudioItemData {
   title: string;
@@ -22,8 +22,6 @@ const BASE_URL = "http://localhost:3001";
 
 export function InnerApp() {
   const [audioItems, setAudioItems] = useState<AudioItemData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // Visualizer toggle state (default off)
   const [showVisualizer, setShowVisualizer] = useState(false);
@@ -103,10 +101,8 @@ export function InnerApp() {
         }
         const data = await response.json();
         setAudioItems(data);
-        setLoading(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : String(err));
-        setLoading(false);
+        console.error("Failed to fetch audio items:", err);
       }
     };
 
@@ -142,49 +138,6 @@ export function InnerApp() {
         onHeightChange={setWaveformHeight}
         onReRender={handleReRender}
       />
-
-      {/* Table Virtualizer Example */}
-      <div className="flex flex-col gap-4">
-        <h2 className="text-sm font-mono text-gray-600 dark:text-gray-400">
-          Table Virtualizer Example
-        </h2>
-        <TableVirtualizer
-          items={Array.from({ length: 1000 }, (_, i) => ({
-            id: i,
-            name: `Item ${i + 1}`,
-            description: `This is item number ${i + 1} in the virtualized list`,
-          }))}
-          itemHeight={60}
-          containerHeight={400}
-          overscan={5}
-          renderItem={(item, _index, isSelected) => (
-            <div
-              className={`border-b border-gray-200 dark:border-gray-800 p-4 hover:opacity-60 transition-opacity font-mono text-sm ${
-                isSelected
-                  ? "bg-black dark:bg-white text-white dark:text-black"
-                  : ""
-              }`}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "1rem",
-              }}
-            >
-              <div className="text-gray-500 dark:text-gray-400 w-12">
-                #{item.id}
-              </div>
-              <div className="flex-1">
-                <div className="text-black dark:text-white font-medium">
-                  {item.name}
-                </div>
-                <div className="text-gray-500 dark:text-gray-400 text-xs">
-                  {item.description}
-                </div>
-              </div>
-            </div>
-          )}
-        />
-      </div>
 
       <div className="flex gap-8 items-start">
         <div className="flex-1">

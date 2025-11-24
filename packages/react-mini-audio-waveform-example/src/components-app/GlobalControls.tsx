@@ -1,9 +1,9 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { ColorPicker } from "../inputs/ColorPicker";
-import { VerticalSlider } from "../inputs/VerticalSlider";
-import { generateOklchPalette } from "../waveform";
-import type { ColorPalette } from "../waveform";
-import { useColorScheme } from "../../hooks/useColorScheme";
+import { ColorPicker } from "@/components/inputs/ColorPicker";
+import { VerticalSlider } from "@/components/inputs/VerticalSlider";
+import { generateOklchPalette } from "@/components/waveform";
+import type { ColorPalette } from "@/components/waveform";
+import { useColorScheme } from "@/hooks/useColorScheme";
 
 interface GlobalControlsProps {
   onPaletteChange: (palette: Partial<ColorPalette>) => void;

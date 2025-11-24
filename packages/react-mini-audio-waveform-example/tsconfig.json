@@ -17,6 +17,7 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
+      "@/*": ["./src/*"],
       "@janwirth/react-web-audio-context": ["../react-web-audio-context/src"],
       "@janwirth/react-mini-audio-waveform": ["../react-mini-audio-waveform/src"]
     }

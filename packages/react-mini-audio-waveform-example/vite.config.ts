@@ -15,6 +15,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
+      "@": resolve(__dirname, "./src"),
       "@janwirth/react-web-audio-context": resolve(
         __dirname,
         "../react-web-audio-context/src/index.ts"
