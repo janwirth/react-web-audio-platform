@@ -10,6 +10,7 @@ import { ColorPalette } from "../waveform";
 import { decodeAudioFile } from "../audio-context";
 import { CoverFlow } from "../CoverFlow";
 import { HotkeysBar } from "../HotkeysBar";
+import { TableVirtualizer } from "../TableVirtualizer";
 
 interface AudioItemData {
   title: string;
