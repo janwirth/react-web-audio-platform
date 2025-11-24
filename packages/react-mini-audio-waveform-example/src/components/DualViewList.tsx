@@ -212,14 +212,14 @@ export const DualViewList = forwardRef<DualViewListHandle, DualViewListProps>(
     return (
       <div className={`grow flex flex-col gap-4 p-4 ${className}`}>
         {/* Toggle button */}
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <button
             onClick={handleToggleCoverflow}
             className="font-mono text-sm border border-black dark:border-white px-3 py-1 hover:opacity-60 transition-opacity"
           >
             {showCoverflow ? "Hide" : "Show"} Coverflow
           </button>
-        </div>
+        </div> */}
 
         {/* CoverFlow on top */}
         {showCoverflow && (

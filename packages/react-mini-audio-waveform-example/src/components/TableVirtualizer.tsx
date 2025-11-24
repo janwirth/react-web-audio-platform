@@ -1,8 +1,10 @@
 import { useImperativeHandle, forwardRef } from "react";
+import { useAtomValue } from "jotai";
 import {
   useVirtualList,
   type UseVirtualListReturn,
 } from "../hooks/useVirtualList";
+import { debugViewAtom } from "../atoms/debugView";
 
 interface VirtualListDebugHeaderProps<T> {
   hookReturn: UseVirtualListReturn<T>;
@@ -97,6 +99,7 @@ export const TableVirtualizer = forwardRef<
   },
   ref
 ) {
+  const debugView = useAtomValue(debugViewAtom);
   const hookReturn = useVirtualList({
     items,
     itemHeight,
@@ -149,11 +152,13 @@ export const TableVirtualizer = forwardRef<
       className={`flex flex-col ${className} flex-1 min-h-0`}
       style={{ position: "relative" }}
     >
-      <VirtualListDebugHeader
-        hookReturn={hookReturn}
-        totalItems={items.length}
-        itemHeight={itemHeight}
-      />
+      {debugView && (
+        <VirtualListDebugHeader
+          hookReturn={hookReturn}
+          totalItems={items.length}
+          itemHeight={itemHeight}
+        />
+      )}
 
       {/* Scrollable content */}
       <div

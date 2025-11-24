@@ -1,4 +1,6 @@
 import { useRef, useEffect, useState, useMemo } from "react";
+import { useAtomValue } from "jotai";
+import { debugViewAtom } from "../atoms/debugView";
 
 interface CoverFlowItem {
   id: string;
@@ -30,6 +32,7 @@ export const CoverFlowV2 = ({ items = defaultItems }: CoverFlowV2Props) => {
   const [offsetX, setOffsetX] = useState(0);
   const [scrollAccumulation, setScrollAccumulation] = useState(0);
   const [containerWidth, setContainerWidth] = useState(0);
+  const debugView = useAtomValue(debugViewAtom);
 
   // Calculate initial offset to center first element and track container width
   useEffect(() => {
@@ -181,22 +184,24 @@ export const CoverFlowV2 = ({ items = defaultItems }: CoverFlowV2Props) => {
       style={{ height: "200px" }}
     >
       {/* Debug overlay */}
-      <div className="absolute top-2 left-2 bg-black/80 dark:bg-white/80 text-white dark:text-black p-2 font-mono text-xs z-50 border border-white dark:border-black">
-        <div>Scroll Accumulation: {scrollAccumulation.toFixed(2)}</div>
-        <div>Offset X: {offsetX.toFixed(2)}px</div>
-        <div>Visible Items: {visibleItems.count}</div>
-        <div>Total Items: {items.length}</div>
-        <div>
-          Current Items: [{visibleItems.firstIndex}..{visibleItems.lastIndex}]
+      {debugView && (
+        <div className="absolute top-2 left-2 bg-black/80 dark:bg-white/80 text-white dark:text-black p-2 font-mono text-xs z-50 border border-white dark:border-black">
+          <div>Scroll Accumulation: {scrollAccumulation.toFixed(2)}</div>
+          <div>Offset X: {offsetX.toFixed(2)}px</div>
+          <div>Visible Items: {visibleItems.count}</div>
+          <div>Total Items: {items.length}</div>
+          <div>
+            Current Items: [{visibleItems.firstIndex}..{visibleItems.lastIndex}]
+          </div>
+          <div className="mt-1 text-[10px] opacity-70">
+            {visibleItems.items.length > 0 && (
+              <div>
+                IDs: {visibleItems.items.map((v) => v.item.id).join(", ")}
+              </div>
+            )}
+          </div>
         </div>
-        <div className="mt-1 text-[10px] opacity-70">
-          {visibleItems.items.length > 0 && (
-            <div>
-              IDs: {visibleItems.items.map((v) => v.item.id).join(", ")}
-            </div>
-          )}
-        </div>
-      </div>
+      )}
 
       <div
         ref={itemsContainerRef}
