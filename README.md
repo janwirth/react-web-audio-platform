@@ -125,3 +125,44 @@ npm publish
 ## License
 
 MIT
+
+## Roadmap:
+
+Before we connect to data
+
+- adjust spacing
+- add color picker (persist in local storage)
+  - oklch color picker
+- Queue navigation with scroll view
+- experiment with noise
+- Remove border around question mark
+- Next / prev better buttons
+- Fixed width controls in player
+- Expand / collapse cover flow
+- selection
+- adjust title during playback
+- Fix missing covers not rendered
+- Cmd-K
+- tree for tab grouping
+  -> Add title to current playback
+  -> Put queue to the left
+  -> OPFS
+
+Qx| Player | global settings
+Q | List
+Hotkeys
+Jump to track in list if playing back
+
+API
+-> tabs
+-> CRUD
+-> useTabContent(tabId => )
+-> generic track format
+
+STORAGE
+
+- Tab storage
+- Generic storage provider?
+- operations
+  - create tab
+  - switch tab

@@ -9,6 +9,7 @@ interface UseLayoutHotkeysParams {
   leftSidebarRef: RefObject<HTMLDivElement | null>;
   centerRef: RefObject<HTMLDivElement | null>;
   rightSidebarRef: RefObject<HTMLDivElement | null>;
+  toggleVisualizer?: () => void;
 }
 
 export function useLayoutHotkeys({
@@ -17,6 +18,7 @@ export function useLayoutHotkeys({
   leftSidebarRef,
   centerRef,
   rightSidebarRef,
+  toggleVisualizer,
 }: UseLayoutHotkeysParams): HotkeyConfig[] {
   const eventBus = usePanelEventBus();
 
@@ -90,8 +92,17 @@ export function useLayoutHotkeys({
         description: "Scroll down / Move selection down",
         handler: handleArrowDown,
       },
+      ...(toggleVisualizer
+        ? [
+            {
+              key: "v",
+              description: "Toggle visualizer",
+              handler: toggleVisualizer,
+            },
+          ]
+        : []),
     ],
-    [switchTab, switchArea, handleArrowUp, handleArrowDown]
+    [switchTab, switchArea, handleArrowUp, handleArrowDown, toggleVisualizer]
   );
 
   return hotkeys;

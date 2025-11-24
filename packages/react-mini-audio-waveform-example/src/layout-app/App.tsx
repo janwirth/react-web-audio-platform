@@ -1,4 +1,4 @@
-import { useReducer, useRef, useCallback } from "react";
+import { useReducer, useRef, useCallback, useState } from "react";
 import { useAtom } from "jotai";
 import { HotkeysBar } from "../components/HotkeysBar";
 import { TableVirtualizerHandle } from "../components/TableVirtualizer";
@@ -30,11 +30,16 @@ function FocusIndicator() {
 function LayoutAppContent() {
   const [state, dispatch] = useReducer(Update, initialState);
   const [debugView, setDebugView] = useAtom(debugViewAtom);
+  const [showVisualizer, setShowVisualizer] = useState(false);
 
   const leftSidebarRef = useRef<HTMLDivElement>(null);
   const centerRef = useRef<HTMLDivElement>(null);
   const rightSidebarRef = useRef<HTMLDivElement>(null);
   const centerVirtualizerRef = useRef<TableVirtualizerHandle>(null);
+
+  const toggleVisualizer = useCallback(() => {
+    setShowVisualizer((prev) => !prev);
+  }, []);
 
   // Get hotkey configurations from hook
   const hotkeys = useLayoutHotkeys({
@@ -43,6 +48,7 @@ function LayoutAppContent() {
     leftSidebarRef,
     centerRef,
     rightSidebarRef,
+    toggleVisualizer,
   });
 
   // Center panel handlers for virtualizer scrolling
@@ -76,7 +82,7 @@ function LayoutAppContent() {
       </div>
       <div className="px-4 py-2">
         <PlayerUI />
-        <Visualizer />
+        {showVisualizer && <Visualizer />}
       </div>
 
       {/* Main Layout */}
