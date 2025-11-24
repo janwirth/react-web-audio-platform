@@ -3,7 +3,7 @@ alwaysApply: true
 ---
 
 - use bun
-- never add backgrounds to containers
+- NEVER add backgrounds to containers in tailwind
 - work wiht opacity / one color highlight for hover
 - prefer black / white color scheme
 - use monospace font

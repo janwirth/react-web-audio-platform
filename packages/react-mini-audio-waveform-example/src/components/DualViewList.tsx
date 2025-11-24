@@ -8,6 +8,7 @@ import {
 } from "react";
 import { TableVirtualizer, TableVirtualizerHandle } from "./TableVirtualizer";
 import { CoverFlow, CoverFlowRef } from "./CoverFlow";
+import { CoverFlowV2 } from "./coverflowV2";
 
 export interface DualViewListItem {
   id: string | number;
@@ -168,7 +169,7 @@ export const DualViewList = forwardRef<
   };
 
   return (
-    <div className={`h-full flex flex-col gap-4 p-4 ${className}`}>
+    <div className={`grow flex flex-col gap-4 p-4 ${className}`}>
       {/* Toggle button */}
       <div className="flex items-center gap-2">
         <button
@@ -182,26 +183,24 @@ export const DualViewList = forwardRef<
       {/* CoverFlow on top */}
       {showCoverflow && (
         <div style={{ height: coverflowHeight }}>
-          <CoverFlow
-            ref={coverFlowRef}
+          <CoverFlowV2
+            // ref={coverFlowRef}
             items={coverFlowItems}
-            onFocussedItem={handleFocussedItem}
+            // onFocussedItem={handleFocussedItem}
           />
         </div>
       )}
 
       {/* TableVirtualizer below */}
-      <div className="flex-1 min-h-0">
-        <TableVirtualizer
-          ref={tableVirtualizerRef}
-          items={items}
-          itemHeight={itemHeight}
-          overscan={overscan}
-          renderItem={(item, index) =>
-            renderItem(item, index, index === cursorIndex)
-          }
-        />
-      </div>
+      <TableVirtualizer
+        ref={tableVirtualizerRef}
+        items={items}
+        itemHeight={itemHeight}
+        overscan={overscan}
+        renderItem={(item, index) =>
+          renderItem(item, index, index === cursorIndex)
+        }
+      />
     </div>
   );
 }) as <T extends DualViewListItem>(

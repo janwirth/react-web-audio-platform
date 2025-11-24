@@ -94,7 +94,7 @@ function LayoutAppContent() {
             }}
             className="flex-1 p-4"
           >
-            <div className="text-sm font-semibold mb-4">Center Area</div>
+            {/* <div className="text-sm font-semibold mb-4">Center Area</div> */}
             <CenterAreaContent
               onArrowUp={handleCenterArrowUp}
               onArrowDown={handleCenterArrowDown}

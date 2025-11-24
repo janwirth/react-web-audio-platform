@@ -1,12 +1,66 @@
+import { useImperativeHandle, forwardRef } from "react";
 import {
-  useRef,
-  useEffect,
-  useState,
-  useCallback,
-  useImperativeHandle,
-  forwardRef,
-} from "react";
-import useResizeObserver from "use-resize-observer";
+  useVirtualList,
+  type UseVirtualListReturn,
+} from "../hooks/useVirtualList";
+
+interface VirtualListDebugHeaderProps<T> {
+  hookReturn: UseVirtualListReturn<T>;
+  totalItems: number;
+  itemHeight: number;
+}
+
+function VirtualListDebugHeader<T>({
+  hookReturn,
+  totalItems,
+  itemHeight,
+}: VirtualListDebugHeaderProps<T>) {
+  const {
+    scrollTop,
+    firstVisibleIndex,
+    visibleRange,
+    visibleItems,
+    totalHeight,
+    containerHeight,
+    visibleRowCount,
+    getFullyVisibleRange,
+  } = hookReturn;
+
+  const fullyVisibleRange = getFullyVisibleRange();
+  const visibleItemsCount = visibleItems.length;
+
+  const debugItems = [
+    { label: "Scroll", value: `${scrollTop}px` },
+    { label: "First Visible Index", value: firstVisibleIndex.toString() },
+    {
+      label: "Visible Range",
+      value: `${visibleRange.start}-${visibleRange.end}`,
+    },
+    {
+      label: "Fully Visible Range",
+      value: `${fullyVisibleRange.start}-${fullyVisibleRange.end}`,
+    },
+    { label: "Total Items", value: totalItems.toString() },
+    { label: "Visible Items Count", value: visibleItemsCount.toString() },
+    { label: "Total Height", value: `${totalHeight}px` },
+    { label: "Container Height", value: `${containerHeight}px` },
+    { label: "Visible Row Count", value: visibleRowCount.toString() },
+    { label: "Item Height", value: `${itemHeight}px` },
+  ];
+
+  return (
+    <div className="px-4 py-2 text-xs font-mono border-b border-gray-300 dark:border-gray-700">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-x-4 gap-y-1">
+        {debugItems.map(({ label, value }) => (
+          <div key={label} className="flex items-center gap-2">
+            <span className="opacity-60">{label}:</span>
+            <span>{value}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 interface TableVirtualizerProps<T> {
   items: T[];
@@ -43,264 +97,69 @@ export const TableVirtualizer = forwardRef<
   },
   ref
 ) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const scrollableRef = useRef<HTMLDivElement>(null);
-  const [firstVisibleIndex, setFirstVisibleIndex] = useState(0);
-  const wheelAccumulatorRef = useRef(0);
-
-  // Use useResizeObserver to measure scrollable container height
-  const { height: containerHeight = 0 } = useResizeObserver({
-    ref: scrollableRef as React.RefObject<Element>,
+  const hookReturn = useVirtualList({
+    items,
+    itemHeight,
+    overscan,
+    onScroll,
+    onFocus,
   });
 
-  // Calculate how many rows fit in the container
-  const visibleRowCount = Math.floor(containerHeight / itemHeight);
-
-  // Calculate scrollTop from firstVisibleIndex (always aligned to row boundaries)
-  const scrollTop = firstVisibleIndex * itemHeight;
-
-  // Scroll by rows (discrete, terminal-like)
-  const scrollByRows = useCallback(
-    (deltaRows: number) => {
-      setFirstVisibleIndex((prev) => {
-        // Allow last row to be at top of viewport
-        const maxFirstIndex = Math.max(0, items.length - 1);
-        const newIndex = Math.max(0, Math.min(maxFirstIndex, prev + deltaRows));
-        return newIndex;
-      });
-    },
-    [items.length]
-  );
-
-  // Scroll to a specific index - makes it the first visible row
-  const scrollToIndex = useCallback(
-    (index: number) => {
-      const clampedIndex = Math.max(0, Math.min(items.length - 1, index));
-      // Make the focused row the first visible row
-      setFirstVisibleIndex(clampedIndex);
-    },
-    [items.length]
-  );
-
-  // Calculate which items should be visible (includes overscan)
-  const calculateVisibleRange = useCallback(() => {
-    const start = Math.max(0, firstVisibleIndex - overscan);
-    const end = Math.min(
-      items.length - 1,
-      firstVisibleIndex + visibleRowCount + overscan
-    );
-    return { start, end };
-  }, [firstVisibleIndex, visibleRowCount, overscan, items.length]);
-
-  // Calculate fully visible range (without overscan)
-  const calculateFullyVisibleRange = useCallback(() => {
-    const start = firstVisibleIndex;
-    const end = Math.min(
-      items.length - 1,
-      firstVisibleIndex + visibleRowCount - 1
-    );
-    return { start, end };
-  }, [firstVisibleIndex, visibleRowCount, items.length]);
-
-  // Scroll to index only if it's outside the fully visible range
-  const scrollToIndexIfNeeded = useCallback(
-    (index: number) => {
-      const clampedIndex = Math.max(0, Math.min(items.length - 1, index));
-      const fullyVisibleRange = calculateFullyVisibleRange();
-
-      // Only scroll if the index is outside the fully visible range
-      if (clampedIndex < fullyVisibleRange.start) {
-        // Index is above visible range, scroll so it becomes the first visible
-        setFirstVisibleIndex(clampedIndex);
-      } else if (clampedIndex > fullyVisibleRange.end) {
-        // Index is below visible range, scroll so it becomes visible
-        // Calculate how much to scroll: we want the index to be the last fully visible item
-        const newFirstIndex = Math.max(0, clampedIndex - visibleRowCount + 1);
-        setFirstVisibleIndex(newFirstIndex);
-      }
-      // If index is within range, do nothing
-    },
-    [items.length, calculateFullyVisibleRange, visibleRowCount]
-  );
+  const {
+    containerRef,
+    scrollableRef,
+    scrollTop,
+    visibleItems,
+    totalHeight,
+    scrollByRows,
+    scrollToTop,
+    scrollToBottom,
+    scrollToIndex,
+    scrollToIndexIfNeeded,
+    getVisibleRange,
+    getFullyVisibleRange,
+  } = hookReturn;
 
   // Expose scroll methods via ref
   useImperativeHandle(
     ref,
     () => ({
       scrollByRows,
-      scrollToTop: () => setFirstVisibleIndex(0),
-      scrollToBottom: () => {
-        // Allow last row to be at top of viewport
-        const endIndex = Math.max(0, items.length - 1);
-        setFirstVisibleIndex(endIndex);
-      },
+      scrollToTop,
+      scrollToBottom,
       scrollToIndex,
       scrollToIndexIfNeeded,
-      getVisibleRange: () => calculateVisibleRange(),
-      getFullyVisibleRange: () => calculateFullyVisibleRange(),
+      getVisibleRange,
+      getFullyVisibleRange,
     }),
     [
       scrollByRows,
-      items.length,
+      scrollToTop,
+      scrollToBottom,
       scrollToIndex,
       scrollToIndexIfNeeded,
-      calculateVisibleRange,
-      calculateFullyVisibleRange,
+      getVisibleRange,
+      getFullyVisibleRange,
     ]
   );
-
-  const [visibleRange, setVisibleRange] = useState(() =>
-    calculateVisibleRange()
-  );
-
-  // Handle wheel events - accumulate until we have enough for a full row
-  useEffect(() => {
-    const container = containerRef.current;
-    const scrollable = scrollableRef.current;
-    if (!container || !scrollable) return;
-
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-
-      // Focus scrollable container on scroll
-      if (onFocus && document.activeElement !== scrollable) {
-        scrollable.focus();
-        onFocus();
-      }
-
-      // Accumulate wheel delta
-      wheelAccumulatorRef.current += e.deltaY;
-
-      // Calculate how many rows to scroll based on accumulated delta
-      const rowsToScroll = Math.floor(
-        Math.abs(wheelAccumulatorRef.current) / itemHeight
-      );
-
-      if (rowsToScroll > 0) {
-        const direction = wheelAccumulatorRef.current > 0 ? 1 : -1;
-        scrollByRows(rowsToScroll * direction);
-        // Keep remainder for next scroll
-        wheelAccumulatorRef.current = wheelAccumulatorRef.current % itemHeight;
-      }
-    };
-
-    container.addEventListener("wheel", handleWheel, { passive: false });
-
-    return () => {
-      container.removeEventListener("wheel", handleWheel);
-    };
-  }, [scrollByRows, itemHeight, onFocus]);
-
-  // Handle click to focus
-  useEffect(() => {
-    const container = containerRef.current;
-    const scrollable = scrollableRef.current;
-    if (!container || !scrollable) return;
-
-    const handleClick = () => {
-      if (onFocus && document.activeElement !== scrollable) {
-        scrollable.focus();
-        onFocus();
-      }
-    };
-
-    container.addEventListener("click", handleClick);
-
-    return () => {
-      container.removeEventListener("click", handleClick);
-    };
-  }, [onFocus]);
-
-  // Handle touch events for mobile - also discrete row scrolling
-  const touchStartYRef = useRef(0);
-  const touchStartIndexRef = useRef(0);
-  const touchRowsAccumulatorRef = useRef(0);
-
-  useEffect(() => {
-    const scrollable = scrollableRef.current;
-    if (!scrollable) return;
-
-    const handleTouchStart = (e: TouchEvent) => {
-      touchStartYRef.current = e.touches[0].clientY;
-      touchStartIndexRef.current = firstVisibleIndex;
-      touchRowsAccumulatorRef.current = 0;
-    };
-
-    const handleTouchMove = (e: TouchEvent) => {
-      e.preventDefault();
-      const deltaY = touchStartYRef.current - e.touches[0].clientY;
-      const rowsDelta = Math.floor(deltaY / itemHeight);
-
-      if (rowsDelta !== touchRowsAccumulatorRef.current) {
-        const deltaRows = rowsDelta - touchRowsAccumulatorRef.current;
-        touchRowsAccumulatorRef.current = rowsDelta;
-        scrollByRows(deltaRows);
-      }
-    };
-
-    scrollable.addEventListener("touchstart", handleTouchStart, {
-      passive: true,
-    });
-    scrollable.addEventListener("touchmove", handleTouchMove, {
-      passive: false,
-    });
-
-    return () => {
-      scrollable.removeEventListener("touchstart", handleTouchStart);
-      scrollable.removeEventListener("touchmove", handleTouchMove);
-    };
-  }, [scrollByRows, itemHeight, firstVisibleIndex]);
-
-  // Update visible range when firstVisibleIndex changes
-  useEffect(() => {
-    const newRange = calculateVisibleRange();
-    setVisibleRange(newRange);
-    onScroll?.(scrollTop);
-  }, [firstVisibleIndex, calculateVisibleRange, scrollTop, onScroll]);
-
-  // Recalculate when items change
-  useEffect(() => {
-    const newRange = calculateVisibleRange();
-    setVisibleRange(newRange);
-  }, [items, calculateVisibleRange]);
-
-  // Calculate total height
-  const totalHeight = items.length * itemHeight;
-
-  // Get visible items
-  const visibleItems: Array<{ item: any; index: number }> = [];
-  for (let i = visibleRange.start; i <= visibleRange.end; i++) {
-    if (i >= 0 && i < items.length) {
-      visibleItems.push({ item: items[i], index: i });
-    }
-  }
-
-  // Calculate visible items count
-  const visibleItemsCount = visibleItems.length;
 
   return (
     <div
       ref={containerRef}
-      className={`flex flex-col h-full ${className}`}
+      className={`flex flex-col ${className} flex-1 min-h-0`}
       style={{ position: "relative" }}
     >
-      {/* Header showing scroll info */}
-      <div className="px-4 py-1 text-xs font-mono border-b border-gray-300 dark:border-gray-700 flex items-center gap-4">
-        <span className="opacity-60">Scroll:</span>
-        <span>{scrollTop}px</span>
-        <span className="opacity-60">Offset:</span>
-        <span>{firstVisibleIndex}</span>
-        <span className="opacity-60">Total:</span>
-        <span>{items.length}</span>
-        <span className="opacity-60">Visible:</span>
-        <span>{visibleItemsCount}</span>
-      </div>
+      <VirtualListDebugHeader
+        hookReturn={hookReturn}
+        totalItems={items.length}
+        itemHeight={itemHeight}
+      />
 
       {/* Scrollable content */}
       <div
         ref={scrollableRef}
         tabIndex={0}
-        className="flex-1 overflow-hidden outline-none focus:outline-none"
+        className="flex-col flex basis-0 flex-1 overflow-hidden outline-none focglus:outline-none  grow"
         style={{ position: "relative" }}
       >
         <div
