@@ -15,6 +15,7 @@ interface CoverFlowItem {
 interface CoverFlowProps {
   items?: CoverFlowItem[];
   onItemChange?: (item: CoverFlowItem, index: number) => void;
+  onFocussedItem?: (item: CoverFlowItem, index: number) => void;
 }
 
 export interface CoverFlowRef {
@@ -33,7 +34,7 @@ const defaultItems: CoverFlowItem[] = Array.from({ length: 100 }, (_, i) => ({
 }));
 
 export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
-  ({ items = defaultItems, onItemChange }, ref) => {
+  ({ items = defaultItems, onItemChange, onFocussedItem }, ref) => {
     const scrollContainerRef = useRef<HTMLUListElement>(null);
     const coverRefs = useRef<(HTMLDivElement | null)[]>([]);
     const itemRefs = useRef<(HTMLLIElement | null)[]>([]);
@@ -43,6 +44,7 @@ export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
     const velocityRef = useRef({ x: 0, lastX: 0, lastTime: 0 });
     const momentumAnimationRef = useRef<number | null>(null);
     const hasInitializedRef = useRef(false);
+    const centeredIndexRef = useRef<number>(-1);
 
     useEffect(() => {
       const scrollContainer = scrollContainerRef.current;
@@ -92,17 +94,26 @@ export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
           const containerRect = scrollContainer.getBoundingClientRect();
           const containerCenter = containerRect.left + containerRect.width / 2;
 
+          let closestIndex = -1;
+          let minDistance = Infinity;
+
           coverRefs.current.forEach((coverEl, index) => {
             if (!coverEl) return;
 
             const coverRect = coverEl.getBoundingClientRect();
             const coverCenter = coverRect.left + coverRect.width / 2;
-            const distanceFromCenter = coverCenter - containerCenter;
+            const distanceFromCenter = Math.abs(coverCenter - containerCenter);
             const maxDistance = containerRect.width / 2;
             const progress = Math.max(
               -1,
-              Math.min(1, distanceFromCenter / maxDistance)
+              Math.min(1, (coverCenter - containerCenter) / maxDistance)
             );
+
+            // Track the closest item to center
+            if (distanceFromCenter < minDistance) {
+              minDistance = distanceFromCenter;
+              closestIndex = index;
+            }
 
             // Calculate rotation: -45deg when left, 0deg when center, 45deg when right
             const rotation = Math.max(-60, Math.min(60, progress * 100));
@@ -124,6 +135,12 @@ export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
               itemEl.style.zIndex = zIndex.toString();
             }
           });
+
+          // Emit event if centered item changed
+          if (closestIndex >= 0 && closestIndex !== centeredIndexRef.current) {
+            centeredIndexRef.current = closestIndex;
+            onFocussedItem?.(items[closestIndex], closestIndex);
+          }
 
           updateSpacing();
           rafId = null;
@@ -158,10 +175,38 @@ export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
         // When CSS scroll-driven animations are supported, still update spacing dynamically
         let rafId: number | null = null;
 
+        const detectCenteredItem = () => {
+          const containerRect = scrollContainer.getBoundingClientRect();
+          const containerCenter = containerRect.left + containerRect.width / 2;
+
+          let closestIndex = -1;
+          let minDistance = Infinity;
+
+          coverRefs.current.forEach((coverEl, index) => {
+            if (!coverEl) return;
+
+            const coverRect = coverEl.getBoundingClientRect();
+            const coverCenter = coverRect.left + coverRect.width / 2;
+            const distanceFromCenter = Math.abs(coverCenter - containerCenter);
+
+            if (distanceFromCenter < minDistance) {
+              minDistance = distanceFromCenter;
+              closestIndex = index;
+            }
+          });
+
+          // Emit event if centered item changed
+          if (closestIndex >= 0 && closestIndex !== centeredIndexRef.current) {
+            centeredIndexRef.current = closestIndex;
+            onFocussedItem?.(items[closestIndex], closestIndex);
+          }
+        };
+
         const handleScroll = () => {
           if (rafId === null) {
             rafId = requestAnimationFrame(() => {
               updateSpacing();
+              detectCenteredItem();
               rafId = null;
             });
           }
@@ -181,6 +226,7 @@ export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
         });
         window.addEventListener("resize", handleResize, { passive: true });
         updateSpacing(); // Initial update
+        detectCenteredItem(); // Initial centered item detection
 
         return () => {
           scrollContainer.removeEventListener("scroll", handleScroll);
@@ -190,7 +236,7 @@ export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
           }
         };
       }
-    }, [items]);
+    }, [items, onFocussedItem]);
 
     // Drag handlers effect
     useEffect(() => {
@@ -347,8 +393,9 @@ export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
         });
 
         onItemChange?.(items[index], index);
+        onFocussedItem?.(items[index], index);
       },
-      [items, onItemChange]
+      [items, onItemChange, onFocussedItem]
     );
 
     // Expose methods via ref
@@ -394,6 +441,7 @@ export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
           // Use instant scroll for initial positioning
           scrollContainer.scrollLeft += scrollOffset;
           onItemChange?.(items[0], 0);
+          onFocussedItem?.(items[0], 0);
           hasInitializedRef.current = true;
         }
       };

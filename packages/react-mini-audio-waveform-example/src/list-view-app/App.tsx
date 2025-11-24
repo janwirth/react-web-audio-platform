@@ -1,4 +1,8 @@
-import { TableVirtualizer } from "../components/TableVirtualizer";
+import { useRef } from "react";
+import {
+  TableVirtualizer,
+  TableVirtualizerHandle,
+} from "../components/TableVirtualizer";
 import { CoverFlow } from "../components/CoverFlow";
 
 // Shared dummy data for both CoverFlow and TableVirtualizer
@@ -14,11 +18,14 @@ const sharedItems = Array.from({ length: 350 }, (_, i) => ({
 }));
 
 function App() {
+  const tableVirtualizerRef = useRef<TableVirtualizerHandle>(null);
+
   // Transform shared data for TableVirtualizer
   const tableItems = sharedItems.map((item) => ({
     id: item.id,
     name: item.name,
     description: item.description,
+    imgSrc: item.imgSrc,
   }));
 
   // Transform shared data for CoverFlow
@@ -28,14 +35,19 @@ function App() {
     imgSrc: item.imgSrc,
   }));
 
+  const handleFocussedItem = (_item: any, index: number) => {
+    tableVirtualizerRef.current?.scrollToIndex(index);
+  };
+
   return (
     <div className="h-screen flex flex-col gap-4 p-4 ">
       {/* CoverFlow on top */}
-      <CoverFlow items={coverFlowItems} />
+      <CoverFlow items={coverFlowItems} onFocussedItem={handleFocussedItem} />
 
       {/* TableVirtualizer below */}
       <div className="flex-1 min-h-0">
         <TableVirtualizer
+          ref={tableVirtualizerRef}
           items={tableItems}
           itemHeight={60}
           overscan={5}
@@ -51,6 +63,18 @@ function App() {
               <div className="text-gray-500 dark:text-gray-400 w-12">
                 #{item.id}
               </div>
+              {item.imgSrc && (
+                <div className="w-12 h-12 shrink-0">
+                  <img
+                    src={item.imgSrc}
+                    alt={item.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
+              {!item.imgSrc && (
+                <div className="w-12 h-12 shrink-0 bg-gray-400 dark:bg-gray-600 border border-gray-800 dark:border-gray-400" />
+              )}
               <div className="flex-1">
                 <div className="text-black dark:text-white font-medium">
                   {item.name}

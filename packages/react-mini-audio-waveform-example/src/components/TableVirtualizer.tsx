@@ -22,6 +22,7 @@ export interface TableVirtualizerHandle {
   scrollByRows: (deltaRows: number) => void;
   scrollToTop: () => void;
   scrollToBottom: () => void;
+  scrollToIndex: (index: number) => void;
 }
 
 export const TableVirtualizer = forwardRef<
@@ -67,6 +68,21 @@ export const TableVirtualizer = forwardRef<
     [items.length, visibleRowCount]
   );
 
+  // Scroll to a specific index
+  const scrollToIndex = useCallback(
+    (index: number) => {
+      const clampedIndex = Math.max(0, Math.min(items.length - 1, index));
+      const maxFirstIndex = Math.max(0, items.length - visibleRowCount);
+      // Center the item in the viewport if possible
+      const targetFirstIndex = Math.max(
+        0,
+        Math.min(maxFirstIndex, clampedIndex - Math.floor(visibleRowCount / 2))
+      );
+      setFirstVisibleIndex(targetFirstIndex);
+    },
+    [items.length, visibleRowCount]
+  );
+
   // Expose scroll methods via ref
   useImperativeHandle(
     ref,
@@ -77,8 +93,9 @@ export const TableVirtualizer = forwardRef<
         const endIndex = Math.max(0, items.length - visibleRowCount);
         setFirstVisibleIndex(endIndex);
       },
+      scrollToIndex,
     }),
-    [scrollByRows, items.length, visibleRowCount]
+    [scrollByRows, items.length, visibleRowCount, scrollToIndex]
   );
 
   // Calculate which items should be visible
