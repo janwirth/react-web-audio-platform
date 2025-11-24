@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import Story4 from "./story4";
-import "../index.css";
+import TableVirtualizer from "./table-virtualizer";
+import "@/index.css";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
@@ -10,7 +10,6 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <Story4 />
+    <TableVirtualizer />
   </StrictMode>
 );
-

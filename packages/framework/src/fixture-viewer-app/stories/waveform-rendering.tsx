@@ -1,9 +1,9 @@
-import { Column } from "./Column";
+import { Column } from "@/components/Column";
 import { Waveform } from "@/components/waveform";
 
 const audioUrl = "http://localhost:3001/audio/track1.mp3";
 
-export default function Story5() {
+export default function WaveformRendering() {
   return (
     <Column className="h-full w-full p-8" style={{ height: "100%" }}>
       <div className="mb-4">
@@ -16,4 +16,3 @@ export default function Story5() {
     </Column>
   );
 }
-

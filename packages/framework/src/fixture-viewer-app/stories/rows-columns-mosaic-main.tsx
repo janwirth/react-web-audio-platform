@@ -1,7 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import Story3 from "./story3";
-import "../index.css";
+import RowsColumnsMosaic from "./rows-columns-mosaic";
+import "@/index.css";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
@@ -10,7 +10,6 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <Story3 />
+    <RowsColumnsMosaic />
   </StrictMode>
 );
-

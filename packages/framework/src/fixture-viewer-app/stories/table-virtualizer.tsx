@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useAtom } from "jotai";
-import { Column } from "./Column";
-import { Row } from "./Row";
-import { TableVirtualizer } from "../components/TableVirtualizer";
-import { debugViewAtom } from "../atoms/debugView";
+import { Column } from "@/components/Column";
+import { Row } from "@/components/Row";
+import { TableVirtualizer as TableVirtualizerComponent } from "@/components/TableVirtualizer";
+import { debugViewAtom } from "@/atoms/debugView";
 
 // Example items for TableVirtualizer
 const exampleItems = Array.from({ length: 1000 }, (_, i) => ({
@@ -16,7 +16,7 @@ const exampleItems = Array.from({ length: 1000 }, (_, i) => ({
   status: i % 3 === 0 ? "active" : i % 3 === 1 ? "pending" : "completed",
 }));
 
-export default function Story4() {
+export default function TableVirtualizer() {
   const [, setDebugView] = useAtom(debugViewAtom);
 
   // Enable debug view for TableVirtualizer
@@ -54,7 +54,7 @@ export default function Story4() {
               flexDirection: "column",
             }}
           >
-            <TableVirtualizer
+            <TableVirtualizerComponent
               items={exampleItems}
               itemHeight={80}
               overscan={5}
@@ -139,4 +139,3 @@ export default function Story4() {
     </Column>
   );
 }
-

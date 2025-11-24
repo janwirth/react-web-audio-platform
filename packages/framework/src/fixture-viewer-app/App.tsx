@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Row } from "./Row";
-import { Column } from "./Column";
+import { Row } from "@/components/Row";
+import { Column } from "@/components/Column";
 import { IframeScaler } from "./IframeScaler";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
 
@@ -14,27 +14,27 @@ const fixtures: Fixture[] = [
   {
     id: "story1",
     name: "Story 1",
-    src: "/fixture-viewer/story1.html",
+    src: "/fixture-viewer/stories/story1.html",
   },
   {
     id: "story2",
     name: "Story 2",
-    src: "/fixture-viewer/story2.html",
+    src: "/fixture-viewer/stories/story2.html",
   },
   {
-    id: "story3",
+    id: "rows-columns-mosaic",
     name: "Rows/Columns Mosaic",
-    src: "/fixture-viewer/story3.html",
+    src: "/fixture-viewer/stories/rows-columns-mosaic.html",
   },
   {
-    id: "story4",
+    id: "table-virtualizer",
     name: "TableVirtualizer",
-    src: "/fixture-viewer/story4.html",
+    src: "/fixture-viewer/stories/table-virtualizer.html",
   },
   {
-    id: "story5",
+    id: "waveform-rendering",
     name: "Waveform Rendering",
-    src: "/fixture-viewer/story5.html",
+    src: "/fixture-viewer/stories/waveform-rendering.html",
   },
 ];
 
@@ -47,27 +47,28 @@ function App() {
     <Column className=" h-screen">
       <Row className="h-full w-full" style={{ height: "100%" }}>
         {/* Left sidebar with fixture list */}
-        <Column className="max-w-64 p-1 w-64 overflow-y-auto">
-          <div className="font-mono text-sm font-bold">Fixtures</div>
+        <Column className="max-w-64 w-64 overflow-y-auto gap-4 p-4">
           {fixtures.map((fixture) => (
             <button
               key={fixture.id}
               onClick={() => setSelectedFixture(fixture)}
               className="font-mono text-sm hover:opacity-60 transition-opacity text-left"
             >
-              <div className="font-bold">{fixture.name}</div>
-              <IframeScaler
-                src={fixture.src}
-                targetWidth={200}
-                targetHeight={150}
-                zoom={0.2}
-              />
+              <Column className="gap-2">
+                <div className="font-bold">{fixture.name}</div>
+                <IframeScaler
+                  src={fixture.src}
+                  targetWidth={200}
+                  targetHeight={150}
+                  zoom={0.2}
+                />
+              </Column>
             </button>
           ))}
         </Column>
 
         {/* Right side with selected fixture */}
-        <Column className="flex-1" style={{ minWidth: 0, minHeight: 0 }}>
+        <Column className="p-8" style={{ minWidth: 0, minHeight: 0 }}>
           {selectedFixture ? (
             <div
               style={{

@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 import { useAtom } from "jotai";
-import { Row } from "./Row";
-import { Column } from "./Column";
-import { TableVirtualizer } from "../components/TableVirtualizer";
-import { debugViewAtom } from "../atoms/debugView";
+import { Row } from "@/components/Row";
+import { Column } from "@/components/Column";
+import { TableVirtualizer } from "@/components/TableVirtualizer";
+import { debugViewAtom } from "@/atoms/debugView";
 
 // Example text content
 const shortText = "This is a short content cell that fits nicely.";
@@ -27,7 +27,7 @@ const exampleItems = Array.from({ length: 100 }, (_, i) => ({
   } in the virtualized list. It contains some example content to demonstrate the TableVirtualizer component with debug view enabled.`,
 }));
 
-export default function Story3() {
+export default function RowsColumnsMosaic() {
   const [, setDebugView] = useAtom(debugViewAtom);
 
   // Enable debug view for TableVirtualizer
