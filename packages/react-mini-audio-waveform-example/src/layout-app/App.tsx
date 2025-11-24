@@ -1,10 +1,10 @@
 import { useReducer, useRef, useCallback } from "react";
-import { HotkeysBar } from "./components/HotkeysBar";
-import { TableVirtualizerHandle } from "./components/TableVirtualizer";
-import { TabsBar } from "./components/TabsBar";
+import { HotkeysBar } from "../components/HotkeysBar";
+import { TableVirtualizerHandle } from "../components/TableVirtualizer";
+import { TabsBar } from "../components/TabsBar";
 import { State, Update } from "./LayoutState";
-import { useLayoutHotkeys } from "./hooks/useLayoutHotkeys";
-import { PanelEventBusProvider } from "./hooks/usePanelEvent";
+import { useLayoutHotkeys } from "../hooks/useLayoutHotkeys";
+import { PanelEventBusProvider } from "../hooks/usePanelEvent";
 import {
   defaultTabs,
   leftSidebarItems,
@@ -13,6 +13,7 @@ import {
   RightSidebarContent,
   CenterAreaContent,
 } from "./Data";
+import { DarkModeToggle } from "../components/DarkModeToggle";
 
 const initialState: State = {
   tabs: defaultTabs,
@@ -52,6 +53,7 @@ function LayoutAppContent() {
 
   return (
     <div className="h-screen flex flex-col font-mono bg-white dark:bg-black text-black dark:text-white">
+      <DarkModeToggle />
       {/* Tabs Bar */}
       <TabsBar
         tabs={state.tabs}

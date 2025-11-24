@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
-import { Tab } from "./LayoutState";
-import { usePanelEvent } from "./hooks/usePanelEvent";
+import { Tab } from "../LayoutState";
+import { usePanelEvent } from "../hooks/usePanelEvent";
 
 // Example tabs data
 export const defaultTabs: Tab[] = [
@@ -152,4 +152,3 @@ export function TableItemRenderer({
     </div>
   );
 }
-

@@ -1,6 +1,6 @@
 import { Dispatch } from "react";
-import { Tab, Action } from "../LayoutState";
-import { defaultTabs } from "../Data";
+import { Tab, Action } from "../layout-app/LayoutState";
+import { defaultTabs } from "../layout-app/Data";
 
 interface TabsBarProps {
   tabs: Tab[];
@@ -67,4 +67,3 @@ export function TabsBar({ tabs, activeTabIndex, dispatch }: TabsBarProps) {
     </div>
   );
 }
-

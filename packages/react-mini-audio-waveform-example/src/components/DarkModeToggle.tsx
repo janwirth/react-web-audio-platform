@@ -1,4 +1,4 @@
-import { useColorScheme, type ColorScheme } from "../../hooks/useColorScheme";
+import { useColorScheme, type ColorScheme } from "../hooks/useColorScheme";
 
 export function DarkModeToggle() {
   const { mode, isDark, setColorScheme } = useColorScheme();

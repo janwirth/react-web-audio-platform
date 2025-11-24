@@ -1,0 +1,39 @@
+// Dark mode initialization script - runs before React
+(function () {
+  // Check localStorage for theme mode preference
+  const stored = localStorage.getItem("themeMode");
+  let isDark = false;
+
+  if (stored === "dark") {
+    isDark = true;
+  } else if (stored === "light") {
+    isDark = false;
+  } else {
+    // Migrate from old "darkMode" key if it exists
+    const oldStored = localStorage.getItem("darkMode");
+    if (oldStored === "true") {
+      isDark = true;
+      // Migrate to new format
+      localStorage.setItem("themeMode", "dark");
+      localStorage.removeItem("darkMode");
+    } else if (oldStored === "false") {
+      isDark = false;
+      localStorage.setItem("themeMode", "light");
+      localStorage.removeItem("darkMode");
+    } else {
+      // auto mode or no preference: follow system preference
+      isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      // Set default to auto if no preference exists
+      if (!stored) {
+        localStorage.setItem("themeMode", "auto");
+      }
+    }
+  }
+
+  if (isDark) {
+    document.documentElement.classList.add("dark");
+  } else {
+    document.documentElement.classList.remove("dark");
+  }
+})();
+
