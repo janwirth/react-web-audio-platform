@@ -9,6 +9,7 @@ import React, {
 } from "react";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { atomFamily } from "jotai/utils";
+import { DualViewListItem } from "../DualViewList";
 
 interface PlayerContextValue {
   audioRef: React.RefObject<HTMLAudioElement | null>;
@@ -33,10 +34,7 @@ const playheadPositionAtomFamily = atomFamily((url: string) =>
 );
 
 // Queue state atoms
-export interface QueueItem {
-  title: string;
-  audioUrl: string;
-}
+export type QueueItem = DualViewListItem;
 
 export const queueAtom = atom<QueueItem[]>([]);
 export const currentQueueIndexAtom = atom<number>(-1);

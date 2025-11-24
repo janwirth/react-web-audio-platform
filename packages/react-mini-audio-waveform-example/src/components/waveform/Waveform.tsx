@@ -30,8 +30,65 @@ export interface WaveformRenderData {
 }
 
 /**
+ * Get cache key for localStorage based on audioUrl
+ */
+const getCacheKey = (audioUrl: string): string => {
+  return `waveform-data-${audioUrl}`;
+};
+
+/**
+ * Load cached render data from localStorage
+ */
+const loadCachedRenderData = (audioUrl: string): WaveformRenderData | null => {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return null;
+  }
+
+  try {
+    const cachedData = localStorage.getItem(getCacheKey(audioUrl));
+    if (!cachedData) {
+      return null;
+    }
+
+    const parsed = JSON.parse(cachedData);
+    // Only accept valid WaveformRenderData format, discard old formats
+    if (
+      parsed &&
+      Array.isArray(parsed.waveformData) &&
+      Array.isArray(parsed.spectralData)
+    ) {
+      return parsed;
+    }
+  } catch (e) {
+    // Invalid cache data, ignore
+    console.warn("Failed to parse cached waveform data:", e);
+  }
+
+  return null;
+};
+
+/**
+ * Save render data to localStorage
+ */
+const saveCachedRenderData = (
+  audioUrl: string,
+  data: WaveformRenderData
+): void => {
+  if (typeof window === "undefined" || !window.localStorage) {
+    return;
+  }
+
+  try {
+    localStorage.setItem(getCacheKey(audioUrl), JSON.stringify(data));
+  } catch (e) {
+    console.warn("Failed to save cached waveform data:", e);
+  }
+};
+
+/**
  * Load and compute both waveform and spectral data together
  * Spectral data depends on waveform data length, so we compute them together
+ * Uses localStorage caching by default if cachedRenderData is not provided
  */
 const useWaveformRenderData = (
   audioUrl: string,
@@ -58,14 +115,26 @@ const useWaveformRenderData = (
       return;
     }
 
-    // If we have cached render data with both waveform and spectral data, use it directly
-    // Do NOT load the audio buffer if we have cached data
+    // Determine which cached data to use:
+    // 1. Use provided cachedRenderData if available
+    // 2. Otherwise, try to load from localStorage
+    let effectiveCachedData: WaveformRenderData | null = null;
+
     if (
       cachedRenderData &&
       Array.isArray(cachedRenderData.waveformData) &&
       Array.isArray(cachedRenderData.spectralData)
     ) {
-      setData(cachedRenderData);
+      effectiveCachedData = cachedRenderData;
+    } else {
+      // Try loading from localStorage as default cache strategy
+      effectiveCachedData = loadCachedRenderData(audioUrl);
+    }
+
+    // If we have cached render data with both waveform and spectral data, use it directly
+    // Do NOT load the audio buffer if we have cached data
+    if (effectiveCachedData) {
+      setData(effectiveCachedData);
       setError(null);
       setLoading(false);
       return;
@@ -78,7 +147,12 @@ const useWaveformRenderData = (
         const waveformData = getWaveformData(buffer, 600);
         // Then compute spectral data (needs waveform length)
         const spectralData = getSpectralData(buffer, waveformData);
-        setData({ waveformData, spectralData });
+        const renderData = { waveformData, spectralData };
+
+        // Save to localStorage as default cache strategy
+        saveCachedRenderData(audioUrl, renderData);
+
+        setData(renderData);
         setError(null);
         setLoading(false);
       })

@@ -1,0 +1,50 @@
+import { Waveform, WaveformRenderData } from "./Waveform";
+import type { ColorPalette } from "./lib/canvas-renderer";
+import { useTrack, type QueueItem } from "@/components/player/Player";
+
+interface WaveformWithPlayheadProps {
+  url: string;
+  colorPalette?: Partial<ColorPalette> | ColorPalette;
+  cachedRenderData?: WaveformRenderData | null;
+  height?: number;
+  onGotData?: (data: WaveformRenderData) => void;
+  allItems?: QueueItem[];
+  onClickAtPercentage?: (percentage: number) => void;
+}
+
+export function WaveformWithPlayhead({
+  url,
+  colorPalette,
+  cachedRenderData,
+  height,
+  onGotData,
+  allItems,
+  onClickAtPercentage,
+}: WaveformWithPlayheadProps) {
+  const player = useTrack(url, allItems);
+
+  const handleWaveformClick = (percentage: number) => {
+    player.seekAndPlay(percentage);
+    onClickAtPercentage?.(percentage);
+  };
+
+  return (
+    <div className="flex-1 relative">
+      {player.playheadPosition !== null && (
+        <div
+          className="bg-black-500 w-[1%] min-w-0.5 h-full absolute bottom-[-10%] z-10 backdrop-invert transition-all"
+          style={{ left: `${player.playheadPosition * 99}%` }}
+        ></div>
+      )}
+      <Waveform
+        {...(onGotData && { onGotData })}
+        onClickAtPercentage={handleWaveformClick}
+        audioUrl={url}
+        colorPalette={colorPalette}
+        cachedRenderData={cachedRenderData}
+        height={height}
+      />
+    </div>
+  );
+}
+

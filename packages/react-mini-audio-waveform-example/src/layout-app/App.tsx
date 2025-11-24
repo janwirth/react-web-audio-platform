@@ -20,6 +20,12 @@ const initialState: State = {
   focusedArea: "center",
 };
 
+function FocusIndicator() {
+  return (
+    <div className="absolute top-2 left-2 w-1.5 h-1.5 bg-red-500 rounded-full z-10" />
+  );
+}
+
 function LayoutAppContent() {
   const [state, dispatch] = useReducer(Update, initialState);
   const [debugView, setDebugView] = useAtom(debugViewAtom);
@@ -76,12 +82,8 @@ function LayoutAppContent() {
         {/* Left Sidebar */}
         <div
           ref={leftSidebarRef}
-          onClick={() => dispatch({ type: "PanelToLeft" })}
-          className="w-64 p-4 overflow-y-auto cursor-pointer transition-opacity opacity-80 hover:opacity-100 relative"
+          className="w-64 p-4 overflow-y-auto transition-opacity opacity-80 hover:opacity-100 relative"
         >
-          {state.focusedArea === "left" && (
-            <div className="absolute top-2 left-2 w-1.5 h-1.5 bg-red-500 rounded-full" />
-          )}
           {/* Tabs Bar */}
           <TabsBar
             tabs={state.tabs}
@@ -94,34 +96,18 @@ function LayoutAppContent() {
         <div
           ref={centerRef}
           onClick={() => {
-            // If we're on left, go right once to get to center
             // If we're on right, go left once to get to center
-            if (state.focusedArea === "left") {
-              dispatch({ type: "PanelToRight" });
-            } else if (state.focusedArea === "right") {
+            if (state.focusedArea === "right") {
               dispatch({ type: "PanelToLeft" });
             }
           }}
           className="flex-1 flex flex-col overflow-hidden relative p-4"
         >
-          {state.focusedArea === "center" && (
-            <div className="absolute top-2 left-2 w-1.5 h-1.5 bg-red-500 rounded-full z-10" />
-          )}
+          {state.focusedArea === "center" && <FocusIndicator />}
           <CenterAreaContent
             onArrowUp={handleCenterArrowUp}
             onArrowDown={handleCenterArrowDown}
           />
-          {/* Example: Use TableVirtualizer with data from Data.tsx
-          <TableVirtualizer
-            ref={centerVirtualizerRef}
-            items={tableItems}
-            itemHeight={32}
-            overscan={5}
-            onFocus={() => dispatch({ type: "PanelToRight" })}
-            renderItem={(item, index) => (
-              <TableItemRenderer item={item} index={index} />
-            )}
-          /> */}
         </div>
 
         {/* Right Sidebar */}

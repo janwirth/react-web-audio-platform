@@ -2,9 +2,12 @@
  * Example file demonstrating Waveform component usage
  */
 import { useMemo } from "react";
-import { Waveform, WaveformRenderData } from "@/components/waveform";
+import {
+  WaveformRenderData,
+  WaveformWithPlayhead,
+} from "@/components/waveform";
 import type { ColorPalette } from "@/components/waveform";
-import { useTrack, type QueueItem } from "@/components/player/Player";
+import type { QueueItem } from "@/components/player/Player";
 
 interface AudioItemProps {
   title: string;
@@ -47,13 +50,6 @@ function WaveformItem({
   onGotData,
   allItems,
 }: WaveformItemProps) {
-  const player = useTrack(audioUrl, allItems);
-
-  const handleWaveformClick = (percentage: number) => {
-    // console.log("Waveform clicked at", percentage * 100, "%");
-    player.seekAndPlay(percentage);
-  };
-
   return (
     <div className="flex items-center gap-2 group">
       {label && (
@@ -61,23 +57,14 @@ function WaveformItem({
           {label}
         </div>
       )}
-      <div className="flex-1 relative">
-        {player.playheadPosition !== null && (
-          <div
-            className="bg-black-500 w-[1%] min-w-0.5 h-full absolute bottom-[-10%] z-10 backdrop-invert transition-all"
-            style={{ left: `${player.playheadPosition * 99}%` }}
-          ></div>
-        )}
-        {/* <div onClick={() => handleWaveformClick(0.5)}>Click me</div> */}
-        <Waveform
-          {...(onGotData && { onGotData })}
-          onClickAtPercentage={handleWaveformClick}
-          audioUrl={audioUrl}
-          colorPalette={colorPalette}
-          cachedRenderData={cachedRenderData}
-          height={waveformHeight}
-        />
-      </div>
+      <WaveformWithPlayhead
+        url={audioUrl}
+        colorPalette={colorPalette}
+        cachedRenderData={cachedRenderData}
+        height={waveformHeight}
+        onGotData={onGotData}
+        allItems={allItems}
+      />
     </div>
   );
 }

@@ -52,7 +52,7 @@ serve({
       // Resolve path relative to server directory
       // import.meta.dir points to the directory containing this file (src/)
       // so we need to go up one level to get to the server root
-      const serverDir = import.meta.dir 
+      const serverDir = import.meta.dir
         ? join(import.meta.dir, "..")
         : process.cwd();
       const audioPath = join(serverDir, "public", url.pathname);
@@ -70,14 +70,14 @@ serve({
         console.error("Error serving audio file:", error);
       }
       // Return 404 with CORS headers
-      return new Response("Audio file not found", { 
+      return new Response("Audio file not found", {
         status: 404,
         headers: corsHeaders,
       });
     }
 
     // Return 404 with CORS headers
-    return new Response("Not found", { 
+    return new Response("Not found", {
       status: 404,
       headers: corsHeaders,
     });
@@ -85,4 +85,3 @@ serve({
 });
 
 console.log("Server running on http://localhost:3001");
-

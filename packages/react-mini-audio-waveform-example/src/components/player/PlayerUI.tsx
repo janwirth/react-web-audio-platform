@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { usePlayerContext, useCurrentPlayback } from "./Player";
 import { MiniSpectro } from "../visualizer/MiniSpectro";
+import { useColorScheme } from "@/hooks";
 
 // Format seconds to MM:SS or HH:MM:SS
 const formatTime = (seconds: number): string => {
@@ -209,6 +210,7 @@ export function PlayerUI() {
   }, [audioRef]);
 
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const color = useColorScheme().isDark ? "white" : "black";
 
   return (
     <div className="flex items-center flex-wrap gap-2">

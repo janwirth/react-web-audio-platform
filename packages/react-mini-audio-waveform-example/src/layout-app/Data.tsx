@@ -1,7 +1,8 @@
 import { useState, useCallback, useRef } from "react";
 import { Tab } from "../LayoutState";
 import { usePanelEvent } from "../hooks/usePanelEvent";
-import { DualViewList, DualViewListHandle } from "../components/DualViewList";
+import { DualViewListHandle } from "../components/DualViewList";
+import { DualViewList } from "@/components/DualViewList";
 
 // Example tabs data
 export const defaultTabs: Tab[] = [
@@ -118,11 +119,7 @@ export function CenterAreaContent({
     }, [onArrowDown]),
   });
 
-  return (
-    <div className="h-full min-h-0 flex flex-col ">
-      <DualViewList ref={dualViewListRef} />
-    </div>
-  );
+  return <DualViewList ref={dualViewListRef} />;
 }
 
 // Example table item renderer component
@@ -144,6 +141,7 @@ export function TableItemRenderer({
       <span className="w-12 text-xs opacity-60">{item.id}</span>
       <span className="flex-1">{item.name}</span>
       <span className="text-xs opacity-60">{item.description}</span>
+      {/* <Waveform audioUrl={item.audioUrl} /> */}
     </div>
   );
 }

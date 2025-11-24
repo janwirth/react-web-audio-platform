@@ -72,6 +72,7 @@ export const MiniSpectro = ({
   const imagerRef = useRef<MiniSpectro | null>(null);
   const animationFrameRef = useRef<number | null>(null);
   const { isDark } = useColorScheme();
+  console.log("isDark", isDark);
 
   // Initialize stereo imager
   useEffect(() => {

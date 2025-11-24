@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect } from "react";
-import { DualViewList, DualViewListHandle } from "../components/DualViewList";
+import { DualViewListHandle } from "../components/DualViewList";
+import { DualViewList } from "@/components/DualViewList.1";
 
 function App() {
   const dualViewListRef = useRef<DualViewListHandle>(null);

@@ -1,5 +1,5 @@
 export type State = {
-  focusedArea: "left" | "center" | "right";
+  focusedArea: "center" | "right";
   tabs: Tab[];
   activeTabIndex: number;
 };
@@ -21,23 +21,19 @@ export const Update = (state: State, action: Action): State => {
   switch (action.type) {
     case "PanelToLeft":
       switch (state.focusedArea) {
-        case "left":
-          return { ...state, focusedArea: "right" };
         case "center":
-          return { ...state, focusedArea: "left" };
+          return { ...state, focusedArea: "right" }; // wrap: center -> right
         case "right":
-          return { ...state, focusedArea: "center" };
+          return { ...state, focusedArea: "center" }; // move left: right -> center
         default:
           return assertNever(state.focusedArea);
       }
     case "PanelToRight":
       switch (state.focusedArea) {
-        case "left":
-          return { ...state, focusedArea: "center" };
         case "center":
-          return { ...state, focusedArea: "right" };
+          return { ...state, focusedArea: "right" }; // move right: center -> right
         case "right":
-          return { ...state, focusedArea: "left" };
+          return { ...state, focusedArea: "center" }; // wrap: right -> center
         default:
           return assertNever(state.focusedArea);
       }

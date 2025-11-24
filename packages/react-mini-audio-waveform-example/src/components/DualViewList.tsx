@@ -5,11 +5,14 @@ import {
   useImperativeHandle,
   forwardRef,
   useCallback,
+  useMemo,
 } from "react";
 import { TableVirtualizer, TableVirtualizerHandle } from "./TableVirtualizer";
 import { CoverFlowRef } from "./CoverFlow";
 import { CoverFlowV2 } from "./coverflowV2";
-import { Waveform } from "./waveform";
+import { Waveform, WaveformWithPlayhead } from "./waveform";
+import { useAudioItems } from "@/hooks/useAudioItems";
+import { QueueItem } from "./player/Player";
 
 export interface DualViewListItem {
   id: string | number;
@@ -38,29 +41,18 @@ const OVERSCAN = 5;
 const COVERFLOW_HEIGHT = "200px";
 const INITIAL_CURSOR_INDEX = 0;
 
-// Generate items data - kept in file
-const generateItems = (count: number = 350): DualViewListItem[] => {
-  return Array.from({ length: count }, (_, i) => ({
-    id: i + 1,
-    title: `Item ${i + 1}`,
-    name: `Item ${i + 1}`,
-    description: `This is item number ${i + 1} in the virtualized list`,
-    coverUrl:
-      i % 2 === 0
-        ? "https://i.scdn.co/image/ab67616d00001e02d9194aa18fa4c9362b47464f"
-        : null,
-    audioUrl: `/audio/track${(i % 3) + 1}.mp3`,
-  }));
-};
-
-const items = generateItems(350);
-
 // Render item function - kept in file
-function renderItem(
-  item: DualViewListItem,
-  _index: number,
-  isSelected: boolean
-) {
+function RenderItemComponent({
+  item,
+  index,
+  allItems,
+  isSelected,
+}: {
+  item: DualViewListItem;
+  _index: number;
+  allItems: QueueItem[];
+  isSelected: boolean;
+}) {
   return (
     <div
       className="dark:border-gray-800 hover:opacity-60 transition-opacity font-mono text-sm relative flex items-center gap-2"
@@ -100,17 +92,20 @@ function renderItem(
             {item.description}
           </div>
         </div>
-        <Waveform
-          height={12}
-          colorPalette={{
-            background: "#1a1a1a",
-            lowFrequency: "#E74C3C",
-            midFrequency: "#3498DB",
-            highFrequency: "#2ECC71",
-            centerLine: "#ECF0F1",
-          }}
-          audioUrl={"http://localhost:3001/audio/track1.mp3"}
-        />
+        {item.audioUrl && (
+          // <WaveformWithPlayhead
+          //   height={12}
+          //   colorPalette={{
+          //     background: "#1a1a1a",
+          //     lowFrequency: "#E74C3C",
+          //     midFrequency: "#3498DB",
+          //     highFrequency: "#2ECC71",
+          //     centerLine: "#ECF0F1",
+          //   }}
+          //   url={item.audioUrl}
+          // />
+          <WaveformWithPlayhead allItems={allItems} url={item.audioUrl} />
+        )}
       </div>
     </div>
   );
@@ -118,11 +113,24 @@ function renderItem(
 
 export const DualViewList = forwardRef<DualViewListHandle, DualViewListProps>(
   function DualViewList({ className = "" }, ref) {
+    const { audioItems, baseUrl } = useAudioItems();
     const [showCoverflow, _setShowCoverflow] = useState(false);
     const [cursorIndex, setCursorIndex] = useState(INITIAL_CURSOR_INDEX);
     const tableVirtualizerRef = useRef<TableVirtualizerHandle>(null);
     const coverFlowRef = useRef<CoverFlowRef>(null);
     const prevShowCoverflowRef = useRef(showCoverflow);
+
+    // Transform audioItems to DualViewListItem format
+    const items = useMemo<DualViewListItem[]>(() => {
+      return audioItems.map((item, index) => ({
+        id: index + 1,
+        title: item.title,
+        name: item.title,
+        description: undefined,
+        coverUrl: null,
+        audioUrl: `${baseUrl}${item.audioUrl}`,
+      }));
+    }, [audioItems, baseUrl]);
 
     // Sync coverflow to cursor when it opens
     useEffect(() => {
@@ -199,23 +207,19 @@ export const DualViewList = forwardRef<DualViewListHandle, DualViewListProps>(
     );
 
     // Transform items for CoverFlow
-    const coverFlowItems = items.map((item) => ({
-      id: `${item.id}`,
-      title: item.title || item.name || `Item ${item.id}`,
-      imgSrc: item.coverUrl,
-    }));
+    const coverFlowItems = useMemo(
+      () =>
+        items.map((item) => ({
+          id: `${item.id}`,
+          title: item.title || item.name || `Item ${item.id}`,
+          imgSrc: item.coverUrl,
+        })),
+      [items]
+    );
 
     return (
       <div className={`grow flex flex-col gap-4 p-4 ${className}`}>
         {/* Toggle button */}
-        {/* <div className="flex items-center gap-2">
-          <button
-            onClick={handleToggleCoverflow}
-            className="font-mono text-sm border border-black dark:border-white px-3 py-1 hover:opacity-60 transition-opacity"
-          >
-            {showCoverflow ? "Hide" : "Show"} Coverflow
-          </button>
-        </div> */}
 
         {/* CoverFlow on top */}
         {showCoverflow && (
@@ -234,9 +238,14 @@ export const DualViewList = forwardRef<DualViewListHandle, DualViewListProps>(
           items={items}
           itemHeight={ITEM_HEIGHT}
           overscan={OVERSCAN}
-          renderItem={(item, index) =>
-            renderItem(item, index, index === cursorIndex)
-          }
+          renderItem={(item, index) => (
+            <RenderItemComponent
+              item={item}
+              index={index}
+              allItems={items}
+              isSelected={index === cursorIndex}
+            />
+          )}
         />
       </div>
     );
