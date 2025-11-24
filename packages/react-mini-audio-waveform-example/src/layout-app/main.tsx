@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import LayoutApp from "./LayoutApp";
+import LayoutApp from "./App";
 import "./index.css";
 
 const rootElement = document.getElementById("root");
@@ -13,4 +13,3 @@ createRoot(rootElement).render(
     <LayoutApp />
   </StrictMode>
 );
-
