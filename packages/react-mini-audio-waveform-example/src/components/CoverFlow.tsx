@@ -42,6 +42,7 @@ export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
     const clickStartRef = useRef({ x: 0, hasDragged: false, targetIndex: -1 });
     const velocityRef = useRef({ x: 0, lastX: 0, lastTime: 0 });
     const momentumAnimationRef = useRef<number | null>(null);
+    const hasInitializedRef = useRef(false);
 
     useEffect(() => {
       const scrollContainer = scrollContainerRef.current;
@@ -373,6 +374,36 @@ export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
       [items, centerItem]
     );
 
+    // Initial scroll to first item on mount
+    useEffect(() => {
+      if (hasInitializedRef.current || items.length === 0) return;
+
+      const scrollContainer = scrollContainerRef.current;
+      if (!scrollContainer) return;
+
+      // Wait for DOM to be ready, then scroll to first item instantly
+      const scrollToFirst = () => {
+        const firstItem = itemRefs.current[0];
+        if (firstItem && scrollContainer) {
+          const containerRect = scrollContainer.getBoundingClientRect();
+          const itemRect = firstItem.getBoundingClientRect();
+          const containerCenter = containerRect.left + containerRect.width / 2;
+          const itemCenter = itemRect.left + itemRect.width / 2;
+          const scrollOffset = itemCenter - containerCenter;
+
+          // Use instant scroll for initial positioning
+          scrollContainer.scrollLeft += scrollOffset;
+          onItemChange?.(items[0], 0);
+          hasInitializedRef.current = true;
+        }
+      };
+
+      // Use requestAnimationFrame to ensure DOM is ready
+      requestAnimationFrame(() => {
+        requestAnimationFrame(scrollToFirst);
+      });
+    }, [items, onItemChange]);
+
     // Keyboard handlers for Home/End keys
     useEffect(() => {
       const scrollContainer = scrollContainerRef.current;
@@ -487,7 +518,11 @@ export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
           <ul
             ref={scrollContainerRef}
             className="list-none flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory m-0 scrollbar-none cursor-grab"
-            style={{ scrollPadding: "0 50%" }}
+            style={{
+              scrollPadding: "0 50%",
+              paddingLeft: "calc(50vw - 100px)",
+              paddingRight: "calc(50vw - 100px)",
+            }}
           >
             {items.map((item, index) => (
               <li

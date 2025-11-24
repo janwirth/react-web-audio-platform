@@ -243,7 +243,7 @@ export const TableVirtualizer = forwardRef<
         ref={scrollableRef}
         tabIndex={0}
         className="flex-1 overflow-hidden outline-none focus:outline-none"
-        style={{ position: "relative", backgroundColor: "pink" }}
+        style={{ position: "relative" }}
       >
         <div
           style={{
