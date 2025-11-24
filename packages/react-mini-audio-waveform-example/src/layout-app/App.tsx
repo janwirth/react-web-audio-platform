@@ -77,40 +77,37 @@ function LayoutAppContent() {
         </div>
 
         {/* Center Area */}
-        <div className="flex-1 flex flex-col overflow-hidden relative">
+        <div
+          ref={centerRef}
+          onClick={() => {
+            // If we're on left, go right once to get to center
+            // If we're on right, go left once to get to center
+            if (state.focusedArea === "left") {
+              dispatch({ type: "PanelToRight" });
+            } else if (state.focusedArea === "right") {
+              dispatch({ type: "PanelToLeft" });
+            }
+          }}
+          className="flex-1 flex flex-col overflow-hidden relative p-4"
+        >
           {state.focusedArea === "center" && (
             <div className="absolute top-2 left-2 w-1.5 h-1.5 bg-red-500 rounded-full z-10" />
           )}
-          <div
-            ref={centerRef}
-            onClick={() => {
-              // If we're on left, go right once to get to center
-              // If we're on right, go left once to get to center
-              if (state.focusedArea === "left") {
-                dispatch({ type: "PanelToRight" });
-              } else if (state.focusedArea === "right") {
-                dispatch({ type: "PanelToLeft" });
-              }
-            }}
-            className="flex-1 p-4"
-          >
-            {/* <div className="text-sm font-semibold mb-4">Center Area</div> */}
-            <CenterAreaContent
-              onArrowUp={handleCenterArrowUp}
-              onArrowDown={handleCenterArrowDown}
-            />
-            {/* Example: Use TableVirtualizer with data from Data.tsx
-            <TableVirtualizer
-              ref={centerVirtualizerRef}
-              items={tableItems}
-              itemHeight={32}
-              overscan={5}
-              onFocus={() => dispatch({ type: "PanelToRight" })}
-              renderItem={(item, index) => (
-                <TableItemRenderer item={item} index={index} />
-              )}
-            /> */}
-          </div>
+          <CenterAreaContent
+            onArrowUp={handleCenterArrowUp}
+            onArrowDown={handleCenterArrowDown}
+          />
+          {/* Example: Use TableVirtualizer with data from Data.tsx
+          <TableVirtualizer
+            ref={centerVirtualizerRef}
+            items={tableItems}
+            itemHeight={32}
+            overscan={5}
+            onFocus={() => dispatch({ type: "PanelToRight" })}
+            renderItem={(item, index) => (
+              <TableItemRenderer item={item} index={index} />
+            )}
+          /> */}
         </div>
 
         {/* Right Sidebar */}
