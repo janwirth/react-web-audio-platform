@@ -60,8 +60,7 @@ function App() {
                 src={fixture.src}
                 targetWidth={200}
                 targetHeight={150}
-                iframeWidth={1920}
-                iframeHeight={1080}
+                zoom={0.2}
               />
             </button>
           ))}

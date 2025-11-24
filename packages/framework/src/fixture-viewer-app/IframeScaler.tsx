@@ -1,11 +1,10 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useMemo } from "react";
 
 interface IframeScalerProps {
   src: string;
   targetWidth: number;
   targetHeight: number;
-  iframeWidth: number;
-  iframeHeight: number;
+  zoom?: number;
   className?: string;
 }
 
@@ -13,24 +12,24 @@ export function IframeScaler({
   src,
   targetWidth,
   targetHeight,
-  iframeWidth,
-  iframeHeight,
+  zoom = 1,
   className = "",
 }: IframeScalerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [scale, setScale] = useState(1);
 
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    // Calculate scale to fit iframe dimensions into target rectangle
-    const scaleX = targetWidth / iframeWidth;
-    const scaleY = targetHeight / iframeHeight;
-    const finalScale = Math.min(scaleX, scaleY);
-
-    setScale(finalScale);
-  }, [targetWidth, targetHeight, iframeWidth, iframeHeight]);
+  // Calculate iframe dimensions from target dimensions and zoom
+  // iframe dimensions = target dimensions / zoom
+  // Then scale by zoom to fit back into target (maintaining proportions)
+  const { iframeWidth, iframeHeight, scale } = useMemo(() => {
+    const iframeW = targetWidth / zoom;
+    const iframeH = targetHeight / zoom;
+    return {
+      iframeWidth: iframeW,
+      iframeHeight: iframeH,
+      scale: zoom,
+    };
+  }, [targetWidth, targetHeight, zoom]);
 
   return (
     <div
