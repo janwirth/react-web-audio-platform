@@ -174,6 +174,26 @@ export function Waveform({
     handleResizeRef.current = handleResize;
   }, [handleResize]);
 
+  // Trigger initial render when canvas becomes available and has width
+  // This handles the case where renderData is ready but resize observer hasn't fired yet
+  useEffect(() => {
+    if (!renderData || debouncedWidth) return; // Skip if we already have debouncedWidth
+
+    const canvas = canvasRef.current;
+    const wrapper = wrapperRef.current;
+    if (!canvas || !wrapper) return;
+
+    // Use requestAnimationFrame to ensure DOM has been laid out
+    const rafId = requestAnimationFrame(() => {
+      const canvasWidth = canvas.clientWidth || wrapper.clientWidth;
+      if (canvasWidth > 0) {
+        handleResizeRef.current?.(canvasWidth, debouncedHeight);
+      }
+    });
+
+    return () => cancelAnimationFrame(rafId);
+  }, [renderData, debouncedHeight]); // Only depend on renderData and height, not debouncedWidth
+
   const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!onClickAtPercentage) return;
     const canvas = canvasRef.current;
@@ -187,7 +207,16 @@ export function Waveform({
   // Trigger re-render when debounced params change
   // Debounce the actual handleResize call to prevent excessive renders
   useEffect(() => {
-    if (!debouncedWidth || !renderData) return;
+    if (!renderData) return;
+
+    // Use debouncedWidth if available, otherwise fall back to canvas clientWidth
+    const effectiveWidth =
+      debouncedWidth ??
+      canvasRef.current?.clientWidth ??
+      wrapperRef.current?.clientWidth;
+
+    // If we still don't have a width, wait for it
+    if (!effectiveWidth) return;
 
     // Clear any existing timeout
     if (resizeTimeoutRef.current) {
@@ -196,7 +225,7 @@ export function Waveform({
 
     // Debounce the resize call
     resizeTimeoutRef.current = setTimeout(() => {
-      handleResizeRef.current?.(debouncedWidth, debouncedHeight);
+      handleResizeRef.current?.(effectiveWidth, debouncedHeight);
     }, debounceDelay);
 
     // Cleanup timeout on unmount or when dependencies change

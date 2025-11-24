@@ -14,6 +14,7 @@ import {
   CenterAreaContent,
 } from "./Data";
 import { DarkModeToggle } from "../components/DarkModeToggle";
+import { AudioContextProvider } from "../components/audio-context";
 
 const initialState: State = {
   tabs: defaultTabs,
@@ -132,9 +133,11 @@ function LayoutAppContent() {
 
 function LayoutApp() {
   return (
-    <PanelEventBusProvider>
-      <LayoutAppContent />
-    </PanelEventBusProvider>
+    <AudioContextProvider>
+      <PanelEventBusProvider>
+        <LayoutAppContent />
+      </PanelEventBusProvider>
+    </AudioContextProvider>
   );
 }
 
