@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Row } from "./Row";
 import { Column } from "./Column";
 import { IframeScaler } from "./IframeScaler";
+import { DarkModeToggle } from "@/components/DarkModeToggle";
 
 interface Fixture {
   id: string;
@@ -38,56 +39,57 @@ function App() {
   );
 
   return (
-    <Row className="h-full w-full" style={{ height: "100%" }}>
-      {/* Left sidebar with fixture list */}
-      <Column className="w-64 overflow-y-auto">
-        <div className="font-mono text-sm font-bold">Fixtures</div>
-        {fixtures.map((fixture) => (
-          <button
-            key={fixture.id}
-            onClick={() => setSelectedFixture(fixture)}
-            className={`
-              font-mono text-sm
-              hover:opacity-60 transition-opacity
-              text-left
-              ${
-                selectedFixture?.id === fixture.id
-                  ? "bg-black dark:bg-white"
-                  : ""
-              }
-            `}
-          >
-            <div
-              className={`font-bold ${
-                selectedFixture?.id === fixture.id
-                  ? "text-white dark:text-black"
-                  : ""
-              }`}
+    <Column className=" h-screen">
+      <Row className="h-full w-full" style={{ height: "100%" }}>
+        {/* Left sidebar with fixture list */}
+        <Column className="max-w-64 p-1 w-64 overflow-y-auto">
+          <div className="font-mono text-sm font-bold">Fixtures</div>
+          {fixtures.map((fixture) => (
+            <button
+              key={fixture.id}
+              onClick={() => setSelectedFixture(fixture)}
+              className="font-mono text-sm hover:opacity-60 transition-opacity text-left"
             >
-              {fixture.name}
-            </div>
-            <IframeScaler
-              src={fixture.src}
-              targetWidth={200}
-              targetHeight={150}
-              iframeWidth={1920}
-              iframeHeight={1080}
-            />
-          </button>
-        ))}
-      </Column>
+              <div className="font-bold">{fixture.name}</div>
+              <IframeScaler
+                src={fixture.src}
+                targetWidth={200}
+                targetHeight={150}
+                iframeWidth={1920}
+                iframeHeight={1080}
+              />
+            </button>
+          ))}
+        </Column>
 
-      {/* Right side with selected fixture */}
-      <Column className="flex-1" style={{ minWidth: 0, minHeight: 0 }}>
-        {selectedFixture ? (
-          <iframe
-            src={selectedFixture.src}
-            className="w-full h-full border-none"
-            style={{ display: "block" }}
-          />
-        ) : null}
-      </Column>
-    </Row>
+        {/* Right side with selected fixture */}
+        <Column className="flex-1" style={{ minWidth: 0, minHeight: 0 }}>
+          {selectedFixture ? (
+            <div
+              style={{
+                width: "100%",
+                height: "100%",
+                overflow: "hidden",
+                border: "1px solid blue",
+                borderRadius: "8px",
+              }}
+            >
+              <iframe
+                src={selectedFixture.src}
+                className="w-full h-full border-none"
+                style={{
+                  display: "block",
+                  border: "none",
+                  outline: "none",
+                  background: "white",
+                }}
+              />
+            </div>
+          ) : null}
+        </Column>
+      </Row>
+      <DarkModeToggle />
+    </Column>
   );
 }
 

@@ -31,7 +31,6 @@ export default function Story4() {
           className="flex-1"
           style={{
             minWidth: 0,
-            border: "1px solid #ccc",
             padding: "20px",
             overflow: "hidden",
           }}
@@ -50,8 +49,6 @@ export default function Story4() {
             style={{
               flex: 1,
               minHeight: 0,
-              border: "1px solid #999",
-              borderRadius: "4px",
               overflow: "hidden",
               display: "flex",
               flexDirection: "column",
@@ -65,7 +62,6 @@ export default function Story4() {
                 <div
                   style={{
                     padding: "12px 16px",
-                    borderBottom: "1px solid #eee",
                     display: "flex",
                     flexDirection: "column",
                     gap: "6px",
@@ -98,13 +94,6 @@ export default function Story4() {
                         fontSize: "11px",
                         fontFamily: "monospace",
                         padding: "2px 8px",
-                        borderRadius: "2px",
-                        background:
-                          item.status === "active"
-                            ? "#e3f2fd"
-                            : item.status === "pending"
-                            ? "#fff3e0"
-                            : "#e8f5e9",
                         color:
                           item.status === "active"
                             ? "#1976d2"

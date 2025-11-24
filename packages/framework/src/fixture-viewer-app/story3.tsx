@@ -43,7 +43,6 @@ export default function Story3() {
           className="flex-1"
           style={{
             minWidth: 0,
-            border: "1px solid #ccc",
             padding: "10px",
             overflow: "hidden",
           }}
@@ -53,9 +52,7 @@ export default function Story3() {
               flex: 1,
               minHeight: 0,
               padding: "8px",
-              border: "1px solid #999",
               overflow: "auto",
-              background: "#f9f9f9",
             }}
           >
             <div
@@ -70,7 +67,6 @@ export default function Story3() {
           className="flex-1"
           style={{
             minWidth: 0,
-            border: "1px solid #ccc",
             padding: "10px",
             overflow: "hidden",
           }}
@@ -80,9 +76,7 @@ export default function Story3() {
               flex: 1,
               minHeight: 0,
               padding: "8px",
-              border: "1px solid #999",
               overflow: "auto",
-              background: "#f9f9f9",
             }}
           >
             <div
@@ -106,7 +100,6 @@ export default function Story3() {
           className="flex-1"
           style={{
             minWidth: 0,
-            border: "1px solid #ccc",
             padding: "10px",
             overflow: "hidden",
           }}
@@ -116,9 +109,7 @@ export default function Story3() {
               flex: 1,
               minHeight: 0,
               padding: "8px",
-              border: "1px solid #999",
               overflow: "auto",
-              background: "#f9f9f9",
             }}
           >
             <div
@@ -137,7 +128,6 @@ export default function Story3() {
           className="flex-1"
           style={{
             minWidth: 0,
-            border: "1px solid #ccc",
             padding: "10px",
             overflow: "hidden",
           }}
@@ -147,9 +137,7 @@ export default function Story3() {
               flex: 1,
               minHeight: 0,
               padding: "8px",
-              border: "1px solid #999",
               overflow: "auto",
-              background: "#f9f9f9",
             }}
           >
             <div
@@ -173,7 +161,6 @@ export default function Story3() {
           className="flex-1"
           style={{
             minWidth: 0,
-            border: "1px solid #ccc",
             padding: "10px",
             overflow: "hidden",
           }}
@@ -183,9 +170,7 @@ export default function Story3() {
               flex: 1,
               minHeight: 0,
               padding: "8px",
-              border: "1px solid #999",
               overflow: "auto",
-              background: "#f9f9f9",
             }}
           >
             <div
@@ -200,7 +185,6 @@ export default function Story3() {
           className="flex-1"
           style={{
             minWidth: 0,
-            border: "1px solid #ccc",
             padding: "10px",
             overflow: "hidden",
           }}
@@ -210,9 +194,7 @@ export default function Story3() {
               flex: 1,
               minHeight: 0,
               padding: "8px",
-              border: "1px solid #999",
               overflow: "auto",
-              background: "#f9f9f9",
             }}
           >
             <div
@@ -240,7 +222,6 @@ export default function Story3() {
           className="flex-1"
           style={{
             minWidth: 0,
-            border: "1px solid #ccc",
             padding: "10px",
             overflow: "hidden",
           }}
@@ -250,9 +231,7 @@ export default function Story3() {
               flex: 1,
               minHeight: 0,
               padding: "8px",
-              border: "1px solid #999",
               overflow: "auto",
-              background: "#f9f9f9",
             }}
           >
             <div
@@ -269,7 +248,6 @@ export default function Story3() {
           className="flex-1"
           style={{
             minWidth: 0,
-            border: "1px solid #ccc",
             padding: "10px",
             overflow: "hidden",
           }}
@@ -279,9 +257,7 @@ export default function Story3() {
               flex: 1,
               minHeight: 0,
               padding: "8px",
-              border: "1px solid #999",
               overflow: "hidden",
-              background: "#f9f9f9",
               display: "flex",
               flexDirection: "column",
             }}
@@ -299,7 +275,6 @@ export default function Story3() {
                 <div
                   style={{
                     padding: "8px 12px",
-                    borderBottom: "1px solid #ddd",
                     display: "flex",
                     flexDirection: "column",
                     gap: "4px",
@@ -340,7 +315,6 @@ export default function Story3() {
           className="flex-1"
           style={{
             minWidth: 0,
-            border: "1px solid #ccc",
             padding: "10px",
             overflow: "hidden",
           }}
@@ -350,9 +324,7 @@ export default function Story3() {
               flex: 1,
               minHeight: 0,
               padding: "8px",
-              border: "1px solid #999",
               overflow: "auto",
-              background: "#f9f9f9",
             }}
           >
             <div

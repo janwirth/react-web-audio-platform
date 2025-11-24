@@ -41,6 +41,8 @@ export function IframeScaler({
         height: targetHeight > 0 ? `${targetHeight}px` : "100%",
         overflow: "hidden",
         position: "relative",
+        border: "1px solid blue",
+        borderRadius: "8px",
       }}
     >
       <div
@@ -61,6 +63,8 @@ export function IframeScaler({
             width: `${iframeWidth}px`,
             height: `${iframeHeight}px`,
             border: "none",
+            outline: "none",
+            background: "white",
             display: "block",
             pointerEvents: "none",
           }}

@@ -1,32 +1,21 @@
-import { ReactNode, CSSProperties } from "react";
+import { ReactNode, CSSProperties, forwardRef } from "react";
 
 interface RowProps {
   children: ReactNode;
-  maxWidth?: number | string;
-  maxHeight?: number | string;
   className?: string;
   style?: CSSProperties;
 }
 
-export function Row({ children, maxWidth, maxHeight, className = "", style }: RowProps) {
-  const customStyle: CSSProperties = {
-    display: "flex",
-    flexDirection: "row",
-    ...style,
-  };
-
-  if (maxWidth !== undefined) {
-    customStyle.maxWidth = typeof maxWidth === "number" ? `${maxWidth}px` : maxWidth;
-  }
-
-  if (maxHeight !== undefined) {
-    customStyle.maxHeight = typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight;
-  }
+export const Row = forwardRef<HTMLDivElement, RowProps>((props, ref) => {
+  const { children, className, style } = props;
 
   return (
-    <div className={`${className}`} style={customStyle}>
+    <div
+      ref={ref}
+      {...props}
+      className={`${className} grow basis-0 flex flex-row`}
+    >
       {children}
     </div>
   );
-}
-
+});

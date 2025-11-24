@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>React Mini Audio Waveform - Components, Layout & List View</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: monospace;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        color: white;
+        background: black;
+      }
+
+      .iframe-container {
+        flex: 1;
+        height: 100vh;
+        position: relative;
+      }
+
+      .iframe-container:hover {
+        opacity: 0.95;
+      }
+
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+      }
+
+      .divider {
+        width: 1px;
+        background: rgba(255, 255, 255, 0.1);
+        flex-shrink: 0;
+      }
+
+      .divider:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="iframe-container">
+      <iframe src="/components.html" title="Components"></iframe>
+    </div>
+    <div class="divider"></div>
+    <div class="iframe-container">
+      <iframe src="/layout-system.html" title="Layout System"></iframe>
+    </div>
+    <div class="divider"></div>
+    <div class="iframe-container">
+      <iframe src="/list-view.html" title="List View"></iframe>
+    </div>
+  </body>
+</html>
