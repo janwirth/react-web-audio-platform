@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 interface CoverFlowItem {
   id: string;
   title?: string;
-  imgSrc?: string;
+  imgSrc?: string | null;
 }
 
 interface CoverFlowProps {
@@ -14,7 +14,10 @@ interface CoverFlowProps {
 const defaultItems: CoverFlowItem[] = Array.from({ length: 100 }, (_, i) => ({
   id: `${i + 1}`,
   title: `Item ${i + 1}`,
-  imgSrc: "https://i.scdn.co/image/ab67616d00001e02d9194aa18fa4c9362b47464f",
+  imgSrc:
+    i % 2 === 0
+      ? "https://i.scdn.co/image/ab67616d00001e02d9194aa18fa4c9362b47464f"
+      : null,
 }));
 
 export function CoverFlow({
@@ -27,6 +30,8 @@ export function CoverFlow({
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, scrollLeft: 0 });
   const clickStartRef = useRef({ x: 0, hasDragged: false, targetIndex: -1 });
+  const velocityRef = useRef({ x: 0, lastX: 0, lastTime: 0 });
+  const momentumAnimationRef = useRef<number | null>(null);
 
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -178,12 +183,44 @@ export function CoverFlow({
     const scrollContainer = scrollContainerRef.current;
     if (!scrollContainer) return;
 
+    const cancelMomentum = () => {
+      if (momentumAnimationRef.current !== null) {
+        cancelAnimationFrame(momentumAnimationRef.current);
+        momentumAnimationRef.current = null;
+      }
+    };
+
+    const applyMomentum = (velocity: number) => {
+      cancelMomentum();
+
+      if (Math.abs(velocity) < 0.1) return;
+
+      const friction = 0.95; // Deceleration factor
+      let currentVelocity = velocity;
+
+      const animate = () => {
+        if (Math.abs(currentVelocity) < 0.1) {
+          momentumAnimationRef.current = null;
+          return;
+        }
+
+        scrollContainer.scrollLeft -= currentVelocity;
+        currentVelocity *= friction;
+        momentumAnimationRef.current = requestAnimationFrame(animate);
+      };
+
+      momentumAnimationRef.current = requestAnimationFrame(animate);
+    };
+
     const handleMouseDown = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
       const listItem = target.closest("li");
       const targetIndex = listItem
         ? itemRefs.current.indexOf(listItem as HTMLLIElement)
         : -1;
+
+      // Cancel any existing momentum
+      cancelMomentum();
 
       // Track click start for all interactions
       clickStartRef.current = { x: e.clientX, hasDragged: false, targetIndex };
@@ -193,6 +230,15 @@ export function CoverFlow({
         x: e.clientX,
         scrollLeft: scrollContainer.scrollLeft,
       };
+
+      // Reset velocity tracking
+      const now = performance.now();
+      velocityRef.current = {
+        x: 0,
+        lastX: e.clientX,
+        lastTime: now,
+      };
+
       scrollContainer.style.cursor = "grabbing";
       scrollContainer.style.userSelect = "none";
     };
@@ -200,11 +246,29 @@ export function CoverFlow({
     const handleMouseMove = (e: MouseEvent) => {
       if (!isDraggingRef.current) return;
 
+      // Cancel momentum during drag
+      cancelMomentum();
+
       const deltaX = e.clientX - dragStartRef.current.x;
       if (Math.abs(deltaX) > 5) {
         clickStartRef.current.hasDragged = true;
       }
       scrollContainer.scrollLeft = dragStartRef.current.scrollLeft - deltaX;
+
+      // Track velocity for momentum
+      const now = performance.now();
+      const timeDelta = now - velocityRef.current.lastTime;
+      if (timeDelta > 0) {
+        const distanceDelta = e.clientX - velocityRef.current.lastX;
+        velocityRef.current.x = distanceDelta / timeDelta;
+        velocityRef.current.lastX = e.clientX;
+        velocityRef.current.lastTime = now;
+      }
+    };
+
+    const handleScroll = () => {
+      // Cancel momentum on any scroll event
+      cancelMomentum();
     };
 
     const handleMouseUp = () => {
@@ -216,9 +280,15 @@ export function CoverFlow({
 
       // If we clicked on an item and didn't drag, center it
       if (!hasDragged && targetIndex >= 0) {
+        cancelMomentum();
         setTimeout(() => {
           centerItem(targetIndex);
         }, 0);
+      } else if (hasDragged) {
+        // Apply momentum based on velocity
+        // Convert velocity from px/ms to px/frame (assuming ~60fps = ~16.67ms per frame)
+        const velocityPerFrame = velocityRef.current.x * 16.67;
+        applyMomentum(velocityPerFrame);
       }
 
       clickStartRef.current = { x: 0, hasDragged: false, targetIndex: -1 };
@@ -227,11 +297,14 @@ export function CoverFlow({
     scrollContainer.addEventListener("mousedown", handleMouseDown);
     document.addEventListener("mousemove", handleMouseMove);
     document.addEventListener("mouseup", handleMouseUp);
+    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
 
     return () => {
       scrollContainer.removeEventListener("mousedown", handleMouseDown);
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
+      scrollContainer.removeEventListener("scroll", handleScroll);
+      cancelMomentum();
     };
   }, []);
 
@@ -256,46 +329,125 @@ export function CoverFlow({
   };
 
   return (
-    <div className="w-full overflow-y-hidden coverflow-wrapper">
-      <ul
-        ref={scrollContainerRef}
-        className="list-none flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory m-0 scrollbar-none cursor-grab"
-        style={{ scrollPadding: "0 50%" }}
-      >
-        {items.map((item, index) => (
-          <li
-            key={item.id}
-            ref={(el) => {
-              itemRefs.current[index] = el;
-            }}
-            className="flex-none w-[200px] snap-center flex flex-col items-center gap-2 relative"
-          >
-            <div
+    <>
+      <style>{`
+        .scrollbar-none {
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+
+        .scrollbar-none::-webkit-scrollbar {
+          display: none;
+        }
+
+        .coverflow-wrapper {
+          perspective: 1000px;
+          perspective-origin: center center;
+        }
+
+        .coverflow-cover {
+          transform-style: preserve-3d;
+          will-change: transform;
+          backface-visibility: hidden;
+          -webkit-box-reflect: below 8px linear-gradient(to bottom, rgba(0, 0, 0, 0.4), transparent 60%);
+        }
+
+        .coverflow-cover img {
+          -webkit-user-drag: none;
+          user-drag: none;
+        }
+
+        /* Fallback reflection for non-WebKit browsers using pseudo-element */
+        @supports not (-webkit-box-reflect: below) {
+          .coverflow-cover::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform: scaleY(-1);
+            opacity: 0.3;
+            background: inherit;
+            pointer-events: none;
+            mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), transparent 60%);
+            -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.6), transparent 60%);
+          }
+        }
+
+        /* Use CSS scroll-driven animations when supported */
+        @supports (animation-timeline: view()) {
+          .coverflow-cover {
+            animation: coverflow-rotate linear;
+            animation-timeline: view();
+            animation-range: entry 0% exit 100%;
+          }
+        }
+
+        @keyframes coverflow-rotate {
+          0% {
+            transform: perspective(1000px) rotateY(45deg) scale(0.8);
+            opacity: 0.6;
+          }
+          50% {
+            transform: perspective(1000px) rotateY(0deg) scale(1);
+            opacity: 1;
+          }
+          100% {
+            transform: perspective(1000px) rotateY(-45deg) scale(0.8);
+            opacity: 0.6;
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .coverflow-cover {
+            animation: none;
+            transform: rotateY(0deg) scale(1);
+            opacity: 1;
+          }
+        }
+      `}</style>
+      <div className="w-full overflow-y-hidden coverflow-wrapper">
+        <ul
+          ref={scrollContainerRef}
+          className="list-none flex overflow-x-auto overflow-y-hidden snap-x snap-mandatory m-0 scrollbar-none cursor-grab"
+          style={{ scrollPadding: "0 50%" }}
+        >
+          {items.map((item, index) => (
+            <li
+              key={item.id}
               ref={(el) => {
-                coverRefs.current[index] = el;
+                itemRefs.current[index] = el;
               }}
-              className="coverflow-cover w-[200px] aspect-square relative"
+              className="flex-none w-[200px] snap-center flex flex-col items-center gap-2 relative"
             >
-              <div className="w-full h-full bg-gray-400 dark:bg-gray-600 border border-gray-800 dark:border-gray-400 shadow-lg">
-                {item.imgSrc && (
-                  <img
-                    src={item.imgSrc}
-                    alt={item.title}
-                    className="w-full h-full object-cover select-none"
-                    draggable={false}
-                    onDragStart={(e) => e.preventDefault()}
-                  />
-                )}
+              <div
+                ref={(el) => {
+                  coverRefs.current[index] = el;
+                }}
+                className="coverflow-cover w-[200px] aspect-square relative"
+              >
+                <div className="w-full h-full bg-gray-400 dark:bg-gray-600 border border-gray-800 dark:border-gray-400 shadow-lg">
+                  {item.imgSrc && (
+                    <img
+                      src={item.imgSrc}
+                      alt={item.title}
+                      className="w-full h-full object-cover select-none"
+                      draggable={false}
+                      onDragStart={(e) => e.preventDefault()}
+                    />
+                  )}
+                </div>
               </div>
-            </div>
-            {item.title && (
-              <div className="font-mono text-xs text-gray-600 dark:text-gray-400 text-center">
-                {item.title}
-              </div>
-            )}
-          </li>
-        ))}
-      </ul>
-    </div>
+              {item.title && (
+                <div className="font-mono text-xs text-gray-600 dark:text-gray-400 text-center">
+                  {item.title}
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      </div>
+    </>
   );
 }

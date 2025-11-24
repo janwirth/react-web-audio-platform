@@ -6,9 +6,10 @@ import { type QueueItem, useTrack } from "../player/Player";
 import { PlayerUI } from "../player/PlayerUI";
 import { Visualizer } from "../visualizer/Visualizer";
 import { Queue, useQueue } from "../player/Queue";
-import { ColorPalette } from "@janwirth/react-mini-audio-waveform";
+import { ColorPalette } from "../waveform";
 import { decodeAudioFile } from "../audio-context";
 import { CoverFlow } from "../CoverFlow";
+import { HotkeysBar } from "../HotkeysBar";
 
 interface AudioItemData {
   title: string;
@@ -113,9 +114,10 @@ export function InnerApp() {
 
   return (
     <div className="flex flex-col gap-8 relative">
+      <HotkeysBar />
       {/* Header with dark mode and visualizer toggles */}
 
-      <div className="sticky bg-white dark:bg-black w-full top-0 left-0 z-10 flex gap-1 items-center transition-colors">
+      <div className="sticky bg-white dark:bg-black w-full top-[32px] left-0 z-10 flex gap-1 items-center transition-colors">
         {/* must take full width */}
         <div className="flex-1 grow">
           <PlayerUI />
