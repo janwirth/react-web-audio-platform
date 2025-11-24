@@ -1,80 +1,80 @@
-import { useRef } from "react";
-import {
-  TableVirtualizer,
-  TableVirtualizerHandle,
-} from "../components/TableVirtualizer";
-import { CoverFlow } from "../components/CoverFlow";
-import { CoverFlowV2 } from "../components/coverflowV2";
+import { useRef, useState } from "react";
+import { DualViewList, DualViewListHandle } from "../components/DualViewList";
 
-// Shared dummy data for both CoverFlow and TableVirtualizer
+// Shared dummy data
 const sharedItems = Array.from({ length: 350 }, (_, i) => ({
   id: i + 1,
   title: `Item ${i + 1}`,
   name: `Item ${i + 1}`,
   description: `This is item number ${i + 1} in the virtualized list`,
-  imgSrc:
+  coverUrl:
     i % 2 === 0
       ? "https://i.scdn.co/image/ab67616d00001e02d9194aa18fa4c9362b47464f"
       : null,
 }));
 
 function App() {
-  const tableVirtualizerRef = useRef<TableVirtualizerHandle>(null);
-
-  // Transform shared data for TableVirtualizer
-  const tableItems = sharedItems.map((item) => ({
-    id: item.id,
-    name: item.name,
-    description: item.description,
-    imgSrc: item.imgSrc,
-  }));
-
-  // Transform shared data for CoverFlow
-  const coverFlowItems = sharedItems.map((item) => ({
-    id: `${item.id}`,
-    title: item.title,
-    imgSrc: item.imgSrc,
-  }));
-
-  const handleFocussedItem = (_item: any, index: number) => {
-    tableVirtualizerRef.current?.scrollToIndex(index);
-  };
+  const dualViewListRef = useRef<DualViewListHandle>(null);
+  const [cursorIndex, setCursorIndex] = useState(0);
 
   return (
-    <div className="h-screen flex flex-col gap-4 p-4 ">
-      {/* CoverFlow on top */}
-      <CoverFlow items={coverFlowItems} onFocussedItem={handleFocussedItem} />
-      <CoverFlowV2 items={coverFlowItems} onFocussedItem={handleFocussedItem} />
+    <div className="h-screen flex flex-col">
+      {/* Control buttons */}
+      <div className="flex items-center gap-2 p-4 border-b border-black dark:border-white">
+        <button
+          onClick={() => dualViewListRef.current?.moveUp()}
+          className="font-mono text-sm border border-black dark:border-white px-3 py-1 hover:opacity-60 transition-opacity"
+        >
+          ↑ Up
+        </button>
+        <button
+          onClick={() => dualViewListRef.current?.moveDown()}
+          className="font-mono text-sm border border-black dark:border-white px-3 py-1 hover:opacity-60 transition-opacity"
+        >
+          ↓ Down
+        </button>
+        <div className="font-mono text-sm ml-4">Cursor: {cursorIndex}</div>
+      </div>
 
-      {/* TableVirtualizer below */}
+      {/* DualViewList */}
       <div className="flex-1 min-h-0">
-        <TableVirtualizer
-          ref={tableVirtualizerRef}
-          items={tableItems}
-          itemHeight={60}
-          overscan={5}
-          renderItem={(item) => (
+        <DualViewList
+          ref={dualViewListRef}
+          items={sharedItems}
+          onCursorChange={setCursorIndex}
+          renderItem={(item, _index, isSelected) => (
             <div
-              className="border-b border-gray-200 dark:border-gray-800 p-4 hover:opacity-60 transition-opacity font-mono text-sm"
+              className="dark:border-gray-800 hover:opacity-60 transition-opacity font-mono text-sm relative"
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: "1rem",
+                backgroundColor: isSelected
+                  ? "rgba(128, 128, 128, 0.15)"
+                  : "transparent",
               }}
             >
+              {isSelected && (
+                <div
+                  className="w-1.5 h-1.5 rounded-full absolute left-2"
+                  style={{
+                    backgroundColor: "currentColor",
+                  }}
+                />
+              )}
               <div className="text-gray-500 dark:text-gray-400 w-12">
                 #{item.id}
               </div>
-              {item.imgSrc && (
+              {item.coverUrl && (
                 <div className="w-12 h-12 shrink-0">
                   <img
-                    src={item.imgSrc}
+                    src={item.coverUrl}
                     alt={item.name}
                     className="w-full h-full object-cover"
                   />
                 </div>
               )}
-              {!item.imgSrc && (
+              {!item.coverUrl && (
                 <div className="w-12 h-12 shrink-0 bg-gray-400 dark:bg-gray-600 border border-gray-800 dark:border-gray-400" />
               )}
               <div className="flex-1">

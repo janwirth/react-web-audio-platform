@@ -23,6 +23,9 @@ export interface TableVirtualizerHandle {
   scrollToTop: () => void;
   scrollToBottom: () => void;
   scrollToIndex: (index: number) => void;
+  scrollToIndexIfNeeded: (index: number) => void;
+  getVisibleRange: () => { start: number; end: number };
+  getFullyVisibleRange: () => { start: number; end: number };
 }
 
 export const TableVirtualizer = forwardRef<
@@ -79,6 +82,47 @@ export const TableVirtualizer = forwardRef<
     [items.length]
   );
 
+  // Calculate which items should be visible (includes overscan)
+  const calculateVisibleRange = useCallback(() => {
+    const start = Math.max(0, firstVisibleIndex - overscan);
+    const end = Math.min(
+      items.length - 1,
+      firstVisibleIndex + visibleRowCount + overscan
+    );
+    return { start, end };
+  }, [firstVisibleIndex, visibleRowCount, overscan, items.length]);
+
+  // Calculate fully visible range (without overscan)
+  const calculateFullyVisibleRange = useCallback(() => {
+    const start = firstVisibleIndex;
+    const end = Math.min(
+      items.length - 1,
+      firstVisibleIndex + visibleRowCount - 1
+    );
+    return { start, end };
+  }, [firstVisibleIndex, visibleRowCount, items.length]);
+
+  // Scroll to index only if it's outside the fully visible range
+  const scrollToIndexIfNeeded = useCallback(
+    (index: number) => {
+      const clampedIndex = Math.max(0, Math.min(items.length - 1, index));
+      const fullyVisibleRange = calculateFullyVisibleRange();
+
+      // Only scroll if the index is outside the fully visible range
+      if (clampedIndex < fullyVisibleRange.start) {
+        // Index is above visible range, scroll so it becomes the first visible
+        setFirstVisibleIndex(clampedIndex);
+      } else if (clampedIndex > fullyVisibleRange.end) {
+        // Index is below visible range, scroll so it becomes visible
+        // Calculate how much to scroll: we want the index to be the last fully visible item
+        const newFirstIndex = Math.max(0, clampedIndex - visibleRowCount + 1);
+        setFirstVisibleIndex(newFirstIndex);
+      }
+      // If index is within range, do nothing
+    },
+    [items.length, calculateFullyVisibleRange, visibleRowCount]
+  );
+
   // Expose scroll methods via ref
   useImperativeHandle(
     ref,
@@ -91,19 +135,19 @@ export const TableVirtualizer = forwardRef<
         setFirstVisibleIndex(endIndex);
       },
       scrollToIndex,
+      scrollToIndexIfNeeded,
+      getVisibleRange: () => calculateVisibleRange(),
+      getFullyVisibleRange: () => calculateFullyVisibleRange(),
     }),
-    [scrollByRows, items.length, scrollToIndex]
+    [
+      scrollByRows,
+      items.length,
+      scrollToIndex,
+      scrollToIndexIfNeeded,
+      calculateVisibleRange,
+      calculateFullyVisibleRange,
+    ]
   );
-
-  // Calculate which items should be visible
-  const calculateVisibleRange = useCallback(() => {
-    const start = Math.max(0, firstVisibleIndex - overscan);
-    const end = Math.min(
-      items.length - 1,
-      firstVisibleIndex + visibleRowCount + overscan
-    );
-    return { start, end };
-  }, [firstVisibleIndex, visibleRowCount, overscan, items.length]);
 
   const [visibleRange, setVisibleRange] = useState(() =>
     calculateVisibleRange()
