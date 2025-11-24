@@ -4,6 +4,7 @@ import {
   TableVirtualizerHandle,
 } from "../components/TableVirtualizer";
 import { CoverFlow } from "../components/CoverFlow";
+import { CoverFlowV2 } from "../components/coverflowV2";
 
 // Shared dummy data for both CoverFlow and TableVirtualizer
 const sharedItems = Array.from({ length: 350 }, (_, i) => ({
@@ -43,6 +44,7 @@ function App() {
     <div className="h-screen flex flex-col gap-4 p-4 ">
       {/* CoverFlow on top */}
       <CoverFlow items={coverFlowItems} onFocussedItem={handleFocussedItem} />
+      <CoverFlowV2 items={coverFlowItems} onFocussedItem={handleFocussedItem} />
 
       {/* TableVirtualizer below */}
       <div className="flex-1 min-h-0">

@@ -381,14 +381,20 @@ export const CoverFlow = forwardRef<CoverFlowRef, CoverFlowProps>(
         const itemEl = itemRefs.current[index];
         if (!scrollContainer || !itemEl) return;
 
-        const containerRect = scrollContainer.getBoundingClientRect();
-        const itemRect = itemEl.getBoundingClientRect();
-        const containerCenter = containerRect.left + containerRect.width / 2;
-        const itemCenter = itemRect.left + itemRect.width / 2;
-        const scrollOffset = itemCenter - containerCenter;
+        // Get item position relative to scroll container content (includes padding)
+        const itemLeft = itemEl.offsetLeft;
+        const itemWidth = itemEl.offsetWidth;
+        const itemCenterInContent = itemLeft + itemWidth / 2;
 
-        scrollContainer.scrollBy({
-          left: scrollOffset,
+        // Calculate target scroll position: item center should align with viewport center
+        // Viewport center in content coordinates = scrollLeft + clientWidth/2
+        // So: itemCenterInContent = targetScrollLeft + clientWidth/2
+        // Therefore: targetScrollLeft = itemCenterInContent - clientWidth/2
+        const containerWidth = scrollContainer.clientWidth;
+        const targetScrollLeft = itemCenterInContent - containerWidth / 2;
+
+        scrollContainer.scrollTo({
+          left: Math.max(0, targetScrollLeft),
           behavior: "smooth",
         });
 
