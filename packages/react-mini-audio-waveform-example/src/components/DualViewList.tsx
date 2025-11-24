@@ -16,7 +16,7 @@ import { QueueItem } from "./player/Player";
 
 export interface DualViewListItem {
   id: string | number;
-  coverUrl?: string | null;
+  coverUrl: string | null;
   title?: string;
   name?: string;
   description?: string;
@@ -53,6 +53,7 @@ function RenderItemComponent({
   allItems: QueueItem[];
   isSelected: boolean;
 }) {
+  console.log("item", item);
   return (
     <div
       className="dark:border-gray-800 hover:opacity-60 transition-opacity font-mono text-sm relative flex items-center gap-2"
@@ -113,7 +114,7 @@ function RenderItemComponent({
 
 export const DualViewList = forwardRef<DualViewListHandle, DualViewListProps>(
   function DualViewList({ className = "" }, ref) {
-    const { audioItems, baseUrl } = useAudioItems();
+    const { audioItems } = useAudioItems();
     const [showCoverflow, _setShowCoverflow] = useState(false);
     const [cursorIndex, setCursorIndex] = useState(INITIAL_CURSOR_INDEX);
     const tableVirtualizerRef = useRef<TableVirtualizerHandle>(null);
@@ -127,10 +128,10 @@ export const DualViewList = forwardRef<DualViewListHandle, DualViewListProps>(
         title: item.title,
         name: item.title,
         description: undefined,
-        coverUrl: null,
-        audioUrl: `${baseUrl}${item.audioUrl}`,
+        coverUrl: item.coverUrl,
+        audioUrl: item.audioUrl, // Already full URL
       }));
-    }, [audioItems, baseUrl]);
+    }, [audioItems]);
 
     // Sync coverflow to cursor when it opens
     useEffect(() => {

@@ -10,7 +10,6 @@ interface MiniSpectro {
   splitterNode: ChannelSplitterNode;
   leftAnalyser: AnalyserNode;
   rightAnalyser: AnalyserNode;
-  gainNode: GainNode;
 }
 
 function initMiniSpectro(audioElement: HTMLAudioElement): MiniSpectro | null {
@@ -25,22 +24,20 @@ function initMiniSpectro(audioElement: HTMLAudioElement): MiniSpectro | null {
     const leftAnalyser = audioContext.createAnalyser();
     const rightAnalyser = audioContext.createAnalyser();
 
-    // Create a gain node to control output volume
-    const gainNode = audioContext.createGain();
-
     // Configure analyser nodes
     leftAnalyser.fftSize = 2048;
     rightAnalyser.fftSize = 2048;
     leftAnalyser.smoothingTimeConstant = 0.8;
     rightAnalyser.smoothingTimeConstant = 0.8;
 
-    // Connect: source -> splitter -> analysers -> gain -> destination
+    // Connect: source -> splitter -> analysers (for analysis only)
+    // Also connect source -> destination (for audio output)
+    // Note: Analyser nodes don't need to be connected to destination to work
     sourceNode.connect(splitterNode);
     splitterNode.connect(leftAnalyser, 0); // Left channel (channel 0)
     splitterNode.connect(rightAnalyser, 1); // Right channel (channel 1)
-    leftAnalyser.connect(gainNode);
-    rightAnalyser.connect(gainNode);
-    gainNode.connect(audioContext.destination);
+    // Connect source directly to destination for audio output (only one path)
+    sourceNode.connect(audioContext.destination);
 
     return {
       audioContext,
@@ -48,7 +45,6 @@ function initMiniSpectro(audioElement: HTMLAudioElement): MiniSpectro | null {
       splitterNode,
       leftAnalyser,
       rightAnalyser,
-      gainNode,
     };
   } catch (error) {
     // Handle case where MediaElementAudioSourceNode already exists
@@ -73,6 +69,12 @@ export const MiniSpectro = ({
   const animationFrameRef = useRef<number | null>(null);
   const { isDark } = useColorScheme();
   console.log("isDark", isDark);
+  const isDarkRef = useRef(isDark);
+
+  // Keep ref in sync with isDark value
+  useEffect(() => {
+    isDarkRef.current = isDark;
+  }, [isDark]);
 
   // Initialize stereo imager
   useEffect(() => {
@@ -158,8 +160,9 @@ export const MiniSpectro = ({
           // Map amplitude (0-1) to grayscale
           // Light mode: Higher amplitude = darker color (lower RGB values)
           // Dark mode: Higher amplitude = lighter color (higher RGB values)
+          // Use ref to get current isDark value dynamically
           let grayValue: number;
-          if (isDark) {
+          if (isDarkRef.current) {
             // Dark mode: range from 30 (dark) to 210 (light)
             grayValue = Math.floor(30 + combinedValue * 180);
           } else {
@@ -212,7 +215,7 @@ export const MiniSpectro = ({
         imagerRef.current = null;
       };
     }
-  }, [audioNode, size, growFromCenter, isDark]);
+  }, [audioNode, size, growFromCenter]);
 
   // Update canvas size when size prop changes
   useEffect(() => {
@@ -237,7 +240,10 @@ export const MiniSpectro = ({
   }, [size]);
 
   return (
-    <div className="inline-block">
+    <div
+      // className="inline-block"
+      style={{ width: size, height: size }}
+    >
       <canvas ref={canvasRef} />
     </div>
   );

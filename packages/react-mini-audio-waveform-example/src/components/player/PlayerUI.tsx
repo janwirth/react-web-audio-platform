@@ -210,12 +210,11 @@ export function PlayerUI() {
   }, [audioRef]);
 
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
-  const color = useColorScheme().isDark ? "white" : "black";
 
   return (
     <div className="flex items-center flex-wrap gap-2">
       {/* Play/Pause Button */}
-      <MiniSpectro size={16} />
+      {playback && <MiniSpectro size={16} />}
       {playback && (
         <button
           onClick={handlePlayPause}

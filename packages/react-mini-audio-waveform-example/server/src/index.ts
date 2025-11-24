@@ -7,17 +7,30 @@ const audioItems = [
     id: "1",
     title: "Sample Track 1",
     audioUrl: "/audio/track1.mp3",
+    coverUrl:
+      "https://www.vinylnerds.de/media/image/68/98/fc/4080_1_600x600.jpg",
   },
   {
     id: "2",
     title: "Sample Track 2",
     audioUrl: "/audio/track2.mp3",
+    coverUrl:
+      "https://www.vinylnerds.de/media/image/68/98/fc/4080_1_600x600.jpg",
   },
   {
     id: "3",
     title: "Sample Track 3",
     audioUrl: "/audio/track3.mp3",
+    coverUrl:
+      "https://www.vinylnerds.de/media/image/68/98/fc/4080_1_600x600.jpg",
   },
+  ...Array.from({ length: 100 }, (_, i) => ({
+    id: `${i + 4}`,
+    title: `Sample Track ${i + 4}`,
+    audioUrl: `/audio/track${i + 4}.mp3`,
+    coverUrl:
+      "https://www.vinylnerds.de/media/image/68/98/fc/4080_1_600x600.jpg",
+  })),
 ];
 
 // CORS headers helper

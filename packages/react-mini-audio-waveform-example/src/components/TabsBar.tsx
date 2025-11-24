@@ -44,7 +44,7 @@ export function TabsBar({ tabs, activeTabIndex, dispatch }: TabsBarProps) {
             }}
             className={`flex items-center justify-between gap-2 px-3 py-2 cursor-pointer transition-opacity ${
               index === activeTabIndex
-                ? "opacity-100 bg-black dark:bg-white text-white dark:text-black"
+                ? "opacity-100  text-black dark:text-white font-black"
                 : "opacity-60 hover:opacity-100"
             }`}
           >
