@@ -62,23 +62,12 @@ function WaveformItem({
         </div>
       )}
       <div className="flex-1 relative">
-        {
-          <>
-            {/* <div className="text-sm text-gray-500 mb-1">
-              Playhead position:{" "}
-              {player.playheadPosition !== null
-                ? (player.playheadPosition * 100).toFixed(2)
-                : "0.00"}
-              %
-            </div> */}
-            {player.playheadPosition !== null && (
-              <div
-                className="bg-black-500 w-[1%] min-w-0.5 h-full absolute bottom-[-10%] z-10 backdrop-invert transition-all"
-                style={{ left: `${player.playheadPosition * 99}%` }}
-              ></div>
-            )}
-          </>
-        }
+        {player.playheadPosition !== null && (
+          <div
+            className="bg-black-500 w-[1%] min-w-0.5 h-full absolute bottom-[-10%] z-10 backdrop-invert transition-all"
+            style={{ left: `${player.playheadPosition * 99}%` }}
+          ></div>
+        )}
         {/* <div onClick={() => handleWaveformClick(0.5)}>Click me</div> */}
         <Waveform
           {...(onGotData && { onGotData })}

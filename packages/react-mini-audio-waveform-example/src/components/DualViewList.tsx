@@ -118,7 +118,7 @@ function renderItem(
 
 export const DualViewList = forwardRef<DualViewListHandle, DualViewListProps>(
   function DualViewList({ className = "" }, ref) {
-    const [showCoverflow, setShowCoverflow] = useState(false);
+    const [showCoverflow, _setShowCoverflow] = useState(false);
     const [cursorIndex, setCursorIndex] = useState(INITIAL_CURSOR_INDEX);
     const tableVirtualizerRef = useRef<TableVirtualizerHandle>(null);
     const coverFlowRef = useRef<CoverFlowRef>(null);
@@ -142,10 +142,6 @@ export const DualViewList = forwardRef<DualViewListHandle, DualViewListProps>(
 
       prevShowCoverflowRef.current = showCoverflow;
     }, [showCoverflow, cursorIndex]);
-
-    const handleToggleCoverflow = () => {
-      setShowCoverflow((prev) => !prev);
-    };
 
     // Move cursor up
     const moveUp = useCallback(() => {

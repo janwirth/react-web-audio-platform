@@ -6,12 +6,7 @@ import { TabsBar } from "../components/TabsBar";
 import { State, Update } from "./LayoutState";
 import { useLayoutHotkeys } from "../hooks/useLayoutHotkeys";
 import { PanelEventBusProvider } from "../hooks/usePanelEvent";
-import {
-  defaultTabs,
-  leftSidebarItems,
-  LeftSidebarContent,
-  CenterAreaContent,
-} from "./Data";
+import { defaultTabs, CenterAreaContent } from "./Data";
 import { DarkModeToggle } from "../components/DarkModeToggle";
 import { AudioContextProvider } from "../components/audio-context";
 import { Queue } from "@/components/player/Queue";
@@ -93,10 +88,6 @@ function LayoutAppContent() {
             activeTabIndex={state.activeTabIndex}
             dispatch={dispatch}
           />
-          <div className="mt-6 pt-6 border-t border-gray-300 dark:border-gray-700">
-            <div className="text-sm font-semibold mb-4">Left Sidebar</div>
-            <LeftSidebarContent items={leftSidebarItems} />
-          </div>
         </div>
 
         {/* Center Area */}

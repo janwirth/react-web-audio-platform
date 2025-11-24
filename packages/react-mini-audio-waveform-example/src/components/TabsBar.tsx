@@ -35,7 +35,6 @@ export function TabsBar({ tabs, activeTabIndex, dispatch }: TabsBarProps) {
 
   return (
     <div className="flex flex-col">
-      <div className="text-sm font-semibold mb-4">Tabs</div>
       <div className="flex flex-col gap-1">
         {tabs.map((tab, index) => (
           <div
@@ -43,7 +42,7 @@ export function TabsBar({ tabs, activeTabIndex, dispatch }: TabsBarProps) {
             onClick={() => {
               dispatch({ type: "TabSetActive", index });
             }}
-            className={`flex items-center justify-between gap-2 px-3 py-2 cursor-pointer transition-opacity rounded ${
+            className={`flex items-center justify-between gap-2 px-3 py-2 cursor-pointer transition-opacity ${
               index === activeTabIndex
                 ? "opacity-100 bg-black dark:bg-white text-white dark:text-black"
                 : "opacity-60 hover:opacity-100"
@@ -61,7 +60,7 @@ export function TabsBar({ tabs, activeTabIndex, dispatch }: TabsBarProps) {
       </div>
       <button
         onClick={addTab}
-        className="mt-2 px-3 py-2 opacity-60 hover:opacity-100 transition-opacity text-sm text-left rounded hover:bg-gray-100 dark:hover:bg-gray-900"
+        className="mt-2 px-3 py-2 opacity-60 hover:opacity-100 transition-opacity text-sm text-left hover:bg-gray-100 dark:hover:bg-gray-900"
       >
         + Add Tab
       </button>
