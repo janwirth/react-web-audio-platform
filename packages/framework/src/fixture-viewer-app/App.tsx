@@ -20,6 +20,11 @@ const fixtures: Fixture[] = [
     name: "Story 2",
     src: "/fixture-viewer/story2.html",
   },
+  {
+    id: "story3",
+    name: "Rows/Columns Mosaic",
+    src: "/fixture-viewer/story3.html",
+  },
 ];
 
 function App() {
