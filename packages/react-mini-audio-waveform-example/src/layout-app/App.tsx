@@ -13,6 +13,7 @@ import { Queue } from "@/components/player/Queue";
 import { Player } from "@/components/player/Player";
 import { PlayerUI } from "@/components/player/PlayerUI";
 import { debugViewAtom } from "../atoms/debugView";
+import { Visualizer } from "@/components/visualizer/Visualizer";
 
 const initialState: State = {
   tabs: defaultTabs,
@@ -75,6 +76,7 @@ function LayoutAppContent() {
       </div>
       <div className="px-4 py-2">
         <PlayerUI />
+        <Visualizer />
       </div>
 
       {/* Main Layout */}
