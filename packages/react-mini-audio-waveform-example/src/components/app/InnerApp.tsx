@@ -143,6 +143,49 @@ export function InnerApp() {
         onReRender={handleReRender}
       />
 
+      {/* Table Virtualizer Example */}
+      <div className="flex flex-col gap-4">
+        <h2 className="text-sm font-mono text-gray-600 dark:text-gray-400">
+          Table Virtualizer Example
+        </h2>
+        <TableVirtualizer
+          items={Array.from({ length: 1000 }, (_, i) => ({
+            id: i,
+            name: `Item ${i + 1}`,
+            description: `This is item number ${i + 1} in the virtualized list`,
+          }))}
+          itemHeight={60}
+          containerHeight={400}
+          overscan={5}
+          renderItem={(item, _index, isSelected) => (
+            <div
+              className={`border-b border-gray-200 dark:border-gray-800 p-4 hover:opacity-60 transition-opacity font-mono text-sm ${
+                isSelected
+                  ? "bg-black dark:bg-white text-white dark:text-black"
+                  : ""
+              }`}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "1rem",
+              }}
+            >
+              <div className="text-gray-500 dark:text-gray-400 w-12">
+                #{item.id}
+              </div>
+              <div className="flex-1">
+                <div className="text-black dark:text-white font-medium">
+                  {item.name}
+                </div>
+                <div className="text-gray-500 dark:text-gray-400 text-xs">
+                  {item.description}
+                </div>
+              </div>
+            </div>
+          )}
+        />
+      </div>
+
       <div className="flex gap-8 items-start">
         <div className="flex-1">
           {audioItems.map((item, index) => (

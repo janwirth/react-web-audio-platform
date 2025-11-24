@@ -5,8 +5,9 @@ interface TableVirtualizerProps<T> {
   itemHeight: number;
   containerHeight: number;
   overscan?: number;
-  renderItem: (item: T, index: number) => React.ReactNode;
+  renderItem: (item: T, index: number, isSelected: boolean) => React.ReactNode;
   onScroll?: (scrollTop: number) => void;
+  onSelectionChange?: (selectedIndex: number | null) => void;
   className?: string;
 }
 
@@ -17,46 +18,104 @@ export function TableVirtualizer<T>({
   overscan = 3,
   renderItem,
   onScroll,
+  onSelectionChange,
   className = "",
 }: TableVirtualizerProps<T>) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const scrollTopRef = useRef(0);
-  const [scrollTop, setScrollTop] = useState(0);
-  const [visibleRange, setVisibleRange] = useState({ start: 0, end: 0 });
+  const [firstVisibleIndex, setFirstVisibleIndex] = useState(0);
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+  const [isFocused, setIsFocused] = useState(false);
+  const wheelAccumulatorRef = useRef(0);
 
+  // Calculate how many rows fit in the container
+  const visibleRowCount = Math.floor(containerHeight / itemHeight);
+  
+  // Calculate scrollTop from firstVisibleIndex (always aligned to row boundaries)
+  const scrollTop = firstVisibleIndex * itemHeight;
+  
   // Calculate which items should be visible
-  const calculateVisibleRange = useCallback(
-    (scrollTop: number) => {
-      const start = Math.max(0, Math.floor(scrollTop / itemHeight) - overscan);
-      const end = Math.min(
-        items.length - 1,
-        Math.ceil((scrollTop + containerHeight) / itemHeight) + overscan
-      );
-      return { start, end };
+  const calculateVisibleRange = useCallback(() => {
+    const start = Math.max(0, firstVisibleIndex - overscan);
+    const end = Math.min(
+      items.length - 1,
+      firstVisibleIndex + visibleRowCount + overscan
+    );
+    return { start, end };
+  }, [firstVisibleIndex, visibleRowCount, overscan, items.length]);
+
+  const [visibleRange, setVisibleRange] = useState(() => calculateVisibleRange());
+
+  // Scroll by rows (discrete, terminal-like)
+  const scrollByRows = useCallback(
+    (deltaRows: number) => {
+      setFirstVisibleIndex((prev) => {
+        const maxFirstIndex = Math.max(0, items.length - visibleRowCount);
+        const newIndex = Math.max(0, Math.min(maxFirstIndex, prev + deltaRows));
+        return newIndex;
+      });
     },
-    [itemHeight, containerHeight, overscan, items.length]
+    [items.length, visibleRowCount]
   );
 
-  // Handle wheel events to simulate scrolling without actual scroll
+  // Move selection
+  const moveSelection = useCallback(
+    (delta: number) => {
+      setSelectedIndex((prev) => {
+        if (prev === null) {
+          const newIndex = Math.max(0, Math.min(items.length - 1, firstVisibleIndex));
+          return newIndex;
+        }
+        const newIndex = Math.max(0, Math.min(items.length - 1, prev + delta));
+        
+        // Auto-scroll to keep selection visible
+        if (newIndex < firstVisibleIndex) {
+          setFirstVisibleIndex(newIndex);
+        } else if (newIndex >= firstVisibleIndex + visibleRowCount) {
+          setFirstVisibleIndex(Math.max(0, newIndex - visibleRowCount + 1));
+        }
+        
+        return newIndex;
+      });
+    },
+    [items.length, firstVisibleIndex, visibleRowCount]
+  );
+
+  // Toggle selection at current index
+  const toggleSelection = useCallback(() => {
+    if (selectedIndex !== null) {
+      setSelectedIndex(null);
+      onSelectionChange?.(null);
+    } else {
+      const indexToSelect = firstVisibleIndex;
+      setSelectedIndex(indexToSelect);
+      onSelectionChange?.(indexToSelect);
+    }
+  }, [selectedIndex, firstVisibleIndex, onSelectionChange]);
+
+  // Handle wheel events - accumulate until we have enough for a full row
+  // Only scroll when focused (focus-bounded scrolling)
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     const handleWheel = (e: WheelEvent) => {
+      // Only handle wheel when container is focused
+      if (!isFocused) return;
+      
       e.preventDefault();
       
-      const newScrollTop = Math.max(
-        0,
-        Math.min(
-          items.length * itemHeight - containerHeight,
-          scrollTopRef.current + e.deltaY
-        )
-      );
-      scrollTopRef.current = newScrollTop;
-      setScrollTop(newScrollTop);
-      const newRange = calculateVisibleRange(newScrollTop);
-      setVisibleRange(newRange);
-      onScroll?.(newScrollTop);
+      // Accumulate wheel delta
+      wheelAccumulatorRef.current += e.deltaY;
+      
+      // Calculate how many rows to scroll based on accumulated delta
+      const rowsToScroll = Math.floor(Math.abs(wheelAccumulatorRef.current) / itemHeight);
+      
+      if (rowsToScroll > 0) {
+        const direction = wheelAccumulatorRef.current > 0 ? 1 : -1;
+        scrollByRows(rowsToScroll * direction);
+        // Keep remainder for next scroll
+        wheelAccumulatorRef.current = wheelAccumulatorRef.current % itemHeight;
+      }
     };
 
     container.addEventListener("wheel", handleWheel, { passive: false });
@@ -64,11 +123,82 @@ export function TableVirtualizer<T>({
     return () => {
       container.removeEventListener("wheel", handleWheel);
     };
-  }, [calculateVisibleRange, onScroll, itemHeight, containerHeight, items.length]);
+  }, [scrollByRows, itemHeight, isFocused]);
 
-  // Handle touch events for mobile
+  // Keyboard navigation with vim hjkl and selection
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle if container is focused
+      if (document.activeElement !== container && !container.contains(document.activeElement)) {
+        return;
+      }
+
+      switch (e.key) {
+        case "ArrowDown":
+        case "j":
+          e.preventDefault();
+          if (selectedIndex !== null) {
+            moveSelection(1);
+          } else {
+            scrollByRows(1);
+          }
+          break;
+        case "ArrowUp":
+        case "k":
+          e.preventDefault();
+          if (selectedIndex !== null) {
+            moveSelection(-1);
+          } else {
+            scrollByRows(-1);
+          }
+          break;
+        case "PageDown":
+          e.preventDefault();
+          scrollByRows(visibleRowCount);
+          break;
+        case "PageUp":
+          e.preventDefault();
+          scrollByRows(-visibleRowCount);
+          break;
+        case "Home":
+          e.preventDefault();
+          setFirstVisibleIndex(0);
+          if (selectedIndex !== null) {
+            setSelectedIndex(0);
+            onSelectionChange?.(0);
+          }
+          break;
+        case "End":
+          e.preventDefault();
+          const endIndex = Math.max(0, items.length - visibleRowCount);
+          setFirstVisibleIndex(endIndex);
+          if (selectedIndex !== null) {
+            const lastItemIndex = items.length - 1;
+            setSelectedIndex(lastItemIndex);
+            onSelectionChange?.(lastItemIndex);
+          }
+          break;
+        case "x":
+        case "X":
+          e.preventDefault();
+          toggleSelection();
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [scrollByRows, visibleRowCount, items.length, selectedIndex, moveSelection, toggleSelection, onSelectionChange]);
+
+  // Handle touch events for mobile - also discrete row scrolling
   const touchStartYRef = useRef(0);
-  const touchStartScrollTopRef = useRef(0);
+  const touchStartIndexRef = useRef(0);
+  const touchRowsAccumulatorRef = useRef(0);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -76,24 +206,20 @@ export function TableVirtualizer<T>({
 
     const handleTouchStart = (e: TouchEvent) => {
       touchStartYRef.current = e.touches[0].clientY;
-      touchStartScrollTopRef.current = scrollTopRef.current;
+      touchStartIndexRef.current = firstVisibleIndex;
+      touchRowsAccumulatorRef.current = 0;
     };
 
     const handleTouchMove = (e: TouchEvent) => {
       e.preventDefault();
       const deltaY = touchStartYRef.current - e.touches[0].clientY;
-      const newScrollTop = Math.max(
-        0,
-        Math.min(
-          items.length * itemHeight - containerHeight,
-          touchStartScrollTopRef.current + deltaY
-        )
-      );
-      scrollTopRef.current = newScrollTop;
-      setScrollTop(newScrollTop);
-      const newRange = calculateVisibleRange(newScrollTop);
-      setVisibleRange(newRange);
-      onScroll?.(newScrollTop);
+      const rowsDelta = Math.floor(deltaY / itemHeight);
+      
+      if (rowsDelta !== touchRowsAccumulatorRef.current) {
+        const deltaRows = rowsDelta - touchRowsAccumulatorRef.current;
+        touchRowsAccumulatorRef.current = rowsDelta;
+        scrollByRows(deltaRows);
+      }
     };
 
     container.addEventListener("touchstart", handleTouchStart, { passive: true });
@@ -103,22 +229,40 @@ export function TableVirtualizer<T>({
       container.removeEventListener("touchstart", handleTouchStart);
       container.removeEventListener("touchmove", handleTouchMove);
     };
-  }, [calculateVisibleRange, onScroll, itemHeight, containerHeight, items.length]);
+  }, [scrollByRows, itemHeight, firstVisibleIndex]);
 
-  // Initial calculation
+  // Handle focus events
   useEffect(() => {
-    const newRange = calculateVisibleRange(0);
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleFocus = () => setIsFocused(true);
+    const handleBlur = () => setIsFocused(false);
+
+    container.addEventListener("focus", handleFocus);
+    container.addEventListener("blur", handleBlur);
+
+    return () => {
+      container.removeEventListener("focus", handleFocus);
+      container.removeEventListener("blur", handleBlur);
+    };
+  }, []);
+
+  // Update visible range when firstVisibleIndex changes
+  useEffect(() => {
+    const newRange = calculateVisibleRange();
     setVisibleRange(newRange);
-  }, [calculateVisibleRange]);
+    onScroll?.(scrollTop);
+  }, [firstVisibleIndex, calculateVisibleRange, scrollTop, onScroll]);
 
-  // Sync ref when state changes
+  // Notify selection changes
   useEffect(() => {
-    scrollTopRef.current = scrollTop;
-  }, [scrollTop]);
+    onSelectionChange?.(selectedIndex);
+  }, [selectedIndex, onSelectionChange]);
 
   // Recalculate when items change
   useEffect(() => {
-    const newRange = calculateVisibleRange(scrollTopRef.current);
+    const newRange = calculateVisibleRange();
     setVisibleRange(newRange);
   }, [items, calculateVisibleRange]);
 
@@ -136,7 +280,10 @@ export function TableVirtualizer<T>({
   return (
     <div
       ref={containerRef}
-      className={`overflow-hidden ${className}`}
+      tabIndex={0}
+      className={`overflow-hidden outline-none focus:outline-none ${
+        isFocused ? "ring-1 ring-gray-400 dark:ring-gray-600" : ""
+      } ${className}`}
       style={{ height: containerHeight, position: "relative" }}
     >
       <div
@@ -144,7 +291,6 @@ export function TableVirtualizer<T>({
           height: totalHeight,
           position: "relative",
           transform: `translateY(-${scrollTop}px)`,
-          willChange: "transform",
         }}
       >
         {visibleItems.map(({ item, index }) => (
@@ -157,7 +303,7 @@ export function TableVirtualizer<T>({
               width: "100%",
             }}
           >
-            {renderItem(item, index)}
+            {renderItem(item, index, selectedIndex === index)}
           </div>
         ))}
       </div>
