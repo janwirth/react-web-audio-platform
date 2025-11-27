@@ -4,13 +4,13 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"bun run dev:server\" \"bun run dev:client\"",
+    "dev": "concurrently \"bun run dev:server\" \"bun run dev:client\" \"bun run storybook\"",
     "dev:client": "vite",
     "dev:server": "cd server && bun run dev",
     "build": "tsc && vite build",
     "prebuild": "bun run --filter @janwirth/react-web-audio-context build && bun run --filter @janwirth/react-mini-audio-waveform build",
     "preview": "vite preview",
-    "storybook": "concurrently \"bun run dev:server\" \"storybook dev -p 6006\"",
+    "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
   "dependencies": {
