@@ -77,6 +77,7 @@ interface TableVirtualizerProps<T> {
   overscan?: number;
   renderItem: (item: T, index: number) => React.ReactNode;
   onScroll?: (scrollTop: number) => void;
+  onScrollFinish?: () => void;
   onFocus?: () => void;
   className?: string;
 }
@@ -241,6 +242,7 @@ export const TableVirtualizer = forwardRef<
     overscan = 3,
     renderItem,
     onScroll,
+    onScrollFinish,
     onFocus,
     className = "",
   },
@@ -321,6 +323,35 @@ export const TableVirtualizer = forwardRef<
       scrollable.removeEventListener("scroll", handleScroll);
     };
   }, [scrollableRef]);
+
+  // Track wheel events and fire onScrollFinish 150ms after the last wheel event
+  useEffect(() => {
+    const scrollable = scrollableRef.current;
+    if (!scrollable || !onScrollFinish) return;
+
+    let scrollFinishTimeout: NodeJS.Timeout | null = null;
+
+    const handleWheel = () => {
+      // Clear existing timeout
+      if (scrollFinishTimeout) {
+        clearTimeout(scrollFinishTimeout);
+      }
+
+      // Set new timeout to fire onScrollFinish 150ms after last wheel event
+      scrollFinishTimeout = setTimeout(() => {
+        onScrollFinish();
+        scrollFinishTimeout = null;
+      }, 150);
+    };
+
+    scrollable.addEventListener("wheel", handleWheel, { passive: true });
+    return () => {
+      scrollable.removeEventListener("wheel", handleWheel);
+      if (scrollFinishTimeout) {
+        clearTimeout(scrollFinishTimeout);
+      }
+    };
+  }, [scrollableRef, onScrollFinish]);
 
   // Handle vertical scrollbar
   const handleVerticalScroll = useCallback(
