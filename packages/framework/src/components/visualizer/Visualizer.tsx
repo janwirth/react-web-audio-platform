@@ -5,7 +5,7 @@ import { PresetSelector } from "./PresetSelector";
 import butterchurnPresets from "butterchurn-presets";
 
 const width = 800;
-const height = 400;
+const defaultHeight = 400;
 
 // Load and sort presets just like in butter.html
 function loadAndSortPresets() {
@@ -27,7 +27,13 @@ function loadAndSortPresets() {
   return { presets: sortedPresets, presetKeys };
 }
 
-export const Visualizer = () => {
+interface VisualizerProps {
+  height?: number;
+}
+
+export const Visualizer = ({
+  height = defaultHeight,
+}: VisualizerProps = {}) => {
   const audioNode = usePlayerContext().audioRef.current;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -35,6 +41,7 @@ export const Visualizer = () => {
   const animationFrameRef = useRef<number | null>(null);
   const resizeTimeoutRef = useRef<number | null>(null);
   const [canvasWidth, setCanvasWidth] = useState<number | null>(null);
+  const [canvasHeight, setCanvasHeight] = useState<number | null>(null);
 
   const { presets, presetKeys } = useMemo(() => loadAndSortPresets(), []);
 
@@ -99,8 +106,8 @@ export const Visualizer = () => {
 
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
-        const { width: newWidth } = entry.contentRect;
-        if (newWidth > 0) {
+        const { width: newWidth, height: newHeight } = entry.contentRect;
+        if (newWidth > 0 && newHeight > 0) {
           // Clear any existing timeout
           if (resizeTimeoutRef.current) {
             window.clearTimeout(resizeTimeoutRef.current);
@@ -108,10 +115,11 @@ export const Visualizer = () => {
           // Set new timeout to debounce the resize
           resizeTimeoutRef.current = window.setTimeout(() => {
             setCanvasWidth(newWidth);
+            setCanvasHeight(newHeight);
             // Update canvas dimensions immediately when debounced callback fires
             if (canvasRef.current) {
               canvasRef.current.width = newWidth;
-              canvasRef.current.height = height;
+              canvasRef.current.height = newHeight;
             }
           }, 300);
         }
@@ -127,7 +135,7 @@ export const Visualizer = () => {
         resizeTimeoutRef.current = null;
       }
     };
-  }, []);
+  }, [height]);
 
   // Initialize visualizer once with the randomly selected preset
   useEffect(() => {
@@ -137,15 +145,17 @@ export const Visualizer = () => {
       initialPreset &&
       canvasWidth !== null &&
       canvasWidth > 0 &&
+      canvasHeight !== null &&
+      canvasHeight > 0 &&
       !visualizerRef.current
     ) {
       // Set initial canvas size
       canvasRef.current.width = canvasWidth;
-      canvasRef.current.height = height;
+      canvasRef.current.height = canvasHeight;
 
       const result = initVisualizer(
         canvasWidth,
-        height,
+        canvasHeight,
         initialPreset,
         canvasRef.current,
         audioNode
@@ -185,30 +195,41 @@ export const Visualizer = () => {
         visualizerRef.current = null;
       };
     }
-  }, [audioNode, initialPreset, canvasWidth, initialPresetName]);
+  }, [audioNode, initialPreset, canvasWidth, canvasHeight, initialPresetName]);
 
-  // Update visualizer width when canvas width changes
+  // Update visualizer when canvas dimensions change
   useEffect(() => {
     if (
       visualizerRef.current?.visualizer &&
       canvasRef.current &&
       canvasWidth !== null &&
-      canvasWidth > 0
+      canvasWidth > 0 &&
+      canvasHeight !== null &&
+      canvasHeight > 0
     ) {
       canvasRef.current.width = canvasWidth;
-      canvasRef.current.height = height;
+      canvasRef.current.height = canvasHeight;
 
       // Resize the visualizer if it has a resize method
       if (typeof visualizerRef.current.visualizer.resize === "function") {
-        visualizerRef.current.visualizer.resize(canvasWidth, height);
+        visualizerRef.current.visualizer.resize(canvasWidth, canvasHeight);
       }
     }
-  }, [canvasWidth]);
+  }, [canvasWidth, canvasHeight]);
 
   return (
-    <div className="flex flex-col gap-1">
-      <div ref={wrapperRef} className="bg-gray-100">
-        <canvas ref={canvasRef} width={canvasWidth ?? width} height={height} />{" "}
+    <div className="flex flex-col gap-1 h-full" style={{ minHeight: 0 }}>
+      <div
+        ref={wrapperRef}
+        className="bg-gray-100 flex-1"
+        style={{ minHeight: 0, position: "relative" }}
+      >
+        <canvas
+          ref={canvasRef}
+          width={canvasWidth ?? width}
+          height={canvasHeight ?? height}
+          style={{ width: "100%", height: "100%", display: "block" }}
+        />
       </div>
 
       <PresetSelector
