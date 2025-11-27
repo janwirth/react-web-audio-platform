@@ -13,5 +13,8 @@
   },
   "devDependencies": {
     "typescript": "~5.0.0"
+  },
+  "dependencies": {
+    "@overengineering/fps-meter": "^0.2.4"
   }
 }

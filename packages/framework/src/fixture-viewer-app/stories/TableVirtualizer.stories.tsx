@@ -5,6 +5,7 @@ import { Column } from '@/components/Column';
 import { Row } from '@/components/Row';
 import { TableVirtualizer as TableVirtualizerComponent } from '@/components/TableVirtualizer';
 import { debugViewAtom } from '@/atoms/debugView';
+import { FPSMeter } from '@overengineering/fps-meter';
 
 // Example items for TableVirtualizer
 const exampleItems = Array.from({ length: 1000 }, (_, i) => ({
@@ -27,6 +28,7 @@ function TableVirtualizer() {
 
   return (
     <Column className="h-full w-full" style={{ height: '100vh' }}>
+      <FPSMeter />
       <Row className="flex-1" style={{ minHeight: 0 }}>
         <Column
           className="flex-1"
@@ -57,7 +59,7 @@ function TableVirtualizer() {
           >
             <TableVirtualizerComponent
               items={exampleItems}
-              itemHeight={80}
+              itemHeight={100}
               overscan={5}
               renderItem={(item, index) => (
                 <div
@@ -68,6 +70,7 @@ function TableVirtualizer() {
                     gap: '6px',
                     height: '100%',
                     justifyContent: 'center',
+                    boxSizing: 'border-box',
                   }}
                 >
                   <div
