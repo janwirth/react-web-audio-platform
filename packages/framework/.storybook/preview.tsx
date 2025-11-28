@@ -1,6 +1,7 @@
-import type { Preview } from '@storybook/react';
-import '../src/index.css';
-import { AudioContextProvider } from '../src/components/audio-context';
+import type { Preview } from "@storybook/react";
+import "../src/index.css";
+import { AudioContextProvider } from "../src/components/audio-context";
+import { DarkModeToggle } from "../src/components/DarkModeToggle";
 
 const preview: Preview = {
   parameters: {
@@ -10,11 +11,12 @@ const preview: Preview = {
         date: /Date$/i,
       },
     },
-    layout: 'fullscreen',
+    layout: "fullscreen",
   },
   decorators: [
     (Story) => (
       <AudioContextProvider>
+        <DarkModeToggle />
         <Story />
       </AudioContextProvider>
     ),
@@ -22,4 +24,3 @@ const preview: Preview = {
 };
 
 export default preview;
-

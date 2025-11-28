@@ -1,6 +1,6 @@
 import { useColorScheme, type ColorScheme } from "../hooks/useColorScheme";
 
-export function DarkModeToggle() {
+export function DarkModeToggle({ emojiOnly = true }: { emojiOnly?: boolean }) {
   const { mode, isDark, setColorScheme } = useColorScheme();
 
   const cycleMode = () => {
@@ -13,8 +13,17 @@ export function DarkModeToggle() {
       setColorScheme("auto");
     }
   };
+  const getEmojiLabel = () => {
+    if (mode === "auto") {
+      return isDark ? "🌓" : "🌓";
+    }
+    return mode === "dark" ? "🌙" : "☀️";
+  };
 
   const getLabel = () => {
+    if (emojiOnly) {
+      return getEmojiLabel();
+    }
     if (mode === "auto") {
       return isDark ? "🌓 Auto (Dark)" : "🌓 Auto (Light)";
     }
