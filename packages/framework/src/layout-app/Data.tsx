@@ -67,36 +67,6 @@ export function LeftSidebarContent({ items }: { items: string[] }) {
   );
 }
 
-export function RightSidebarContent({ items }: { items: string[] }) {
-  const [lastEvent, setLastEvent] = useState<string | null>(null);
-
-  usePanelEvent("right", {
-    arrowUp: useCallback(() => {
-      const event = "Arrow Up";
-      console.log(`[Right Panel] ${event}`);
-      setLastEvent(event);
-    }, []),
-    arrowDown: useCallback(() => {
-      const event = "Arrow Down";
-      console.log(`[Right Panel] ${event}`);
-      setLastEvent(event);
-    }, []),
-  });
-
-  return (
-    <div className="space-y-2 text-xs opacity-80">
-      {items.map((item, index) => (
-        <div key={index}>{item}</div>
-      ))}
-      {lastEvent && (
-        <div className="mt-4 pt-2 border-t border-gray-300 dark:border-gray-700 text-xs opacity-60">
-          Last event: {lastEvent}
-        </div>
-      )}
-    </div>
-  );
-}
-
 export function CenterAreaContent({
   onArrowUp,
   onArrowDown,

@@ -1,7 +1,6 @@
 import type { Preview } from "@storybook/react";
 import "../src/index.css";
 import { AudioContextProvider } from "../src/components/audio-context";
-import { DarkModeToggle } from "../src/components/DarkModeToggle";
 
 const preview: Preview = {
   parameters: {
@@ -16,7 +15,6 @@ const preview: Preview = {
   decorators: [
     (Story) => (
       <AudioContextProvider>
-        <DarkModeToggle />
         <Story />
       </AudioContextProvider>
     ),
