@@ -1,12 +1,17 @@
-import { useState, useMemo, useEffect, useCallback } from "react";
-import { Column } from "@/components/Column";
-import { Waveform } from "@/components/waveform";
-import { ColorPicker } from "@/components/inputs/ColorPicker";
-import { VerticalSlider } from "@/components/inputs/VerticalSlider";
-import { generateOklchPalette, type ColorPalette } from "@/components/waveform";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import type { Meta, StoryObj } from '@storybook/react';
+import { AudioContextProvider } from '@/components/audio-context';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { Column } from '@/components/Column';
+import { Waveform } from '@/components/waveform';
+import { ColorPicker } from '@/components/inputs/ColorPicker';
+import { VerticalSlider } from '@/components/inputs/VerticalSlider';
+import {
+  generateOklchPalette,
+  type ColorPalette,
+} from '@/components/waveform';
+import { useColorScheme } from '@/hooks/useColorScheme';
 
-const STORAGE_KEY_PREFIX = "waveform-controls-story-";
+const STORAGE_KEY_PREFIX = 'waveform-controls-story-';
 
 // Default values matching GlobalControls
 const DEFAULT_HUE = 240;
@@ -18,7 +23,7 @@ const DEFAULT_HEIGHT = 32;
 
 // Helper functions for localStorage
 const loadFromStorage = <T,>(key: string, defaultValue: T): T => {
-  if (typeof window === "undefined") return defaultValue;
+  if (typeof window === 'undefined') return defaultValue;
   try {
     const stored = localStorage.getItem(`${STORAGE_KEY_PREFIX}${key}`);
     if (stored !== null) {
@@ -31,7 +36,7 @@ const loadFromStorage = <T,>(key: string, defaultValue: T): T => {
 };
 
 const saveToStorage = <T,>(key: string, value: T): void => {
-  if (typeof window === "undefined") return;
+  if (typeof window === 'undefined') return;
   try {
     localStorage.setItem(`${STORAGE_KEY_PREFIX}${key}`, JSON.stringify(value));
   } catch (e) {
@@ -40,57 +45,57 @@ const saveToStorage = <T,>(key: string, value: T): void => {
 };
 
 const audioUrls = [
-  "http://localhost:3001/audio/track1.mp3",
-  "http://localhost:3001/audio/track2.mp3",
-  "http://localhost:3001/audio/track3.mp3",
+  'http://localhost:3001/audio/track1.mp3',
+  'http://localhost:3001/audio/track2.mp3',
+  'http://localhost:3001/audio/track3.mp3',
 ];
 
-export default function WaveformControlsStory() {
+function WaveformControlsStory() {
   const { isDark } = useColorScheme();
 
   // Load initial values from localStorage or use defaults
   const [hue, setHue] = useState(() =>
-    loadFromStorage("hue", DEFAULT_HUE)
+    loadFromStorage('hue', DEFAULT_HUE)
   );
   const [saturation, setSaturation] = useState(() =>
-    loadFromStorage("saturation", DEFAULT_SATURATION)
+    loadFromStorage('saturation', DEFAULT_SATURATION)
   );
   const [hueSpread, setHueSpread] = useState(() =>
-    loadFromStorage("hueSpread", DEFAULT_HUE_SPREAD)
+    loadFromStorage('hueSpread', DEFAULT_HUE_SPREAD)
   );
   const [contrast, setContrast] = useState(() =>
-    loadFromStorage("contrast", DEFAULT_CONTRAST)
+    loadFromStorage('contrast', DEFAULT_CONTRAST)
   );
   const [lightness, setLightness] = useState(() =>
-    loadFromStorage("lightness", DEFAULT_LIGHTNESS)
+    loadFromStorage('lightness', DEFAULT_LIGHTNESS)
   );
   const [waveformHeight, setWaveformHeight] = useState(() =>
-    loadFromStorage("height", DEFAULT_HEIGHT)
+    loadFromStorage('height', DEFAULT_HEIGHT)
   );
 
   // Save to localStorage whenever values change
   useEffect(() => {
-    saveToStorage("hue", hue);
+    saveToStorage('hue', hue);
   }, [hue]);
 
   useEffect(() => {
-    saveToStorage("saturation", saturation);
+    saveToStorage('saturation', saturation);
   }, [saturation]);
 
   useEffect(() => {
-    saveToStorage("hueSpread", hueSpread);
+    saveToStorage('hueSpread', hueSpread);
   }, [hueSpread]);
 
   useEffect(() => {
-    saveToStorage("contrast", contrast);
+    saveToStorage('contrast', contrast);
   }, [contrast]);
 
   useEffect(() => {
-    saveToStorage("lightness", lightness);
+    saveToStorage('lightness', lightness);
   }, [lightness]);
 
   useEffect(() => {
-    saveToStorage("height", waveformHeight);
+    saveToStorage('height', waveformHeight);
   }, [waveformHeight]);
 
   // Generate custom OKLCH palette
@@ -112,7 +117,7 @@ export default function WaveformControlsStory() {
   }, []);
 
   return (
-    <Column className="h-full w-full p-8 gap-6" style={{ height: "100%" }}>
+    <Column className="h-full w-full p-8 gap-6" style={{ height: '100vh' }}>
       <div className="mb-4">
         <h1 className="text-xl font-bold mb-2 text-black dark:text-white">
           Waveform Controls Story
@@ -172,4 +177,25 @@ export default function WaveformControlsStory() {
     </Column>
   );
 }
+
+const meta = {
+  title: "Stories/WaveformControlsStory",
+  component: WaveformControlsStory,
+  parameters: {
+    layout: "fullscreen",
+  },
+  tags: ["autodocs"],
+  decorators: [
+    (Story) => (
+      <AudioContextProvider>
+        <Story />
+      </AudioContextProvider>
+    ),
+  ],
+} satisfies Meta<typeof WaveformControlsStory>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+export const Default: Story = {};
 

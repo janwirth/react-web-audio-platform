@@ -1,10 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { useEffect } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useAtom } from 'jotai';
 import { Row } from '@/components/Row';
 import { Column } from '@/components/Column';
 import { TableVirtualizer } from '@/components/TableVirtualizer';
 import { debugViewAtom } from '@/atoms/debugView';
+import { Player } from '@/components/player/Player';
+import { PlayerUI } from '@/components/player/PlayerUI';
+import { Visualizer } from '@/components/visualizer/Visualizer';
+import { ColorPicker } from '@/components/inputs/ColorPicker';
+import { generateOklchPalette } from '@/components/waveform';
+import type { ColorPalette } from '@/components/waveform';
+import { useColorScheme } from '@/hooks/useColorScheme';
+import { AudioContextProvider } from '@/components/audio-context';
 
 // Example text content
 const shortText = 'This is a short content cell that fits nicely.';
@@ -26,7 +34,16 @@ const exampleItems = Array.from({ length: 100 }, (_, i) => ({
   description: `This is item number ${
     i + 1
   } in the virtualized list. It contains some example content to demonstrate the TableVirtualizer component with debug view enabled.`,
+  category: `Category ${Math.floor(i / 10) + 1}`,
+  status: i % 3 === 0 ? "active" : i % 3 === 1 ? "pending" : "completed",
 }));
+
+// Default values for OKLCH color picker
+const DEFAULT_HUE = 240;
+const DEFAULT_SATURATION = 0.2;
+const DEFAULT_HUE_SPREAD = 60;
+const DEFAULT_CONTRAST = 0;
+const DEFAULT_LIGHTNESS = 0.5;
 
 function RowsColumnsMosaic() {
   const [, setDebugView] = useAtom(debugViewAtom);
@@ -341,17 +358,454 @@ function RowsColumnsMosaic() {
   );
 }
 
+// Enhanced version with Player, Visualizer, and ColorPicker
+function RowsColumnsMosaicContent() {
+  const [, setDebugView] = useAtom(debugViewAtom);
+  const { isDark } = useColorScheme();
+
+  // Enable debug view for TableVirtualizer
+  useEffect(() => {
+    setDebugView(true);
+  }, [setDebugView]);
+
+  // OKLCH color picker state
+  const [hue, setHue] = useState(DEFAULT_HUE);
+  const [saturation, setSaturation] = useState(DEFAULT_SATURATION);
+  const [hueSpread, setHueSpread] = useState(DEFAULT_HUE_SPREAD);
+  const [contrast, setContrast] = useState(DEFAULT_CONTRAST);
+  const [lightness, setLightness] = useState(DEFAULT_LIGHTNESS);
+
+  // Generate custom OKLCH palette
+  const colorPalette = useMemo<ColorPalette>(
+    () =>
+      generateOklchPalette(
+        hue,
+        saturation,
+        hueSpread,
+        isDark ? -contrast : contrast,
+        lightness
+      ),
+    [hue, saturation, hueSpread, contrast, lightness, isDark]
+  );
+
+  // Extract text color from palette
+  const textColor = colorPalette.lowFrequency;
+
+  return (
+    <Column className="h-full w-full" style={{ height: "100%" }}>
+      {/* First Row */}
+      <Row className="flex-1" style={{ minHeight: 0 }}>
+        <Column
+          className="flex-1"
+          style={{
+            minWidth: 0,
+            padding: "10px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              minHeight: 0,
+              padding: "8px",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <div
+              style={{
+                fontWeight: "bold",
+                marginBottom: "8px",
+                color: textColor,
+              }}
+            >
+              Player Controls
+            </div>
+            <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
+              <PlayerUI />
+            </div>
+          </div>
+        </Column>
+        <Column
+          className="flex-1"
+          style={{
+            minWidth: 0,
+            padding: "10px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              minHeight: 0,
+              padding: "8px",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <div
+              style={{
+                fontWeight: "bold",
+                marginBottom: "8px",
+                color: textColor,
+              }}
+            >
+              Visualizer
+            </div>
+            <div style={{ flex: 1, minHeight: 0 }}>
+              <Visualizer />
+            </div>
+          </div>
+        </Column>
+        <Column
+          className="flex-1"
+          style={{
+            minWidth: 0,
+            padding: "10px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              minHeight: 0,
+              padding: "8px",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <div
+              style={{
+                fontWeight: "bold",
+                marginBottom: "8px",
+                color: textColor,
+              }}
+            >
+              OKLCH Color Picker
+            </div>
+            <div
+              style={{
+                flex: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <ColorPicker
+                hue={hue}
+                saturation={saturation}
+                hueSpread={hueSpread}
+                contrast={contrast}
+                lightness={lightness}
+                onHueChange={setHue}
+                onSaturationChange={setSaturation}
+                onHueSpreadChange={setHueSpread}
+                onContrastChange={setContrast}
+                onLightnessChange={setLightness}
+              />
+            </div>
+            <div
+              style={{
+                marginTop: "8px",
+                fontSize: "12px",
+                color: textColor,
+                opacity: 0.7,
+              }}
+            >
+              Color: {colorPalette.lowFrequency}
+            </div>
+          </div>
+        </Column>
+      </Row>
+
+      {/* Second Row */}
+      <Row className="flex-1" style={{ minHeight: 0 }}>
+        <Column
+          className="flex-1"
+          style={{
+            minWidth: 0,
+            padding: "10px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              minHeight: 0,
+              padding: "8px",
+              overflow: "auto",
+            }}
+          >
+            <div
+              style={{ fontWeight: "bold", marginBottom: "8px", color: "#333" }}
+            >
+              Cell 4 - Very Long
+            </div>
+            <div
+              style={{
+                whiteSpace: "pre-wrap",
+                wordWrap: "break-word",
+                fontSize: "12px",
+                lineHeight: "1.4",
+              }}
+            >
+              {longText2}
+            </div>
+          </div>
+        </Column>
+        <Column
+          className="flex-1"
+          style={{
+            minWidth: 0,
+            padding: "10px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              minHeight: 0,
+              padding: "8px",
+              overflow: "auto",
+            }}
+          >
+            <div
+              style={{ fontWeight: "bold", marginBottom: "8px", color: "#333" }}
+            >
+              Cell 5 - Short
+            </div>
+            <div style={{ fontSize: "14px" }}>Brief content here.</div>
+          </div>
+        </Column>
+        <Column
+          className="flex-1"
+          style={{
+            minWidth: 0,
+            padding: "10px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              minHeight: 0,
+              padding: "8px",
+              overflow: "auto",
+            }}
+          >
+            <div
+              style={{ fontWeight: "bold", marginBottom: "8px", color: "#333" }}
+            >
+              Cell 6 - Overflowing
+            </div>
+            <div
+              style={{
+                whiteSpace: "pre-wrap",
+                wordWrap: "break-word",
+                fontSize: "12px",
+                lineHeight: "1.4",
+              }}
+            >
+              {longText3}
+            </div>
+          </div>
+        </Column>
+      </Row>
+
+      {/* Third Row */}
+      <Row className="flex-1" style={{ minHeight: 0 }}>
+        <Column
+          className="flex-1"
+          style={{
+            minWidth: 0,
+            padding: "10px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              minHeight: 0,
+              padding: "8px",
+              overflow: "auto",
+            }}
+          >
+            <div
+              style={{ fontWeight: "bold", marginBottom: "8px", color: "#333" }}
+            >
+              Cell 7 - Normal
+            </div>
+            <div style={{ fontSize: "14px" }}>
+              Standard content that fits well.
+            </div>
+          </div>
+        </Column>
+        <Column
+          className="flex-1"
+          style={{
+            minWidth: 0,
+            padding: "10px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              minHeight: 0,
+              padding: "8px",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <div
+              style={{
+                fontWeight: "bold",
+                marginBottom: "8px",
+                color: textColor,
+              }}
+            >
+              Playlist (TableVirtualizer)
+            </div>
+            <TableVirtualizer
+              items={exampleItems}
+              itemHeight={80}
+              overscan={5}
+              renderItem={(item) => (
+                <div
+                  style={{
+                    padding: "12px 16px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                    height: "100%",
+                    justifyContent: "center",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: "14px",
+                        fontFamily: "monospace",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                        flex: 1,
+                        color: textColor,
+                      }}
+                    >
+                      {item.title}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: "11px",
+                        fontFamily: "monospace",
+                        padding: "2px 8px",
+                        color:
+                          item.status === "active"
+                            ? "#1976d2"
+                            : item.status === "pending"
+                            ? "#f57c00"
+                            : "#388e3c",
+                      }}
+                    >
+                      {item.status}
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#666",
+                      fontFamily: "monospace",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: "vertical",
+                      lineHeight: "1.4",
+                    }}
+                  >
+                    {item.description}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "11px",
+                      color: "#999",
+                      fontFamily: "monospace",
+                    }}
+                  >
+                    {item.category}
+                  </div>
+                </div>
+              )}
+              className="flex-1"
+            />
+          </div>
+        </Column>
+        <Column
+          className="flex-1"
+          style={{
+            minWidth: 0,
+            padding: "10px",
+            overflow: "hidden",
+          }}
+        >
+          <div
+            style={{
+              flex: 1,
+              minHeight: 0,
+              padding: "8px",
+              overflow: "auto",
+            }}
+          >
+            <div
+              style={{ fontWeight: "bold", marginBottom: "8px", color: "#333" }}
+            >
+              Cell 9 - Compact
+            </div>
+            <div style={{ fontSize: "14px" }}>Small content.</div>
+          </div>
+        </Column>
+      </Row>
+    </Column>
+  );
+}
+
+function RowsColumnsMosaicWithPlayer() {
+  return (
+    <AudioContextProvider>
+      <Player>
+        <RowsColumnsMosaicContent />
+      </Player>
+    </AudioContextProvider>
+  );
+}
+
 const meta = {
-  title: 'Stories/RowsColumnsMosaic',
+  title: "Stories/RowsColumnsMosaic",
   component: RowsColumnsMosaic,
   parameters: {
-    layout: 'fullscreen',
+    layout: "fullscreen",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof RowsColumnsMosaic>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+export const WithPlayer: Story = {
+  render: RowsColumnsMosaicWithPlayer,
+};
 

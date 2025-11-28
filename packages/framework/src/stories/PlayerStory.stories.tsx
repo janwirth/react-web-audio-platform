@@ -9,6 +9,7 @@ import type { QueueItem } from "@/components/player/Player";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { COLOR_PALETTES } from "@/components/waveform/lib/color-palettes";
 import { FPSMeter } from "@overengineering/fps-meter";
+import { AudioContextProvider } from "@/components/audio-context";
 
 const audioItems: QueueItem[] = [
   {
@@ -144,6 +145,13 @@ const meta = {
     layout: "fullscreen",
   },
   tags: ["autodocs"],
+  decorators: [
+    (Story) => (
+      <AudioContextProvider>
+        <Story />
+      </AudioContextProvider>
+    ),
+  ],
 } satisfies Meta<typeof PlayerStory>;
 
 export default meta;
