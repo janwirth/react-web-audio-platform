@@ -1,20 +1,19 @@
 import { useState, useCallback, useRef } from "react";
-import { Tab } from "../LayoutState";
 import { usePanelEvent } from "../hooks/usePanelEvent";
-import { DualViewListHandle } from "../components/DualViewList";
-import { DualViewList } from "@/components/DualViewList";
+import { TracklistHandle } from "../components/Tracklist";
+import { Tracklist } from "@/components/Tracklist";
 
 // Example tabs data
-export const defaultTabs: Tab[] = [
-  {
-    id: "tab-1",
-    title: "Tab 1",
-  },
-  {
-    id: "tab-2",
-    title: "Tab 2",
-  },
-];
+// export const defaultTabs: Tab[] = [
+//   {
+//     id: "tab-1",
+//     title: "Tab 1",
+//   },
+//   {
+//     id: "tab-2",
+//     title: "Tab 2",
+//   },
+// ];
 
 // Example sidebar items
 export const leftSidebarItems = ["Item 1", "Item 2", "Item 3"];
@@ -74,22 +73,22 @@ export function CenterAreaContent({
   onArrowUp?: () => void;
   onArrowDown?: () => void;
 }) {
-  const dualViewListRef = useRef<DualViewListHandle>(null);
+  const tracklistRef = useRef<TracklistHandle>(null);
 
   usePanelEvent("center", {
     arrowUp: useCallback(() => {
       console.log(`[Center Panel] Arrow Up`);
-      dualViewListRef.current?.moveUp();
+      tracklistRef.current?.moveUp();
       onArrowUp?.();
     }, [onArrowUp]),
     arrowDown: useCallback(() => {
       console.log(`[Center Panel] Arrow Down`);
-      dualViewListRef.current?.moveDown();
+      tracklistRef.current?.moveDown();
       onArrowDown?.();
     }, [onArrowDown]),
   });
 
-  return <DualViewList ref={dualViewListRef} />;
+  return <Tracklist ref={tracklistRef} />;
 }
 
 // Example table item renderer component

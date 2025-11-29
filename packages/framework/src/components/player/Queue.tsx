@@ -70,6 +70,9 @@ export function Queue() {
         return newIndex;
       });
     }, [queue.length]),
+    enter: useCallback(() => {
+      tableVirtualizerRef.current?.triggerEnter?.();
+    }, []),
   });
 
   const handleNext = () => {

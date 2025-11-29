@@ -104,7 +104,7 @@ export function GridLayout({
     }
   }, [focusableAreas, focusedArea]);
 
-  // Create hotkey bindings for arrow keys
+  // Create hotkey bindings for arrow keys and enter
   const arrowKeyBindings = useMemo(
     () => [
       createHotkeyBinding("arrowleft", navigateLeft, "Navigate left"),
@@ -124,6 +124,14 @@ export function GridLayout({
           eventBus.emit(focusedArea, "arrowDown");
         },
         "Scroll down / Move selection down"
+      ),
+      createHotkeyBinding(
+        "enter",
+        () => {
+          if (!eventBus || !focusedArea) return;
+          eventBus.emit(focusedArea, "enter");
+        },
+        "Activate / Select item"
       ),
     ],
     [navigateLeft, navigateRight, eventBus, focusedArea]

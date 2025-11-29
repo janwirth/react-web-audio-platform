@@ -17,6 +17,7 @@ import { TableVirtualizer } from "@/components/TableVirtualizer";
 import { HotkeyDebuggerSection } from "@/components/HotkeyDebuggerSection";
 import { CenterAreaContent } from "@/layout-app/Data";
 import { Queue } from "@/components/player/Queue";
+import { Tracklist } from "@/components/Tracklist";
 
 const meta = {
   title: "Stories/Hotkeys",
@@ -1153,7 +1154,7 @@ function VisualizerWithTableLayout() {
             visible: visibility.header,
           }}
           center={{
-            render: <CenterAreaContent />,
+            render: <Tracklist />,
             focusable: visibility.center,
             visible: visibility.center,
           }}

@@ -112,7 +112,6 @@ export function HotkeysBar({
 
   return (
     <>
-
       <div className="flex flex-wrap items-center gap-4 px-4 py-1">
         {hotkeyBindings.map((binding, index) => (
           <div
@@ -120,13 +119,14 @@ export function HotkeysBar({
             className="flex items-center gap-2 text-[10px] font-mono text-gray-600 dark:text-gray-400 whitespace-nowrap"
           >
             <kbd className="px-1.5 py-0.5 rounded text-gray-800 dark:text-gray-200">
-              {binding.displayKey || binding.code
-                .replace(/key/gi, "")
-                .replace(/arrowleft/gi, "←")
-                .replace(/arrowright/gi, "→")
-                .replace(/arrowup/gi, "↑")
-                .replace(/arrowdown/gi, "↓")
-                .replace(/space/gi, "Space")}
+              {binding.displayKey ||
+                binding.code
+                  .replace(/key/gi, "")
+                  .replace(/arrowleft/gi, "←")
+                  .replace(/arrowright/gi, "→")
+                  .replace(/arrowup/gi, "↑")
+                  .replace(/arrowdown/gi, "↓")
+                  .replace(/space/gi, "Space")}
             </kbd>
             <span>{binding.description}</span>
           </div>

@@ -5,11 +5,12 @@ type PanelId = string;
 interface PanelEventHandlers {
   arrowUp?: () => void;
   arrowDown?: () => void;
+  enter?: () => void;
 }
 
 interface PanelEventBus {
   subscribe: (panelId: PanelId, handlers: PanelEventHandlers) => () => void;
-  emit: (panelId: PanelId, event: "arrowUp" | "arrowDown") => void;
+  emit: (panelId: PanelId, event: "arrowUp" | "arrowDown" | "enter") => void;
 }
 
 // Create the event bus
@@ -24,7 +25,7 @@ class EventBus implements PanelEventBus {
     };
   }
 
-  emit(panelId: PanelId, event: "arrowUp" | "arrowDown"): void {
+  emit(panelId: PanelId, event: "arrowUp" | "arrowDown" | "enter"): void {
     const handlers = this.listeners.get(panelId);
     if (handlers) {
       const handler = handlers[event];
@@ -74,6 +75,7 @@ export function usePanelEvent(
     const wrappedHandlers: PanelEventHandlers = {
       arrowUp: () => handlersRef.current.arrowUp?.(),
       arrowDown: () => handlersRef.current.arrowDown?.(),
+      enter: () => handlersRef.current.enter?.(),
     };
 
     const unsubscribe = eventBus.subscribe(panelId, wrappedHandlers);

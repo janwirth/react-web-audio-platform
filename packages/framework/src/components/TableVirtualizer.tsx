@@ -1,4 +1,4 @@
-import { useImperativeHandle, forwardRef, useCallback, useEffect } from "react";
+import { useImperativeHandle, forwardRef, useCallback } from "react";
 import { useAtomValue } from "jotai";
 import { useVirtualList } from "../hooks/useVirtualList";
 import { debugViewAtom } from "../atoms/debugView";
@@ -28,6 +28,7 @@ export interface TableVirtualizerHandle {
   scrollToIndexIfNeeded: (index: number) => void;
   getVisibleRange: () => { start: number; end: number };
   getFullyVisibleRange: () => { start: number; end: number };
+  triggerEnter?: () => void;
 }
 
 export const TableVirtualizer = forwardRef<
@@ -88,25 +89,36 @@ export const TableVirtualizer = forwardRef<
   // Track scroll finish events
   useScrollFinish(scrollableRef, onScrollFinish);
 
-  // Handle Enter key press
-  useEffect(() => {
-    if (!onEnter) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Enter" && selectedIndex !== undefined && selectedIndex >= 0 && selectedIndex < items.length) {
-        e.preventDefault();
-        onEnter(items[selectedIndex], selectedIndex);
-      }
-    };
-
-    const scrollableElement = scrollableRef.current;
-    if (scrollableElement) {
-      scrollableElement.addEventListener("keydown", handleKeyDown);
-      return () => {
-        scrollableElement.removeEventListener("keydown", handleKeyDown);
-      };
-    }
-  }, [onEnter, selectedIndex, items]);
+  // Expose method to trigger enter action (called from event bus)
+  useImperativeHandle(
+    ref,
+    () => ({
+      scrollByRows,
+      scrollToTop,
+      scrollToBottom,
+      scrollToIndex,
+      scrollToIndexIfNeeded,
+      getVisibleRange,
+      getFullyVisibleRange,
+      triggerEnter: () => {
+        if (onEnter && selectedIndex !== undefined && selectedIndex >= 0 && selectedIndex < items.length) {
+          onEnter(items[selectedIndex], selectedIndex);
+        }
+      },
+    }),
+    [
+      scrollByRows,
+      scrollToTop,
+      scrollToBottom,
+      scrollToIndex,
+      scrollToIndexIfNeeded,
+      getVisibleRange,
+      getFullyVisibleRange,
+      onEnter,
+      selectedIndex,
+      items,
+    ]
+  );
 
   // Handle vertical scrollbar
   const handleVerticalScroll = useCallback(
@@ -127,28 +139,6 @@ export const TableVirtualizer = forwardRef<
     [scrollableRef]
   );
 
-  // Expose scroll methods via ref
-  useImperativeHandle(
-    ref,
-    () => ({
-      scrollByRows,
-      scrollToTop,
-      scrollToBottom,
-      scrollToIndex,
-      scrollToIndexIfNeeded,
-      getVisibleRange,
-      getFullyVisibleRange,
-    }),
-    [
-      scrollByRows,
-      scrollToTop,
-      scrollToBottom,
-      scrollToIndex,
-      scrollToIndexIfNeeded,
-      getVisibleRange,
-      getFullyVisibleRange,
-    ]
-  );
 
   return (
     <div
