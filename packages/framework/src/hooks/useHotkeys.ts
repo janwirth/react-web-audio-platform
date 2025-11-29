@@ -101,10 +101,13 @@ export function useHotkeys(
         if (handler) {
           matchedKey = comboKey;
         }
-      }
-
-      // Fall back to simple key matching
-      if (!handler) {
+        // If modifiers are pressed but no explicit modifier combo is registered, ignore the keypress
+        // This prevents accidental matches when modifiers are held down
+        if (!handler) {
+          return;
+        }
+      } else {
+        // Only match simple keys when no modifiers are pressed
         // For single-letter keys, try matching by logical key (e.key) first for layout-independence
         // This allows "j" to match regardless of physical key position
         if (logicalKey.length === 1 && /[a-z]/.test(logicalKey)) {

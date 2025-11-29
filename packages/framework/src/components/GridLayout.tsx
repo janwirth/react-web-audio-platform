@@ -15,7 +15,7 @@ function getHighlightablePanelClasses(
   includeBorderRight: boolean = true
 ): string {
   const baseClasses =
-    "p-4 text-black dark:text-white border-black dark:border-white";
+    "text-black dark:text-white border-black dark:border-white flex";
   const borderClass = includeBorderRight ? "border-r" : "";
   const focusClasses = isFocused
     ? "outline outline-2 outline-black dark:outline-white -outline-offset-3"
@@ -169,7 +169,7 @@ export function GridLayout({
       {/* Header - full width, auto height */}
       {hasHeader && headerConfig && (
         <div
-          className="border-b border-black dark:border-white p-4 flex items-center text-black dark:text-white"
+          className="border-b border-black dark:border-white flex items-center text-black dark:text-white"
           style={{
             gridColumn: "1 / -1",
             gridRow: "1",
@@ -182,7 +182,7 @@ export function GridLayout({
       {/* Stage - top half of main content, full width, above center/sidebars */}
       {hasStage && stageConfig && (
         <div
-          className="border-b border-black dark:border-white p-4 text-black dark:text-white"
+          className="border-b border-black dark:border-white text-black dark:text-white"
           style={{
             gridColumn: "1 / -1",
             gridRow: hasHeader
@@ -230,7 +230,7 @@ export function GridLayout({
 
       {/* Center - bottom half of main content if stage exists, otherwise full height */}
       {centerConfig?.visible && (
-        <div
+        <main
           className={getHighlightablePanelClasses(
             focusedArea === "center",
             true
@@ -261,7 +261,7 @@ export function GridLayout({
           }}
         >
           {centerConfig.render}
-        </div>
+        </main>
       )}
 
       {/* Right Sidebar - spans bottom half of main content if stage exists, otherwise full height */}
@@ -297,7 +297,7 @@ export function GridLayout({
       {/* Footer - full width, auto height */}
       {hasFooter && footerConfig && (
         <div
-          className="border-t border-black dark:border-white p-4 flex items-center text-black dark:text-white"
+          className="border-t border-black dark:border-white flex items-center text-black dark:text-white"
           style={{
             gridColumn: "1 / -1",
             gridRow: "-1",

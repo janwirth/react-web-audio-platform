@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { useState, useCallback, useEffect, useMemo, useRef } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
 import {
   useHotkeys,
   createHotkeyBindings,
@@ -8,7 +8,15 @@ import {
 import { GridLayout } from "@/components/GridLayout";
 import { PanelEventBusProvider } from "@/hooks/usePanelEvent";
 import { HotkeyHint } from "@/components/HotkeyHint";
-import { useAreaVisibility, type AreaType } from "@/hooks/useAreaVisibility";
+import { useAreaVisibility } from "@/hooks/useAreaVisibility";
+import { AreaVisibilityHotkeysFooter } from "@/components/AreaVisibilityHotkeysFooter";
+import { Player } from "@/components/player/Player";
+import { PlayerUI } from "@/components/player/PlayerUI";
+import { Visualizer } from "@/components/visualizer/Visualizer";
+import { TableVirtualizer } from "@/components/TableVirtualizer";
+import { HotkeyDebuggerSection } from "@/components/HotkeyDebuggerSection";
+import { CenterAreaContent } from "@/Data";
+import { Queue } from "@/components/player/Queue";
 
 const meta = {
   title: "Stories/Hotkeys",
@@ -1010,7 +1018,7 @@ export const InGridLayout: Story = {
 };
 
 function AreaVisibilityHotkeys() {
-  const { visibility, toggleArea, hotkeyBindings } = useAreaVisibility({
+  const visibilityHook = useAreaVisibility({
     header: true,
     footer: true,
     leftSidebar: true,
@@ -1018,36 +1026,7 @@ function AreaVisibilityHotkeys() {
     center: true,
     stage: true,
   });
-
-  const [activeHotkey, setActiveHotkey] = useState<string | null>(null);
-  const prevVisibilityRef = useRef(visibility);
-
-  // Track visibility changes to detect which hotkey was pressed
-  useEffect(() => {
-    const prev = prevVisibilityRef.current;
-    const areaToKey: Record<keyof typeof visibility, string> = {
-      header: "H",
-      footer: "F",
-      leftSidebar: "L",
-      rightSidebar: "R",
-      center: "C",
-      stage: "S",
-    };
-
-    // Find which area changed
-    for (const [area, key] of Object.entries(areaToKey)) {
-      if (
-        prev[area as keyof typeof prev] !==
-        visibility[area as keyof typeof visibility]
-      ) {
-        setActiveHotkey(key);
-        setTimeout(() => setActiveHotkey(null), 300);
-        break;
-      }
-    }
-
-    prevVisibilityRef.current = visibility;
-  }, [visibility]);
+  const { visibility } = visibilityHook;
 
   return (
     <PanelEventBusProvider>
@@ -1062,56 +1041,7 @@ function AreaVisibilityHotkeys() {
         }}
         footer={{
           render: (
-            <div className="w-full font-mono">
-              <div className="text-xs text-black dark:text-white mb-2">
-                Registered hotkeys:
-              </div>
-              <div className="flex flex-wrap gap-2 text-xs">
-                {hotkeyBindings.map((binding, index) => {
-                  const displayKey =
-                    binding.displayKey ||
-                    binding.code
-                      .replace(/key/gi, "")
-                      .replace(/arrowleft/gi, "←")
-                      .replace(/arrowright/gi, "→")
-                      .replace(/arrowup/gi, "↑")
-                      .replace(/arrowdown/gi, "↓")
-                      .replace(/space/gi, "Space");
-                  const isActive = activeHotkey === displayKey;
-                  const areaKey = displayKey.toLowerCase();
-                  const areaMap: Record<string, string> = {
-                    h: "header",
-                    f: "footer",
-                    l: "leftSidebar",
-                    r: "rightSidebar",
-                    c: "center",
-                    s: "stage",
-                  };
-                  const area = areaMap[areaKey] as AreaType | undefined;
-                  const isAreaVisible = area ? visibility[area] : false;
-
-                  return (
-                    <HotkeyHint
-                      key={index}
-                      active={isActive || isAreaVisible}
-                      onClick={() => {
-                        if (area) {
-                          toggleArea(area);
-                        }
-                      }}
-                    >
-                      <span className="flex items-center gap-1.5">
-                        <kbd>{displayKey}</kbd>
-                        <span>
-                          {binding.description}
-                          {area && ` (${isAreaVisible ? "ON" : "OFF"})`}
-                        </span>
-                      </span>
-                    </HotkeyHint>
-                  );
-                })}
-              </div>
-            </div>
+            <AreaVisibilityHotkeysFooter visibilityHook={visibilityHook} />
           ),
           visible: visibility.footer,
         }}
@@ -1185,6 +1115,84 @@ function AreaVisibilityHotkeys() {
 
 export const AreaVisibility: Story = {
   render: () => <AreaVisibilityHotkeys />,
+  parameters: {
+    layout: "fullscreen",
+  },
+};
+
+// Sample items for TableVirtualizer
+const sampleTableItems = Array.from({ length: 100 }, (_, i) => ({
+  id: i,
+  title: `Item ${i + 1}`,
+  description: `Description for item ${i + 1}`,
+  category: `Category ${Math.floor(i / 10) + 1}`,
+}));
+
+function VisualizerWithTableLayout() {
+  const visibilityHook = useAreaVisibility({
+    header: true,
+    footer: true,
+    leftSidebar: true,
+    rightSidebar: true,
+    center: false,
+    stage: true,
+  });
+  const { visibility } = visibilityHook;
+
+  return (
+    <PanelEventBusProvider>
+      <Player>
+        <GridLayout
+          header={{
+            render: (
+              <div className="p-4">
+                <PlayerUI />
+              </div>
+            ),
+            visible: visibility.header,
+          }}
+          center={{
+            render: <CenterAreaContent />,
+            focusable: visibility.center,
+            visible: visibility.center,
+          }}
+          footer={{
+            render: (
+              <AreaVisibilityHotkeysFooter visibilityHook={visibilityHook} />
+            ),
+            visible: visibility.footer,
+          }}
+          leftSidebar={{
+            render: (
+              <HotkeyDebuggerSection panelId="leftSidebar">
+                <div className="text-black dark:text-white font-mono p-4">
+                  <div className="text-sm font-bold mb-2">Left Sidebar</div>
+                  <div className="text-xs opacity-60">
+                    Press L to toggle visibility
+                  </div>
+                </div>
+              </HotkeyDebuggerSection>
+            ),
+            focusable: visibility.leftSidebar,
+            visible: visibility.leftSidebar,
+          }}
+          rightSidebar={{
+            render: <Queue></Queue>,
+            focusable: visibility.rightSidebar,
+            visible: visibility.rightSidebar,
+          }}
+          stage={{
+            render: <Visualizer height={400} />,
+            visible: visibility.stage,
+          }}
+        />
+      </Player>
+    </PanelEventBusProvider>
+  );
+}
+
+export const VisualizerWithTable: Story = {
+  render: () => <VisualizerWithTableLayout />,
   parameters: {
     layout: "fullscreen",
   },
