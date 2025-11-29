@@ -1,4 +1,4 @@
-import { useImperativeHandle, forwardRef, useCallback } from "react";
+import { useImperativeHandle, forwardRef, useCallback, useEffect } from "react";
 import { useAtomValue } from "jotai";
 import { useVirtualList } from "../hooks/useVirtualList";
 import { debugViewAtom } from "../atoms/debugView";
@@ -15,6 +15,8 @@ interface TableVirtualizerProps<T> {
   onScroll?: (scrollTop: number) => void;
   onScrollFinish?: () => void;
   onFocus?: () => void;
+  onEnter?: (item: T, index: number) => void;
+  selectedIndex?: number;
   className?: string;
 }
 
@@ -40,6 +42,8 @@ export const TableVirtualizer = forwardRef<
     onScroll,
     onScrollFinish,
     onFocus,
+    onEnter,
+    selectedIndex,
     className = "",
   },
   ref
@@ -83,6 +87,26 @@ export const TableVirtualizer = forwardRef<
 
   // Track scroll finish events
   useScrollFinish(scrollableRef, onScrollFinish);
+
+  // Handle Enter key press
+  useEffect(() => {
+    if (!onEnter) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Enter" && selectedIndex !== undefined && selectedIndex >= 0 && selectedIndex < items.length) {
+        e.preventDefault();
+        onEnter(items[selectedIndex], selectedIndex);
+      }
+    };
+
+    const scrollableElement = scrollableRef.current;
+    if (scrollableElement) {
+      scrollableElement.addEventListener("keydown", handleKeyDown);
+      return () => {
+        scrollableElement.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [onEnter, selectedIndex, items]);
 
   // Handle vertical scrollbar
   const handleVerticalScroll = useCallback(
