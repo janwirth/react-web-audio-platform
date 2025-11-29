@@ -440,6 +440,99 @@ export const useTrack = (
   };
 };
 
+export const usePlayer = () => {
+  const { audioRef } = usePlayerContext();
+  const [activeUrl, setActiveUrl] = useAtom(activeUrlAtom);
+  const setQueue = useSetAtom(queueAtom);
+  const setCurrentQueueIndex = useSetAtom(currentQueueIndexAtom);
+
+  const play = useCallback(
+    (item: QueueItem, allTracks?: QueueItem[]) => {
+      const audio = audioRef.current;
+      if (!audio || !item.audioUrl) return;
+
+      const normalizedUrl = normalizeUrl(item.audioUrl);
+
+      // If allTracks is provided, build a queue starting from this track
+      if (allTracks && allTracks.length > 0) {
+        // Find the index of the current track in allTracks
+        const currentIndex = allTracks.findIndex((track) => {
+          const normalizedTrackUrl = normalizeUrl(track.audioUrl);
+          return normalizedTrackUrl === normalizedUrl;
+        });
+
+        // If found, create a queue starting from this track
+        if (currentIndex >= 0) {
+          const queueItems = allTracks.slice(currentIndex);
+          setQueue(queueItems);
+          setCurrentQueueIndex(0);
+        }
+      }
+
+      // Set this URL as active
+      setActiveUrl(item.audioUrl);
+      const currentSrc = audio.src;
+      const normalizedCurrentSrc = normalizeUrl(currentSrc);
+
+      // Ensure the correct audio file is loaded
+      if (normalizedCurrentSrc !== normalizedUrl) {
+        audio.src = item.audioUrl;
+        audio.load();
+      }
+
+      // Function to perform the actual play from start
+      const performPlay = () => {
+        // Reset to start (position 0)
+        audio.currentTime = 0;
+        audio.play().catch(console.error);
+      };
+
+      // Check if metadata is already loaded
+      if (audio.duration && !isNaN(audio.duration)) {
+        // Metadata is available, perform play immediately
+        if (audio.readyState >= 2) {
+          performPlay();
+        } else {
+          const onCanplay = () => {
+            audio.removeEventListener("canplay", onCanplay);
+            audio.removeEventListener("canplaythrough", onCanplay);
+            performPlay();
+          };
+          audio.addEventListener("canplay", onCanplay, { once: true });
+          audio.addEventListener("canplaythrough", onCanplay, { once: true });
+        }
+      } else {
+        // Wait for metadata to be loaded first
+        const onLoadedmetadata = () => {
+          audio.removeEventListener("loadedmetadata", onLoadedmetadata);
+
+          // After metadata is loaded, wait for audio to be ready
+          const onCanplaythrough = () => {
+            audio.removeEventListener("canplaythrough", onCanplaythrough);
+            performPlay();
+          };
+
+          if (audio.readyState >= 3) {
+            performPlay();
+          } else {
+            audio.addEventListener("canplaythrough", onCanplaythrough, {
+              once: true,
+            });
+          }
+        };
+        audio.addEventListener("loadedmetadata", onLoadedmetadata, {
+          once: true,
+        });
+      }
+    },
+    [audioRef, setActiveUrl, setQueue, setCurrentQueueIndex]
+  );
+
+  return {
+    play,
+  };
+};
+
 const waitForBuffered = (
   audio: HTMLAudioElement,
   targetTime: number

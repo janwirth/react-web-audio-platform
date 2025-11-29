@@ -9,7 +9,7 @@ import {
 import { TableVirtualizer, TableVirtualizerHandle } from "./TableVirtualizer";
 import { WaveformWithPlayhead } from "./waveform";
 import { useAudioItems } from "@/hooks/useAudioItems";
-import { QueueItem, usePlayerContext } from "./player/Player";
+import { QueueItem, usePlayer } from "./player/Player";
 import { usePanelEvent } from "@/hooks/usePanelEvent";
 
 export interface TracklistItem {
@@ -41,7 +41,7 @@ const INITIAL_CURSOR_INDEX = 0;
 // Render item function
 function TrackItemRenderer({
   item,
-  index,
+  index: _index,
   allItems,
   isSelected,
 }: {
@@ -143,6 +143,9 @@ export const Tracklist = forwardRef<TracklistHandle, TracklistProps>(
       arrowDown: useCallback(() => {
         moveDown();
       }, [moveDown]),
+      enter: useCallback(() => {
+        tableVirtualizerRef.current?.triggerEnter?.();
+      }, []),
     });
 
     // Expose imperative handle
@@ -162,17 +165,18 @@ export const Tracklist = forwardRef<TracklistHandle, TracklistProps>(
       }),
       [moveUp, moveDown, cursorIndex, items.length]
     );
-    const player = usePlayerContext();
+    const { play } = usePlayer();
+
+    const handleEnter = useCallback(
+      (item: TracklistItem, _index: number) => {
+        play(item, items);
+      },
+      [play, items]
+    );
 
     return (
       <div className={`grow flex flex-col ${className}`}>
         <TableVirtualizer
-          onEnter={useCallback((item) => {
-            console.log("onEnter", item);
-            if (!player.audioRef.current) return;
-            player.audioRef.current.src = item.audioUrl;
-            player.audioRef.current?.play();
-          }, [])}
           ref={tableVirtualizerRef}
           items={items}
           itemHeight={ITEM_HEIGHT}
@@ -185,6 +189,8 @@ export const Tracklist = forwardRef<TracklistHandle, TracklistProps>(
               isSelected={index === cursorIndex}
             />
           )}
+          onEnter={handleEnter}
+          selectedIndex={cursorIndex}
         />
       </div>
     );
