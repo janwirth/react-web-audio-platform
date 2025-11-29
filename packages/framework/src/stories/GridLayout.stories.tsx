@@ -2,8 +2,6 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { PanelEventBusProvider } from "@/hooks/usePanelEvent";
 import { HotkeyDebuggerSection } from "@/components/HotkeyDebuggerSection";
 import { GridLayout } from "@/components/GridLayout";
-import { HotkeysBar, HotkeyConfig } from "@/components/HotkeysBar";
-import { useState, useCallback } from "react";
 
 const meta = {
   title: "Stories/GridLayout",
