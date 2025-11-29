@@ -2,6 +2,8 @@ import type { Meta, StoryObj } from "@storybook/react";
 import { PanelEventBusProvider } from "@/hooks/usePanelEvent";
 import { HotkeyDebuggerSection } from "@/components/HotkeyDebuggerSection";
 import { GridLayout } from "@/components/GridLayout";
+import { useAreaVisibility } from "@/hooks/useAreaVisibility";
+import { AreaVisibilityControls } from "@/components/AreaVisibilityControls";
 
 const meta = {
   title: "Stories/GridLayout",
@@ -10,17 +12,7 @@ const meta = {
     layout: "fullscreen",
   },
   tags: ["autodocs"],
-  argTypes: {
-    header: { control: "text" },
-    footer: { control: "text" },
-    leftSidebar: { control: "text" },
-    rightSidebar: { control: "text" },
-    center: { control: "text" },
-    stage: { control: "text" },
-    focusableLeftSidebar: { control: "boolean" },
-    focusableCenter: { control: "boolean" },
-    focusableRightSidebar: { control: "boolean" },
-  },
+  argTypes: {},
 } satisfies Meta<typeof GridLayout>;
 
 export default meta;
@@ -28,78 +20,99 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    header: "Header",
-    footer: "Footer",
-    leftSidebar: "Left Sidebar",
-    rightSidebar: "Right Sidebar",
-    center: "Center Content",
-    stage: "Stage",
+    header: { render: "Header", visible: true },
+    footer: { render: "Footer", visible: true },
+    leftSidebar: { render: "Left Sidebar", visible: true },
+    rightSidebar: { render: "Right Sidebar", visible: true },
+    center: { render: "Center Content", visible: true },
+    stage: { render: "Stage", visible: true },
   },
 };
 
 export const EmptyCenter: Story = {
   args: {
-    header: "Header",
-    footer: "Footer",
-    leftSidebar: "Left Sidebar",
-    rightSidebar: "Right Sidebar",
-    stage: "Stage",
+    header: { render: "Header", visible: true },
+    footer: { render: "Footer", visible: true },
+    leftSidebar: { render: "Left Sidebar", visible: true },
+    rightSidebar: { render: "Right Sidebar", visible: true },
+    stage: { render: "Stage", visible: true },
   },
 };
 
 export const OnlyCenter: Story = {
   args: {
-    center: "Only Center Content",
+    center: { render: "Only Center Content", visible: true },
   },
 };
 
 export const HeaderAndFooter: Story = {
   args: {
-    header: "Header",
-    footer: "Footer",
-    center: "Center Content",
+    header: { render: "Header", visible: true },
+    footer: { render: "Footer", visible: true },
+    center: { render: "Center Content", visible: true },
   },
 };
 
 export const SidebarsOnly: Story = {
   args: {
-    leftSidebar: "Left Sidebar",
-    rightSidebar: "Right Sidebar",
-    center: "Center Content",
+    leftSidebar: { render: "Left Sidebar", visible: true },
+    rightSidebar: { render: "Right Sidebar", visible: true },
+    center: { render: "Center Content", visible: true },
   },
 };
 
 function GridLayoutWithHotkeys() {
+  const visibilityHook = useAreaVisibility();
+  const { visibility } = visibilityHook;
+
   return (
     <PanelEventBusProvider>
       <GridLayout
-        header="Header"
-        footer="Footer"
-        leftSidebar={
-          <HotkeyDebuggerSection panelId="leftSidebar">
-            <div>Left Sidebar Item 1</div>
-            <div>Left Sidebar Item 2</div>
-            <div>Left Sidebar Item 3</div>
-          </HotkeyDebuggerSection>
-        }
-        rightSidebar={
-          <HotkeyDebuggerSection panelId="rightSidebar">
-            <div>Right Sidebar Item A</div>
-            <div>Right Sidebar Item B</div>
-            <div>Right Sidebar Item C</div>
-          </HotkeyDebuggerSection>
-        }
-        center={
-          <HotkeyDebuggerSection panelId="center">
-            <div>Center Content Item 1</div>
-            <div>Center Content Item 2</div>
-            <div>Center Content Item 3</div>
-          </HotkeyDebuggerSection>
-        }
-        stage="Stage"
-        focusableLeftSidebar={true}
-        focusableCenter={true}
-        focusableRightSidebar={true}
+        header={{
+          render: "Header",
+          visible: visibility.header,
+        }}
+        footer={{
+          render: <AreaVisibilityControls visibilityHook={visibilityHook} />,
+          visible: visibility.footer,
+        }}
+        leftSidebar={{
+          render: (
+            <HotkeyDebuggerSection panelId="leftSidebar">
+              <div>Left Sidebar Item 1</div>
+              <div>Left Sidebar Item 2</div>
+              <div>Left Sidebar Item 3</div>
+            </HotkeyDebuggerSection>
+          ),
+          focusable: visibility.leftSidebar,
+          visible: visibility.leftSidebar,
+        }}
+        rightSidebar={{
+          render: (
+            <HotkeyDebuggerSection panelId="rightSidebar">
+              <div>Right Sidebar Item A</div>
+              <div>Right Sidebar Item B</div>
+              <div>Right Sidebar Item C</div>
+            </HotkeyDebuggerSection>
+          ),
+          focusable: visibility.rightSidebar,
+          visible: visibility.rightSidebar,
+        }}
+        center={{
+          render: (
+            <HotkeyDebuggerSection panelId="center">
+              <div>Center Content Item 1</div>
+              <div>Center Content Item 2</div>
+              <div>Center Content Item 3</div>
+            </HotkeyDebuggerSection>
+          ),
+          focusable: visibility.center,
+          visible: visibility.center,
+        }}
+        stage={{
+          render: "Stage",
+          visible: visibility.stage,
+        }}
       />
     </PanelEventBusProvider>
   );
@@ -107,4 +120,47 @@ function GridLayoutWithHotkeys() {
 
 export const WithHotkeyNavigation: Story = {
   render: () => <GridLayoutWithHotkeys />,
+};
+
+function GridLayoutWithAreaVisibility() {
+  const visibilityHook = useAreaVisibility();
+  const { visibility } = visibilityHook;
+
+  return (
+    <PanelEventBusProvider>
+      <GridLayout
+        header={{
+          render: "Header",
+          visible: visibility.header,
+        }}
+        footer={{
+          render: <AreaVisibilityControls visibilityHook={visibilityHook} />,
+          visible: visibility.footer,
+        }}
+        leftSidebar={{
+          render: "Left Sidebar",
+          focusable: visibility.leftSidebar,
+          visible: visibility.leftSidebar,
+        }}
+        rightSidebar={{
+          render: "Right Sidebar",
+          focusable: visibility.rightSidebar,
+          visible: visibility.rightSidebar,
+        }}
+        center={{
+          render: "Center Content",
+          focusable: visibility.center,
+          visible: visibility.center,
+        }}
+        stage={{
+          render: "Stage",
+          visible: visibility.stage,
+        }}
+      />
+    </PanelEventBusProvider>
+  );
+}
+
+export const WithAreaVisibility: Story = {
+  render: () => <GridLayoutWithAreaVisibility />,
 };
