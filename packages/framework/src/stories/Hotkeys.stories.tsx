@@ -7,71 +7,8 @@ import {
 } from "@/hooks/useHotkeys";
 import { GridLayout } from "@/components/GridLayout";
 import { PanelEventBusProvider } from "@/hooks/usePanelEvent";
-
-interface HotkeyHintProps {
-  active?: boolean;
-  matched?: boolean;
-  onClick?: () => void;
-  children: React.ReactNode;
-}
-
-function HotkeyHint({ active, matched, onClick, children }: HotkeyHintProps) {
-  const [isHovered, setIsHovered] = useState(false);
-  const prevHighlightedRef = useRef(false);
-  const elementRef = useRef<HTMLElement>(null);
-  const isHighlighted = Boolean(active || matched);
-  const Component = onClick ? "button" : "div";
-
-  // Manage transition timing: instant when becoming highlighted, transition when leaving
-  useEffect(() => {
-    const wasHighlighted = prevHighlightedRef.current;
-
-    if (isHighlighted && !wasHighlighted) {
-      // Becoming highlighted: disable transition immediately
-      if (elementRef.current) {
-        elementRef.current.style.transition =
-          "opacity 0ms, background-color 0ms, color 0ms";
-      }
-    } else if (!isHighlighted && wasHighlighted) {
-      // Leaving highlight: enable transition
-      if (elementRef.current) {
-        elementRef.current.style.transition =
-          "opacity 150ms, background-color 150ms, color 150ms";
-      }
-    }
-
-    prevHighlightedRef.current = isHighlighted;
-  }, [isHighlighted]);
-
-  // Handle hover transitions
-  useEffect(() => {
-    if (!elementRef.current) return;
-
-    if (isHovered) {
-      elementRef.current.style.transition =
-        "opacity 0ms, background-color 0ms, color 0ms";
-    } else if (!isHighlighted) {
-      elementRef.current.style.transition =
-        "opacity 150ms, background-color 150ms, color 150ms";
-    }
-  }, [isHovered, isHighlighted]);
-
-  return (
-    <Component
-      ref={elementRef as any}
-      onClick={onClick}
-      className={`text-xs ${onClick ? "cursor-pointer" : "cursor-default"} ${
-        isHighlighted
-          ? "bg-black dark:bg-white text-white dark:text-black"
-          : `text-black dark:text-white ${isHovered ? "opacity-85" : ""}`
-      }`}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {children}
-    </Component>
-  );
-}
+import { HotkeyHint } from "@/components/HotkeyHint";
+import { useAreaVisibility, type AreaType } from "@/hooks/useAreaVisibility";
 
 const meta = {
   title: "Stories/Hotkeys",
@@ -1067,6 +1004,187 @@ function HotkeyTesterInGridLayout() {
 
 export const InGridLayout: Story = {
   render: () => <HotkeyTesterInGridLayout />,
+  parameters: {
+    layout: "fullscreen",
+  },
+};
+
+function AreaVisibilityHotkeys() {
+  const { visibility, toggleArea, hotkeyBindings } = useAreaVisibility({
+    header: true,
+    footer: true,
+    leftSidebar: true,
+    rightSidebar: true,
+    center: true,
+    stage: true,
+  });
+
+  const [activeHotkey, setActiveHotkey] = useState<string | null>(null);
+  const prevVisibilityRef = useRef(visibility);
+
+  // Track visibility changes to detect which hotkey was pressed
+  useEffect(() => {
+    const prev = prevVisibilityRef.current;
+    const areaToKey: Record<keyof typeof visibility, string> = {
+      header: "H",
+      footer: "F",
+      leftSidebar: "L",
+      rightSidebar: "R",
+      center: "C",
+      stage: "S",
+    };
+
+    // Find which area changed
+    for (const [area, key] of Object.entries(areaToKey)) {
+      if (
+        prev[area as keyof typeof prev] !==
+        visibility[area as keyof typeof visibility]
+      ) {
+        setActiveHotkey(key);
+        setTimeout(() => setActiveHotkey(null), 300);
+        break;
+      }
+    }
+
+    prevVisibilityRef.current = visibility;
+  }, [visibility]);
+
+  return (
+    <PanelEventBusProvider>
+      <GridLayout
+        header={{
+          render: (
+            <div className="text-black dark:text-white font-mono">
+              Area Visibility Hotkeys
+            </div>
+          ),
+          visible: visibility.header,
+        }}
+        footer={{
+          render: (
+            <div className="w-full font-mono">
+              <div className="text-xs text-black dark:text-white mb-2">
+                Registered hotkeys:
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs">
+                {hotkeyBindings.map((binding, index) => {
+                  const displayKey =
+                    binding.displayKey ||
+                    binding.code
+                      .replace(/key/gi, "")
+                      .replace(/arrowleft/gi, "←")
+                      .replace(/arrowright/gi, "→")
+                      .replace(/arrowup/gi, "↑")
+                      .replace(/arrowdown/gi, "↓")
+                      .replace(/space/gi, "Space");
+                  const isActive = activeHotkey === displayKey;
+                  const areaKey = displayKey.toLowerCase();
+                  const areaMap: Record<string, string> = {
+                    h: "header",
+                    f: "footer",
+                    l: "leftSidebar",
+                    r: "rightSidebar",
+                    c: "center",
+                    s: "stage",
+                  };
+                  const area = areaMap[areaKey] as AreaType | undefined;
+                  const isAreaVisible = area ? visibility[area] : false;
+
+                  return (
+                    <HotkeyHint
+                      key={index}
+                      active={isActive || isAreaVisible}
+                      onClick={() => {
+                        if (area) {
+                          toggleArea(area);
+                        }
+                      }}
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <kbd>{displayKey}</kbd>
+                        <span>
+                          {binding.description}
+                          {area && ` (${isAreaVisible ? "ON" : "OFF"})`}
+                        </span>
+                      </span>
+                    </HotkeyHint>
+                  );
+                })}
+              </div>
+            </div>
+          ),
+          visible: visibility.footer,
+        }}
+        leftSidebar={{
+          render: (
+            <div className="text-black dark:text-white font-mono p-4">
+              <div className="text-sm font-bold mb-2">Left Sidebar</div>
+              <div className="text-xs opacity-60">
+                Press L to toggle visibility
+              </div>
+            </div>
+          ),
+          focusable: visibility.leftSidebar,
+          visible: visibility.leftSidebar,
+        }}
+        rightSidebar={{
+          render: (
+            <div className="text-black dark:text-white font-mono p-4">
+              <div className="text-sm font-bold mb-2">Right Sidebar</div>
+              <div className="text-xs opacity-60">
+                Press R to toggle visibility
+              </div>
+            </div>
+          ),
+          focusable: visibility.rightSidebar,
+          visible: visibility.rightSidebar,
+        }}
+        center={{
+          render: (
+            <div className="p-8 text-black dark:text-white font-mono">
+              <h2 className="text-xl font-bold mb-4">
+                Area Visibility Hotkeys
+              </h2>
+              <p className="text-sm mb-4">
+                Use hotkeys to toggle visibility of different layout areas:
+              </p>
+              <div className="space-y-2 text-xs mb-6">
+                <p>• Press H to toggle Header</p>
+                <p>• Press F to toggle Footer</p>
+                <p>• Press L to toggle Left Sidebar</p>
+                <p>• Press R to toggle Right Sidebar</p>
+                <p>• Press C to toggle Center</p>
+                <p>• Press S to toggle Stage</p>
+              </div>
+              <div className="text-xs opacity-60">
+                <p>
+                  Hotkey buttons in the footer show current state (ON/OFF) and
+                  can be clicked to toggle.
+                </p>
+              </div>
+            </div>
+          ),
+          focusable: visibility.center,
+          visible: visibility.center,
+        }}
+        stage={{
+          render: (
+            <div className="text-black dark:text-white font-mono p-4">
+              <div className="text-sm font-bold mb-2">Stage Area</div>
+              <div className="text-xs opacity-60">
+                Press S to toggle visibility
+              </div>
+            </div>
+          ),
+          visible: visibility.stage,
+        }}
+      />
+    </PanelEventBusProvider>
+  );
+}
+
+export const AreaVisibility: Story = {
+  render: () => <AreaVisibilityHotkeys />,
   parameters: {
     layout: "fullscreen",
   },
