@@ -1,6 +1,8 @@
-import { useState, useCallback } from "react";
-import { Tab } from "./LayoutState";
-import { usePanelEvent } from "./hooks/usePanelEvent";
+import { useState, useCallback, useRef } from "react";
+import { Tab } from "../LayoutState";
+import { usePanelEvent } from "../hooks/usePanelEvent";
+import { DualViewListHandle } from "../components/DualViewList";
+import { DualViewList } from "@/components/DualViewList";
 
 // Example tabs data
 export const defaultTabs: Tab[] = [
@@ -65,36 +67,6 @@ export function LeftSidebarContent({ items }: { items: string[] }) {
   );
 }
 
-export function RightSidebarContent({ items }: { items: string[] }) {
-  const [lastEvent, setLastEvent] = useState<string | null>(null);
-
-  usePanelEvent("right", {
-    arrowUp: useCallback(() => {
-      const event = "Arrow Up";
-      console.log(`[Right Panel] ${event}`);
-      setLastEvent(event);
-    }, []),
-    arrowDown: useCallback(() => {
-      const event = "Arrow Down";
-      console.log(`[Right Panel] ${event}`);
-      setLastEvent(event);
-    }, []),
-  });
-
-  return (
-    <div className="space-y-2 text-xs opacity-80">
-      {items.map((item, index) => (
-        <div key={index}>{item}</div>
-      ))}
-      {lastEvent && (
-        <div className="mt-4 pt-2 border-t border-gray-300 dark:border-gray-700 text-xs opacity-60">
-          Last event: {lastEvent}
-        </div>
-      )}
-    </div>
-  );
-}
-
 export function CenterAreaContent({
   onArrowUp,
   onArrowDown,
@@ -102,32 +74,22 @@ export function CenterAreaContent({
   onArrowUp?: () => void;
   onArrowDown?: () => void;
 }) {
-  const [lastEvent, setLastEvent] = useState<string | null>(null);
+  const dualViewListRef = useRef<DualViewListHandle>(null);
 
   usePanelEvent("center", {
     arrowUp: useCallback(() => {
-      const event = "Arrow Up";
-      console.log(`[Center Panel] ${event}`);
-      setLastEvent(event);
+      console.log(`[Center Panel] Arrow Up`);
+      dualViewListRef.current?.moveUp();
       onArrowUp?.();
     }, [onArrowUp]),
     arrowDown: useCallback(() => {
-      const event = "Arrow Down";
-      console.log(`[Center Panel] ${event}`);
-      setLastEvent(event);
+      console.log(`[Center Panel] Arrow Down`);
+      dualViewListRef.current?.moveDown();
       onArrowDown?.();
     }, [onArrowDown]),
   });
 
-  return (
-    <div className="text-xs opacity-80">
-      {lastEvent && (
-        <div className="mb-4 pb-2 border-b border-gray-300 dark:border-gray-700 text-xs opacity-60">
-          Last event: {lastEvent}
-        </div>
-      )}
-    </div>
-  );
+  return <DualViewList ref={dualViewListRef} />;
 }
 
 // Example table item renderer component
@@ -149,6 +111,7 @@ export function TableItemRenderer({
       <span className="w-12 text-xs opacity-60">{item.id}</span>
       <span className="flex-1">{item.name}</span>
       <span className="text-xs opacity-60">{item.description}</span>
+      {/* <Waveform audioUrl={item.audioUrl} /> */}
     </div>
   );
 }

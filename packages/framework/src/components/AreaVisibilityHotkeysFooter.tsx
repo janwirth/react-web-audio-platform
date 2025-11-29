@@ -41,10 +41,7 @@ export function AreaVisibilityHotkeysFooter({
   }, [visibility]);
 
   return (
-    <div className="w-full font-mono">
-      <div className="text-xs text-black dark:text-white mb-2">
-        Registered hotkeys:
-      </div>
+    <div className="w-full font-mono pt-2">
       <div className="flex flex-wrap gap-2 text-xs">
         {hotkeyBindings.map((binding, index) => {
           const displayKey =
@@ -93,4 +90,3 @@ export function AreaVisibilityHotkeysFooter({
     </div>
   );
 }
-

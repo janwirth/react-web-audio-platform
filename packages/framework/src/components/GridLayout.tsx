@@ -10,18 +10,13 @@ export interface AreaConfig {
   visible?: boolean;
 }
 
-function getHighlightablePanelClasses(
-  isFocused: boolean,
-  includeBorderRight: boolean = true
-): string {
-  const baseClasses =
-    "text-black dark:text-white border-black dark:border-white flex";
-  const borderClass = includeBorderRight ? "border-r" : "";
+function getHighlightablePanelClasses(isFocused: boolean): string {
+  const baseClasses = "text-black dark:text-white dark:border-white flex";
   const focusClasses = isFocused
-    ? "outline outline-2 outline-black dark:outline-white -outline-offset-3"
+    ? " dotted outline-3 z-index-10 outline-black dark:outline-white outline-offset-2"
     : "";
 
-  return [baseClasses, borderClass, focusClasses].filter(Boolean).join(" ");
+  return [baseClasses, focusClasses].filter(Boolean).join(" ");
 }
 
 function normalizeArea(
@@ -169,7 +164,7 @@ export function GridLayout({
       {/* Header - full width, auto height */}
       {hasHeader && headerConfig && (
         <div
-          className="border-b border-black dark:border-white flex items-center text-black dark:text-white"
+          className="border-black dark:border-white flex items-center text-black dark:text-white"
           style={{
             gridColumn: "1 / -1",
             gridRow: "1",
@@ -182,7 +177,7 @@ export function GridLayout({
       {/* Stage - top half of main content, full width, above center/sidebars */}
       {hasStage && stageConfig && (
         <div
-          className="border-b border-black dark:border-white text-black dark:text-white"
+          className="border-black dark:border-white text-black dark:text-white "
           style={{
             gridColumn: "1 / -1",
             gridRow: hasHeader
@@ -202,8 +197,7 @@ export function GridLayout({
       {leftSidebarConfig?.visible && (
         <div
           className={getHighlightablePanelClasses(
-            focusedArea === "leftSidebar",
-            true
+            focusedArea === "leftSidebar"
           )}
           style={{
             gridColumn: "1 / 3",
@@ -231,11 +225,9 @@ export function GridLayout({
       {/* Center - bottom half of main content if stage exists, otherwise full height */}
       {centerConfig?.visible && (
         <main
-          className={getHighlightablePanelClasses(
-            focusedArea === "center",
-            true
-          )}
+          className={getHighlightablePanelClasses(focusedArea === "center")}
           style={{
+            // backgroundColor: "red",
             gridColumn: leftSidebarConfig?.visible
               ? rightSidebarConfig?.visible
                 ? "3 / 10"
@@ -268,8 +260,7 @@ export function GridLayout({
       {rightSidebarConfig?.visible && (
         <div
           className={getHighlightablePanelClasses(
-            focusedArea === "rightSidebar",
-            false
+            focusedArea === "rightSidebar"
           )}
           style={{
             gridColumn: "10 / -1",
@@ -297,7 +288,7 @@ export function GridLayout({
       {/* Footer - full width, auto height */}
       {hasFooter && footerConfig && (
         <div
-          className="border-t border-black dark:border-white flex items-center text-black dark:text-white"
+          className="border-black dark:border-white flex items-center text-black dark:text-white"
           style={{
             gridColumn: "1 / -1",
             gridRow: "-1",

@@ -219,7 +219,7 @@ export const DualViewList = forwardRef<DualViewListHandle, DualViewListProps>(
     );
 
     return (
-      <div className={`grow flex flex-col gap-4 p-4 ${className}`}>
+      <div className={`grow flex flex-col gap-4 ${className}`}>
         {/* Toggle button */}
 
         {/* CoverFlow on top */}

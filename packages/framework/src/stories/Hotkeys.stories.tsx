@@ -15,7 +15,7 @@ import { PlayerUI } from "@/components/player/PlayerUI";
 import { Visualizer } from "@/components/visualizer/Visualizer";
 import { TableVirtualizer } from "@/components/TableVirtualizer";
 import { HotkeyDebuggerSection } from "@/components/HotkeyDebuggerSection";
-import { CenterAreaContent } from "@/Data";
+import { CenterAreaContent } from "@/layout-app/Data";
 import { Queue } from "@/components/player/Queue";
 
 const meta = {
@@ -1134,7 +1134,7 @@ function VisualizerWithTableLayout() {
     footer: true,
     leftSidebar: true,
     rightSidebar: true,
-    center: false,
+    center: true,
     stage: true,
   });
   const { visibility } = visibilityHook;
@@ -1145,7 +1145,8 @@ function VisualizerWithTableLayout() {
         <GridLayout
           header={{
             render: (
-              <div className="p-4">
+              <div className="px-2 py-1 w-full">
+                {" "}
                 <PlayerUI />
               </div>
             ),
