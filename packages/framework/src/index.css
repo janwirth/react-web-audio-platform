@@ -42,3 +42,24 @@
 input::-moz-focus-inner {
   border: 0;
 }
+
+.stripe-indicator {
+  background-image: repeating-linear-gradient(
+    45deg,
+    black,
+    black 2px,
+    white 2px,
+    white 4px
+  );
+  background-size: 4px 4px;
+  animation: stripeMove 0.5s linear infinite;
+}
+
+@keyframes stripeMove {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 4px 0;
+  }
+}

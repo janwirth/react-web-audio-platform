@@ -9,13 +9,15 @@ import {
 // Re-export for backward compatibility
 export type { AreaConfig };
 
-function getHighlightablePanelClasses(isFocused: boolean): string {
-  const baseClasses = "text-black dark:text-white dark:border-white flex";
-  const focusClasses = isFocused
-    ? " dotted outline-3 z-index-10 outline-black dark:outline-white outline-offset-2"
-    : "";
+function getHighlightablePanelClasses(): string {
+  return "pt-1 text-black dark:text-white dark:border-white flex relative";
+}
 
-  return [baseClasses, focusClasses].filter(Boolean).join(" ");
+function ActivePanelIndicator({ isActive }: { isActive: boolean }) {
+  if (!isActive) return null;
+  return (
+    <div className="absolute top-0 left-0 right-0 h-2 z-10 stripe-indicator" />
+  );
 }
 
 export interface GridLayoutProps {
@@ -94,13 +96,12 @@ export function GridLayout({
       {/* Left Sidebar - spans bottom half of main content if stage exists, otherwise full height */}
       {config.leftSidebarConfig?.visible && (
         <div
-          className={getHighlightablePanelClasses(
-            focusedArea === "leftSidebar"
-          )}
+          className={getHighlightablePanelClasses()}
           style={{
             gridArea: "left",
           }}
         >
+          <ActivePanelIndicator isActive={focusedArea === "leftSidebar"} />
           {config.leftSidebarConfig.render}
         </div>
       )}
@@ -108,11 +109,12 @@ export function GridLayout({
       {/* Center - bottom half of main content if stage exists, otherwise full height */}
       {config.centerConfig?.visible && (
         <main
-          className={getHighlightablePanelClasses(focusedArea === "center")}
+          className={getHighlightablePanelClasses()}
           style={{
             gridArea: "cent",
           }}
         >
+          <ActivePanelIndicator isActive={focusedArea === "center"} />
           {config.centerConfig.render}
         </main>
       )}
@@ -120,13 +122,12 @@ export function GridLayout({
       {/* Right Sidebar - spans bottom half of main content if stage exists, otherwise full height */}
       {config.rightSidebarConfig?.visible && (
         <div
-          className={getHighlightablePanelClasses(
-            focusedArea === "rightSidebar"
-          )}
+          className={getHighlightablePanelClasses()}
           style={{
             gridArea: "rght",
           }}
         >
+          <ActivePanelIndicator isActive={focusedArea === "rightSidebar"} />
           {config.rightSidebarConfig.render}
         </div>
       )}
