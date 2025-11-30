@@ -19,6 +19,7 @@
     "butterchurn": "^2.6.7",
     "butterchurn-presets": "^2.4.7",
     "jotai": "^2.15.1",
+    "motion": "^12.23.24",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-grid-layout": "^1.5.2",
