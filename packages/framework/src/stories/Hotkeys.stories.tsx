@@ -13,12 +13,10 @@ import { AreaVisibilityHotkeysFooter } from "@/components/AreaVisibilityHotkeysF
 import { Player } from "@/components/player/Player";
 import { PlayerUI } from "@/components/player/PlayerUI";
 import { Visualizer } from "@/components/visualizer/Visualizer";
-import { TableVirtualizer } from "@/components/TableVirtualizer";
-import { HotkeyDebuggerSection } from "@/components/HotkeyDebuggerSection";
-import { CenterAreaContent } from "@/layout-app/Data";
 import { Queue } from "@/components/player/Queue";
 import { Tracklist } from "@/components/Tracklist";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
+import { Lists } from "@/components/Lists";
 
 const meta = {
   title: "Stories/Hotkeys",
@@ -1170,16 +1168,7 @@ function VisualizerWithTableLayout() {
             visible: visibility.footer,
           }}
           leftSidebar={{
-            render: (
-              <HotkeyDebuggerSection panelId="leftSidebar">
-                <div className="text-black dark:text-white font-mono p-4">
-                  <div className="text-sm font-bold mb-2">Left Sidebar</div>
-                  <div className="text-xs opacity-60">
-                    Press L to toggle visibility
-                  </div>
-                </div>
-              </HotkeyDebuggerSection>
-            ),
+            render: <Lists />,
             focusable: visibility.leftSidebar,
             visible: visibility.leftSidebar,
           }}

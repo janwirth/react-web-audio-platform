@@ -8,7 +8,6 @@ export function initVisualizer(
   canvas: HTMLCanvasElement,
   audioElement: HTMLAudioElement
 ) {
-  console.log("initVisualizer", audioElement, canvas, preset);
   const audioContext = new AudioContext();
   const analyserNode = audioContext.createAnalyser();
 
@@ -27,7 +26,10 @@ export function initVisualizer(
   } catch (error) {
     // Another component already created a source node from this audio element
     // We can't create another one, so visualization won't work
-    console.warn("Could not create MediaElementAudioSourceNode (may already exist):", error);
+    console.warn(
+      "Could not create MediaElementAudioSourceNode (may already exist):",
+      error
+    );
     // Return early - we can't visualize without a source node
     return null;
   }

@@ -8,9 +8,10 @@ import {
 } from "react";
 import { TableVirtualizer, TableVirtualizerHandle } from "./TableVirtualizer";
 import { WaveformWithPlayhead } from "./waveform";
-import { useAudioItems } from "@/hooks/useAudioItems";
 import { QueueItem, usePlayer } from "./player/Player";
 import { usePanelEvent } from "@/hooks/usePanelEvent";
+import { useAtomValue } from "jotai";
+import { tracksAtom } from "@/hooks/useData";
 
 export interface TracklistItem {
   id: string | number;
@@ -67,7 +68,9 @@ function TrackItemRenderer({
           }}
         />
       )}
-      <div className="text-gray-500 dark:text-gray-400 w-12">#{item.id}</div>
+      <div className="p-1 text-xs text-gray-500 dark:text-gray-400">
+        {_index}
+      </div>
       {item.coverUrl && (
         <div className="w-12 h-12 shrink-0">
           <img
@@ -99,21 +102,21 @@ function TrackItemRenderer({
 
 export const Tracklist = forwardRef<TracklistHandle, TracklistProps>(
   function Tracklist({ className = "" }, ref) {
-    const { audioItems } = useAudioItems();
+    const tracks = useAtomValue(tracksAtom);
     const [cursorIndex, setCursorIndex] = useState(INITIAL_CURSOR_INDEX);
     const tableVirtualizerRef = useRef<TableVirtualizerHandle>(null);
 
-    // Transform audioItems to TracklistItem format
+    // Transform tracks to TracklistItem format
     const items = useMemo<TracklistItem[]>(() => {
-      return audioItems.map((item, index) => ({
-        id: index + 1,
-        title: item.title,
-        name: item.title,
+      return tracks.map((track) => ({
+        id: track.id,
+        title: track.title,
+        name: track.title,
         description: undefined,
-        coverUrl: item.coverUrl,
-        audioUrl: item.audioUrl,
+        coverUrl: track.coverUrl,
+        audioUrl: track.audioUrl,
       }));
-    }, [audioItems]);
+    }, [tracks]);
 
     // Move cursor up
     const moveUp = useCallback(() => {
