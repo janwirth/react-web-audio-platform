@@ -66,7 +66,7 @@ function TrackItemRenderer({
 }) {
   return (
     <div
-      className="dark:border-gray-800 hover:opacity-60 transition-opacity font-mono text-sm relative flex items-center gap-2"
+      className="dark:border-gray-800 transition-opacity font-mono text-sm relative flex items-center gap-2"
       style={{
         backgroundColor: isSelected
           ? "rgba(128, 128, 128, 0.15)"

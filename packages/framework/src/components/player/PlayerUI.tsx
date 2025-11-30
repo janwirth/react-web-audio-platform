@@ -1,5 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import { usePlayerContext, useCurrentPlayback } from "./Player";
+import { useAtomValue } from "jotai";
+import {
+  usePlayerContext,
+  useCurrentPlayback,
+  queueAtom,
+  currentQueueIndexAtom,
+} from "./Player";
 import { MiniSpectro } from "../visualizer/MiniSpectro";
 import { Row } from "../Row";
 import { NextIcon, PreviousIcon } from "./Icons";
@@ -97,6 +103,7 @@ export function PlayerUI() {
   return (
     <Row className="items-center gap-5 px-2">
       <Controls isPlaying={isPlaying} handlePlayPause={handlePlayPause} />
+      <CurrentTrackInfo />
       <Duration
         currentTime={currentTime}
         duration={duration}
@@ -121,6 +128,39 @@ export function PlayerUI() {
     </Row>
   );
 }
+const CurrentTrackInfo = () => {
+  const queue = useAtomValue(queueAtom);
+  const currentQueueIndex = useAtomValue(currentQueueIndexAtom);
+  const currentTrack =
+    currentQueueIndex >= 0 && currentQueueIndex < queue.length
+      ? queue[currentQueueIndex]
+      : null;
+
+  if (!currentTrack) return null;
+
+  return (
+    <>
+      {/* Track Cover */}
+      {currentTrack.coverUrl ? (
+        <div className="w-8 h-8 shrink-0">
+          <img
+            src={currentTrack.coverUrl}
+            alt={currentTrack.title || currentTrack.name || "Track cover"}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      ) : (
+        <div className="w-8 h-8 shrink-0 bg-gray-400 dark:bg-gray-600 border border-gray-800 dark:border-gray-400" />
+      )}
+
+      {/* Track Title */}
+      <span className="text-xs font-mono text-black dark:text-white font-medium shrink-0 truncate w-80">
+        {currentTrack.title || currentTrack.name || "Unknown Track"}
+      </span>
+    </>
+  );
+};
+
 const Duration = ({
   currentTime,
   duration,
@@ -133,8 +173,9 @@ const Duration = ({
   playback: ReturnType<typeof useCurrentPlayback>;
 }) => {
   const colorPalette = useColorPalette();
+
   return (
-    <Row className="flex flex-1 w-full items-center justify-center gap-2">
+    <Row className="flex flex-1 w-full items-center gap-2">
       <span className="text-xs font-mono text-gray-600 dark:text-gray-400 text-right font-black">
         {duration > 0 ? formatTime(currentTime) : "-:--"}
       </span>
