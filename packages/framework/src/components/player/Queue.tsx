@@ -9,6 +9,7 @@ import {
 import { usePlayerContext } from "./Player";
 import { TableVirtualizer, TableVirtualizerHandle } from "../TableVirtualizer";
 import { usePanelEvent, useIsPanelFocused } from "../../hooks/usePanelEvent";
+import { WaveformWithPlayhead } from "../waveform/WaveformWithPlayhead";
 
 export function useQueue() {
   const setQueue = useSetAtom(queueAtom);
@@ -22,7 +23,7 @@ export function useQueue() {
   return { initQueue };
 }
 
-const ITEM_HEIGHT = 32;
+const ITEM_HEIGHT = 80;
 const OVERSCAN = 3;
 
 export function Queue() {
@@ -74,34 +75,6 @@ export function Queue() {
       tableVirtualizerRef.current?.triggerEnter?.();
     }, []),
   });
-
-  const handleNext = () => {
-    if (currentIndex < queue.length - 1) {
-      const nextIndex = currentIndex + 1;
-      const nextItem = queue[nextIndex];
-      if (nextItem?.audioUrl && audioRef.current) {
-        setCurrentQueueIndex(nextIndex);
-        setActiveUrl(nextItem.audioUrl);
-        audioRef.current.src = nextItem.audioUrl;
-        audioRef.current.load();
-        audioRef.current.play().catch(console.error);
-      }
-    }
-  };
-
-  const handlePrev = () => {
-    if (currentIndex > 0) {
-      const prevIndex = currentIndex - 1;
-      const prevItem = queue[prevIndex];
-      if (prevItem?.audioUrl && audioRef.current) {
-        setCurrentQueueIndex(prevIndex);
-        setActiveUrl(prevItem.audioUrl);
-        audioRef.current.src = prevItem.audioUrl;
-        audioRef.current.load();
-        audioRef.current.play().catch(console.error);
-      }
-    }
-  };
 
   const handleDragStart = (index: number) => {
     setDraggedIndex(index);
@@ -183,9 +156,6 @@ export function Queue() {
     [playItemAtIndex]
   );
 
-  const canGoNext = currentIndex < queue.length - 1;
-  const canGoPrev = currentIndex > 0;
-
   const isPanelFocused = useIsPanelFocused("rightSidebar");
 
   const renderItem = useCallback(
@@ -215,7 +185,7 @@ export function Queue() {
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, index)}
           onDragEnd={handleDragEnd}
-          className="cursor-pointer select-none py-1 px-2 rounded transition-opacity font-mono text-xs relative flex items-center gap-2"
+          className="cursor-pointer select-none py-1 px-2 rounded transition-opacity font-mono text-xs relative flex flex-col gap-1"
           style={{
             opacity,
             backgroundColor:
@@ -224,12 +194,23 @@ export function Queue() {
                 : "transparent",
           }}
         >
-          {isSelected && isPanelFocused && (
-            <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+          <div className="flex items-center gap-2">
+            {isSelected && isPanelFocused && (
+              <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+            )}
+            <span>
+              {index + 1}. {item.title}
+            </span>
+          </div>
+          {isCurrent && item.audioUrl && (
+            <div className="w-full">
+              <WaveformWithPlayhead
+                url={item.audioUrl}
+                height={32}
+                allItems={queue}
+              />
+            </div>
           )}
-          <span>
-            {index + 1}. {item.title}
-          </span>
         </div>
       );
     },
@@ -239,6 +220,7 @@ export function Queue() {
       currentIndex,
       selectedIndex,
       isPanelFocused,
+      queue,
       handleClick,
       handleDragStart,
       handleDragOver,
@@ -250,27 +232,6 @@ export function Queue() {
 
   return (
     <div className="text-xs font-mono flex flex-col h-full w-full">
-      <div className="flex items-center justify-between mb-2">
-        <div>Queue ({queue.length})</div>
-        {queue.length > 0 && (
-          <div className="flex gap-2">
-            <button
-              onClick={handlePrev}
-              disabled={!canGoPrev}
-              style={{ opacity: canGoPrev ? 1 : 0.5 }}
-            >
-              ← Prev
-            </button>
-            <button
-              onClick={handleNext}
-              disabled={!canGoNext}
-              style={{ opacity: canGoNext ? 1 : 0.5 }}
-            >
-              Next →
-            </button>
-          </div>
-        )}
-      </div>
       {queue.length === 0 ? (
         <div className="text-gray-400 dark:text-gray-700">empty.</div>
       ) : (
