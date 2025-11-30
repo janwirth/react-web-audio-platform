@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { useAtom, useSetAtom } from "jotai";
 import { queueAtom, currentQueueIndexAtom, activeUrlAtom } from "./Player";
 import { NextIcon, PreviousIcon } from "./Icons";
-import { Row } from "../Row";
+import { Row } from "../../ui/Row";
 
 const ControlButton = ({
   onClick,

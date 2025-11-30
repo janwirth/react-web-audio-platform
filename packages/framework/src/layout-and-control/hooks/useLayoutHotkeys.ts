@@ -1,5 +1,5 @@
 import { useMemo, useCallback, RefObject, Dispatch } from "react";
-import { HotkeyConfig } from "../components/HotkeysBar";
+import { HotkeyConfig } from "../HotkeysBar";
 import { Action, State } from "../LayoutState";
 import { usePanelEventBus } from "./usePanelEvent";
 

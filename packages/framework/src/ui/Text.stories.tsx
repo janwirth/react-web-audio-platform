@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
-import { Column } from '@/components/Column';
-import { Row } from '@/components/Row';
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { Column } from '@/ui/Column';
+import { Row } from '@/ui/Row';
+import { useColorScheme } from '@/ui/hooks/useColorScheme';
 
 // Basic text component
 function Text({

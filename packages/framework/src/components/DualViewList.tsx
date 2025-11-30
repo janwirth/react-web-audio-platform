@@ -7,13 +7,13 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import { TableVirtualizer, TableVirtualizerHandle } from "./TableVirtualizer";
+import { TableVirtualizer, TableVirtualizerHandle } from "../ui/TableVirtualizer";
 import { CoverFlowRef } from "./CoverFlow";
 import { CoverFlowV2 } from "./coverflowV2";
 import { Waveform, WaveformWithPlayhead } from "../media/waveform";
 import { useAudioItems } from "@/hooks/useAudioItems";
 import { QueueItem } from "../media/player/Player";
-import { useIsPanelFocused } from "@/hooks/usePanelEvent";
+import { useIsPanelFocused } from "@/layout-and-control/hooks/usePanelEvent";
 
 export interface DualViewListItem {
   id: string | number;

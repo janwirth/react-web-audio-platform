@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
-import { useHotkeys, createHotkeyBinding } from "@/hooks/useHotkeys";
-import { usePanelEventBus } from "@/hooks/usePanelEvent";
+import { useHotkeys, createHotkeyBinding } from "@/layout-and-control/hooks/useHotkeys";
+import { usePanelEventBus } from "@/layout-and-control/hooks/usePanelEvent";
 
 type FocusableArea = "leftSidebar" | "center" | "rightSidebar";
 

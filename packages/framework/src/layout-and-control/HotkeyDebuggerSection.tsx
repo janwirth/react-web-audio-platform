@@ -1,5 +1,5 @@
 import { useState, useCallback, ReactNode } from "react";
-import { usePanelEvent } from "@/hooks/usePanelEvent";
+import { usePanelEvent } from "@/layout-and-control/hooks/usePanelEvent";
 
 interface HotkeyDebuggerSectionProps {
   panelId: string;

@@ -1,7 +1,7 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import butterchurnPresets from "butterchurn-presets";
-import { TableVirtualizer } from "../TableVirtualizer";
-import { Column } from "../Column";
+import { TableVirtualizer } from "../../ui/TableVirtualizer";
+import { Column } from "../../ui/Column";
 
 interface PresetSelectorProps {
   selectedPresetName?: string | null;

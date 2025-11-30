@@ -11,7 +11,7 @@ import React, {
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { atomFamily } from "jotai/utils";
 import { DualViewListItem } from "../../components/DualViewList";
-import { useHotkeys, createHotkeyBinding } from "../../hooks/useHotkeys";
+import { useHotkeys, createHotkeyBinding } from "../../layout-and-control/hooks/useHotkeys";
 
 interface PlayerContextValue {
   audioRef: React.RefObject<HTMLAudioElement | null>;

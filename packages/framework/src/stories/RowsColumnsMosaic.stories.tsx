@@ -1,17 +1,17 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useEffect, useState, useMemo } from "react";
 import { useAtom } from "jotai";
-import { Row } from "@/components/Row";
-import { Column } from "@/components/Column";
-import { TableVirtualizer } from "@/components/TableVirtualizer";
+import { Row } from "@/ui/Row";
+import { Column } from "@/ui/Column";
+import { TableVirtualizer } from "@/ui/TableVirtualizer";
 import { debugViewAtom } from "@/atoms/debugView";
 import { Player } from "@/media/player/Player";
 import { PlayerUI } from "@/media/player/PlayerUI";
-import { Visualizer } from "@/components/visualizer/Visualizer";
+import { Visualizer } from "@/media/visualizer/Visualizer";
 import { ColorPicker } from "@/ui/inputs/ColorPicker";
 import { generateOklchPalette } from "@/media/waveform";
 import type { ColorPalette } from "@/media/waveform";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { useColorScheme } from "@/ui/hooks/useColorScheme";
 import { AudioContextProvider } from "@/media/audio-context";
 
 // Example text content

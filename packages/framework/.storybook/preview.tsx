@@ -1,6 +1,7 @@
 import type { Preview } from "@storybook/react";
+import React from "react";
 import "../src/index.css";
-import { AudioContextProvider } from "../src/components/audio-context";
+import { AudioContextProvider } from "../src/media/audio-context";
 
 const preview: Preview = {
   parameters: {
@@ -22,6 +23,3 @@ const preview: Preview = {
 };
 
 export default preview;
-
-
-

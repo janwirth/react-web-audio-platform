@@ -1,4 +1,4 @@
-import type { UseVirtualListReturn } from "../hooks/useVirtualList";
+import type { UseVirtualListReturn } from "./hooks/useVirtualList";
 
 interface VirtualListDebugHeaderProps<T> {
   hookReturn: UseVirtualListReturn<T>;

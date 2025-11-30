@@ -6,8 +6,8 @@ import {
   queueAtom,
   currentQueueIndexAtom,
 } from "./Player";
-import { MiniSpectro } from "../../components/visualizer/MiniSpectro";
-import { Row } from "../Row";
+import { MiniSpectro } from "../visualizer/MiniSpectro";
+import { Row } from "../../ui/Row";
 import { WaveformWithPlayhead } from "../waveform";
 import { PlayerControls } from "./PlayerControls";
 import { useColorPalette } from "../../components/Tracklist";

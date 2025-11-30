@@ -6,10 +6,16 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import { TableVirtualizer, TableVirtualizerHandle } from "./TableVirtualizer";
+import {
+  TableVirtualizer,
+  TableVirtualizerHandle,
+} from "../ui/TableVirtualizer";
 import { WaveformWithPlayhead } from "../media/waveform";
 import { QueueItem, usePlayer } from "../media/player/Player";
-import { usePanelEvent, useIsPanelFocused } from "@/hooks/usePanelEvent";
+import {
+  usePanelEvent,
+  useIsPanelFocused,
+} from "@/layout-and-control/hooks/usePanelEvent";
 import { useAtomValue } from "jotai";
 import {
   tracksAtom,
@@ -20,8 +26,8 @@ import {
   lightnessAtom,
 } from "@/hooks/useData";
 import { generateOklchPalette } from "../media/waveform/lib/color-palettes";
-import { useColorScheme } from "@/hooks/useColorScheme";
-import { FocusIndicator } from "./FocusIndicator";
+import { useColorScheme } from "@/ui/hooks/useColorScheme";
+import { FocusIndicator } from "../layout-and-control/FocusIndicator";
 
 export interface TracklistItem {
   id: string | number;

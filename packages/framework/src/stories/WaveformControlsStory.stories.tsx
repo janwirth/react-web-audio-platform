@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { AudioContextProvider } from "@/media/audio-context";
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { Column } from "@/components/Column";
+import { Column } from "@/ui/Column";
 import { Waveform } from "@/media/waveform";
 import { ColorPicker } from "@/ui/inputs/ColorPicker";
 import { VerticalSlider } from "@/ui/inputs/VerticalSlider";
 import { generateOklchPalette, type ColorPalette } from "@/media/waveform";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { useColorScheme } from "@/ui/hooks/useColorScheme";
 
 const STORAGE_KEY_PREFIX = "waveform-controls-story-";
 

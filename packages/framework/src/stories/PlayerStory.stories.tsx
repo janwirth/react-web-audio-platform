@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useMemo, useState } from "react";
-import { Column } from "@/components/Column";
+import { Column } from "@/ui/Column";
 import { Player } from "@/media/player/Player";
 import { PlayerUI } from "@/media/player/PlayerUI";
 import { WaveformWithPlayhead } from "@/media/waveform/WaveformWithPlayhead";
-import { Visualizer } from "@/components/visualizer/Visualizer";
+import { Visualizer } from "@/media/visualizer/Visualizer";
 import type { QueueItem } from "@/media/player/Player";
-import { useColorScheme } from "@/hooks/useColorScheme";
+import { useColorScheme } from "@/ui/hooks/useColorScheme";
 import { COLOR_PALETTES } from "@/media/waveform/lib/color-palettes";
 import { FPSMeter } from "@overengineering/fps-meter";
 import { AudioContextProvider } from "@/media/audio-context";

@@ -4,7 +4,7 @@ import {
   useGridLayoutConfig,
   useGridLayoutFocus,
   useGridLayoutHotkeys,
-} from "@/hooks/useGridLayout";
+} from "@/layout-and-control/hooks/useGridLayout";
 
 // Re-export for backward compatibility
 export type { AreaConfig };

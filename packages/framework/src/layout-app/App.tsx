@@ -1,22 +1,23 @@
 import { useReducer, useRef, useCallback, useState, useEffect } from "react";
 import { useAtom } from "jotai";
-import { HotkeysBar } from "../components/HotkeysBar";
-import { TableVirtualizerHandle } from "../components/TableVirtualizer";
-import { TabsBar } from "../components/TabsBar";
+import { HotkeysBar } from "../layout-and-control/HotkeysBar";
+import { TableVirtualizerHandle } from "../ui/TableVirtualizer";
+// import { TabsBar } from "../components/TabsBar";
 import { State, Update } from "./LayoutState";
-import { useLayoutHotkeys } from "../hooks/useLayoutHotkeys";
-import { PanelEventBusProvider, usePanelEventBus } from "../hooks/usePanelEvent";
-import { defaultTabs, CenterAreaContent } from "./Data";
-import { DarkModeToggle } from "../components/DarkModeToggle";
+import { useLayoutHotkeys } from "../layout-and-control/hooks/useLayoutHotkeys";
+import { PanelEventBusProvider, usePanelEventBus } from "../layout-and-control/hooks/usePanelEvent";
+import { CenterAreaContent } from "./Data";
+// import { defaultTabs } from "./Data";
+import { DarkModeToggle } from "../ui/DarkModeToggle";
 import { AudioContextProvider } from "../media/audio-context";
 import { Queue } from "@/media/player/Queue";
 import { Player } from "@/media/player/Player";
 import { PlayerUI } from "@/media/player/PlayerUI";
 import { debugViewAtom } from "../atoms/debugView";
-import { Visualizer } from "@/components/visualizer/Visualizer";
+import { Visualizer } from "@/media/visualizer/Visualizer";
 
 const initialState: State = {
-  tabs: defaultTabs,
+  tabs: [], // defaultTabs was commented out
   activeTabIndex: 0,
   focusedArea: "center",
 };
@@ -103,11 +104,11 @@ function LayoutAppContent() {
           className="w-64 p-4 overflow-y-auto transition-opacity opacity-80 hover:opacity-100 relative"
         >
           {/* Tabs Bar */}
-          <TabsBar
+          {/* <TabsBar
             tabs={state.tabs}
             activeTabIndex={state.activeTabIndex}
             dispatch={dispatch}
-          />
+          /> */}
         </div>
 
         {/* Center Area */}

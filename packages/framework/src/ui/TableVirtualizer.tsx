@@ -6,12 +6,12 @@ import {
   useRef,
 } from "react";
 import { useAtomValue } from "jotai";
-import { useVirtualList } from "../hooks/useVirtualList";
+import { useVirtualList } from "./hooks/useVirtualList";
 import { debugViewAtom } from "../atoms/debugView";
 import { VirtualListDebugHeader } from "./VirtualListDebugHeader";
 import { Scrollbar } from "./Scrollbar";
-import { useHorizontalScroll } from "../hooks/useHorizontalScroll";
-import { useScrollFinish } from "../hooks/useScrollFinish";
+import { useHorizontalScroll } from "./hooks/useHorizontalScroll";
+import { useScrollFinish } from "../layout-and-control/hooks/useScrollFinish";
 
 interface TableVirtualizerProps<T> {
   items: T[];

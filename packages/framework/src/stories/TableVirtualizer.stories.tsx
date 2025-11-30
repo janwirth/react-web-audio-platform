@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useAtom } from "jotai";
-import { Column } from "@/components/Column";
-import { Row } from "@/components/Row";
+import { Column } from "@/ui/Column";
+import { Row } from "@/ui/Row";
 import {
   TableVirtualizer as TableVirtualizerComponent,
   TableVirtualizerHandle,
-} from "@/components/TableVirtualizer";
+} from "@/ui/TableVirtualizer";
 import { debugViewAtom } from "@/atoms/debugView";
 import { FPSMeter } from "@overengineering/fps-meter";
 

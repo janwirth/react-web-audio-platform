@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { IframeScaler } from "@/components/IframeScaler";
-import { Column } from "@/components/Column";
-import { Row } from "@/components/Row";
+import { IframeScaler } from "@/ui/IframeScaler";
+import { Column } from "@/ui/Column";
+import { Row } from "@/ui/Row";
 
 const meta = {
   title: "Components/IframeScaler",

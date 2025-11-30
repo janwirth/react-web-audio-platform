@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { Column } from "@/components/Column";
+import { Column } from "@/ui/Column";
 import { Waveform } from "@/media/waveform";
 
 const meta = {

@@ -1,4 +1,4 @@
-import { useHotkeys, createHotkeyBinding } from "@/hooks/useHotkeys";
+import { useHotkeys, createHotkeyBinding } from "@/layout-and-control/hooks/useHotkeys";
 import { usePlayerContext } from "../media/player/Player";
 import { useCallback, useMemo } from "react";
 

@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from "react";
-import { usePanelEvent } from "../hooks/usePanelEvent";
+import { usePanelEvent } from "../layout-and-control/hooks/usePanelEvent";
 import { TracklistHandle } from "../components/Tracklist";
 import { Tracklist } from "@/components/Tracklist";
 

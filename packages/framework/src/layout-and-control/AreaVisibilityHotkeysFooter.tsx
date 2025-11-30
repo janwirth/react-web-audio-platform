@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useAreaVisibility, type AreaType } from "@/hooks/useAreaVisibility";
+import { useAreaVisibility, type AreaType } from "@/layout-and-control/hooks/useAreaVisibility";
 import { HotkeyHint } from "./HotkeyHint";
 
 interface AreaVisibilityHotkeysFooterProps {

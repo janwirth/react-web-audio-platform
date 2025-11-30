@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { PanelEventBusProvider } from "@/hooks/usePanelEvent";
-import { HotkeyDebuggerSection } from "@/components/HotkeyDebuggerSection";
-import { GridLayout } from "@/components/GridLayout";
-import { useAreaVisibility } from "@/hooks/useAreaVisibility";
-import { AreaVisibilityControls } from "@/components/AreaVisibilityControls";
+import { PanelEventBusProvider } from "@/layout-and-control/hooks/usePanelEvent";
+import { HotkeyDebuggerSection } from "@/layout-and-control/HotkeyDebuggerSection";
+import { GridLayout } from "@/layout-and-control/GridLayout";
+import { useAreaVisibility } from "@/layout-and-control/hooks/useAreaVisibility";
+import { AreaVisibilityControls } from "@/layout-and-control/AreaVisibilityControls";
 
 const meta = {
   title: "Stories/GridLayout",

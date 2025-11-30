@@ -4,18 +4,18 @@ import {
   useHotkeys,
   createHotkeyBindings,
   HotkeyBinding,
-} from "@/hooks/useHotkeys";
-import { GridLayout } from "@/components/GridLayout";
-import { PanelEventBusProvider } from "@/hooks/usePanelEvent";
-import { HotkeyHint } from "@/components/HotkeyHint";
-import { useAreaVisibility } from "@/hooks/useAreaVisibility";
-import { AreaVisibilityHotkeysFooter } from "@/components/AreaVisibilityHotkeysFooter";
+} from "@/layout-and-control/hooks/useHotkeys";
+import { GridLayout } from "@/layout-and-control/GridLayout";
+import { PanelEventBusProvider } from "@/layout-and-control/hooks/usePanelEvent";
+import { HotkeyHint } from "@/layout-and-control/HotkeyHint";
+import { useAreaVisibility } from "@/layout-and-control/hooks/useAreaVisibility";
+import { AreaVisibilityHotkeysFooter } from "@/layout-and-control/AreaVisibilityHotkeysFooter";
 import { Player } from "@/media/player/Player";
 import { PlayerUI } from "@/media/player/PlayerUI";
-import { Visualizer } from "@/components/visualizer/Visualizer";
+import { Visualizer } from "@/media/visualizer/Visualizer";
 import { Queue } from "@/media/player/Queue";
 import { Tracklist } from "@/components/Tracklist";
-import { DarkModeToggle } from "@/components/DarkModeToggle";
+import { DarkModeToggle } from "@/ui/DarkModeToggle";
 import { Lists } from "@/components/Lists";
 import { Settings } from "@/components/Settings";
 

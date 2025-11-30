@@ -1,8 +1,8 @@
 import { useRef, useState, useCallback, useMemo, useEffect } from "react";
-import { TableVirtualizer, TableVirtualizerHandle } from "./TableVirtualizer";
+import { TableVirtualizer, TableVirtualizerHandle } from "../ui/TableVirtualizer";
 import { useData } from "@/hooks/useData";
-import { usePanelEvent, useIsPanelFocused } from "@/hooks/usePanelEvent";
-import { FocusIndicator } from "./FocusIndicator";
+import { usePanelEvent, useIsPanelFocused } from "@/layout-and-control/hooks/usePanelEvent";
+import { FocusIndicator } from "../layout-and-control/FocusIndicator";
 
 const ITEM_HEIGHT = 32;
 const OVERSCAN = 3;

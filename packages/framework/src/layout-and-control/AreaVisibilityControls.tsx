@@ -1,4 +1,4 @@
-import { UseAreaVisibilityReturn, AreaType } from "@/hooks/useAreaVisibility";
+import { UseAreaVisibilityReturn, AreaType } from "@/layout-and-control/hooks/useAreaVisibility";
 
 interface AreaVisibilityControlsProps {
   visibilityHook: UseAreaVisibilityReturn;
