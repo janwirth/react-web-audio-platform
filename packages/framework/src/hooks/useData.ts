@@ -115,6 +115,46 @@ export const tracksAtom = atom<Track[]>([]);
 export const loadingAtom = atom<boolean>(true);
 export const errorAtom = atom<string | null>(null);
 
+// Color settings atoms for waveform
+const STORAGE_KEY_PREFIX = "waveform-color-settings-";
+const DEFAULT_HUE = 240;
+const DEFAULT_SATURATION = 0.2;
+const DEFAULT_HUE_SPREAD = 60;
+const DEFAULT_CONTRAST = 0;
+const DEFAULT_LIGHTNESS = 0.5;
+
+const loadFromStorage = <T>(key: string, defaultValue: T): T => {
+  if (typeof window === "undefined") return defaultValue;
+  try {
+    const stored = localStorage.getItem(`${STORAGE_KEY_PREFIX}${key}`);
+    if (stored !== null) {
+      return JSON.parse(stored) as T;
+    }
+  } catch (e) {
+    console.warn(`Failed to load ${key} from localStorage:`, e);
+  }
+  return defaultValue;
+};
+
+export const hueAtom = atom<number>(loadFromStorage("hue", DEFAULT_HUE));
+export const saturationAtom = atom<number>(
+  loadFromStorage("saturation", DEFAULT_SATURATION)
+);
+export const hueSpreadAtom = atom<number>(
+  loadFromStorage("hueSpread", DEFAULT_HUE_SPREAD)
+);
+export const contrastAtom = atom<number>(
+  loadFromStorage("contrast", DEFAULT_CONTRAST)
+);
+export const lightnessAtom = atom<number>(
+  loadFromStorage("lightness", DEFAULT_LIGHTNESS)
+);
+
+// Save to localStorage when atoms change
+if (typeof window !== "undefined") {
+  // This will be handled by components using the atoms
+}
+
 export function useData() {
   const [tags, setTags] = useAtom(tagsAtom);
   const [activeTag, setActiveTag] = useAtom(activeTagAtom);

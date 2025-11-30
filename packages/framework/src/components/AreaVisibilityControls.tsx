@@ -34,6 +34,14 @@ export function AreaVisibilityControls({
       },
     },
     {
+      key: "settings",
+      label: "Settings",
+      hotkeyInfo: hotkeyInfo.find((h) => h.key === "S") || {
+        key: "S",
+        description: "[S]ettings",
+      },
+    },
+    {
       key: "leftSidebar",
       label: "Left",
       hotkeyInfo: hotkeyInfo.find((h) => h.key === "L") || {

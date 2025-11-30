@@ -11,7 +11,16 @@ import { WaveformWithPlayhead } from "./waveform";
 import { QueueItem, usePlayer } from "./player/Player";
 import { usePanelEvent } from "@/hooks/usePanelEvent";
 import { useAtomValue } from "jotai";
-import { tracksAtom } from "@/hooks/useData";
+import {
+  tracksAtom,
+  hueAtom,
+  saturationAtom,
+  hueSpreadAtom,
+  contrastAtom,
+  lightnessAtom,
+} from "@/hooks/useData";
+import { generateOklchPalette } from "./waveform/lib/color-palettes";
+import { useColorScheme } from "@/hooks/useColorScheme";
 
 export interface TracklistItem {
   id: string | number;
@@ -45,11 +54,13 @@ function TrackItemRenderer({
   index: _index,
   allItems,
   isSelected,
+  colorPalette,
 }: {
   item: TracklistItem;
   index: number;
   allItems: QueueItem[];
   isSelected: boolean;
+  colorPalette?: ReturnType<typeof generateOklchPalette>;
 }) {
   return (
     <div
@@ -93,7 +104,11 @@ function TrackItemRenderer({
           </div>
         </div>
         {item.audioUrl && (
-          <WaveformWithPlayhead allItems={allItems} url={item.audioUrl} />
+          <WaveformWithPlayhead
+            allItems={allItems}
+            url={item.audioUrl}
+            colorPalette={colorPalette}
+          />
         )}
       </div>
     </div>
@@ -105,6 +120,27 @@ export const Tracklist = forwardRef<TracklistHandle, TracklistProps>(
     const tracks = useAtomValue(tracksAtom);
     const [cursorIndex, setCursorIndex] = useState(INITIAL_CURSOR_INDEX);
     const tableVirtualizerRef = useRef<TableVirtualizerHandle>(null);
+    const { isDark } = useColorScheme();
+
+    // Get color settings from atoms
+    const hue = useAtomValue(hueAtom);
+    const saturation = useAtomValue(saturationAtom);
+    const hueSpread = useAtomValue(hueSpreadAtom);
+    const contrast = useAtomValue(contrastAtom);
+    const lightness = useAtomValue(lightnessAtom);
+
+    // Generate color palette from settings
+    const colorPalette = useMemo(
+      () =>
+        generateOklchPalette(
+          hue,
+          saturation,
+          hueSpread,
+          isDark ? -contrast : contrast,
+          lightness
+        ),
+      [hue, saturation, hueSpread, contrast, lightness, isDark]
+    );
 
     // Transform tracks to TracklistItem format
     const items = useMemo<TracklistItem[]>(() => {
@@ -190,6 +226,7 @@ export const Tracklist = forwardRef<TracklistHandle, TracklistProps>(
               index={index}
               allItems={items}
               isSelected={index === cursorIndex}
+              colorPalette={colorPalette}
             />
           )}
           onEnter={handleEnter}

@@ -23,6 +23,7 @@ function ActivePanelIndicator({ isActive }: { isActive: boolean }) {
 export interface GridLayoutProps {
   player?: ReactNode | AreaConfig;
   footer?: ReactNode | AreaConfig;
+  settings?: ReactNode | AreaConfig;
   leftSidebar?: ReactNode | AreaConfig;
   rightSidebar?: ReactNode | AreaConfig;
   center?: ReactNode | AreaConfig;
@@ -35,6 +36,7 @@ export interface GridLayoutProps {
 export function GridLayout({
   player,
   footer,
+  settings,
   leftSidebar,
   rightSidebar,
   center,
@@ -46,6 +48,7 @@ export function GridLayout({
   const config = useGridLayoutConfig({
     player,
     footer,
+    settings,
     leftSidebar,
     rightSidebar,
     center,
@@ -138,6 +141,18 @@ export function GridLayout({
         >
           <ActivePanelIndicator isActive={focusedArea === "rightSidebar"} />
           {config.rightSidebarConfig.render}
+        </div>
+      )}
+
+      {/* Settings - full width, auto height, above footer */}
+      {config.hasSettings && config.settingsConfig && (
+        <div
+          className="border-black dark:border-white flex items-center text-black dark:text-white"
+          style={{
+            gridArea: "sett",
+          }}
+        >
+          {config.settingsConfig.render}
         </div>
       )}
 

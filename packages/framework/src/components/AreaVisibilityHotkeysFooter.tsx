@@ -19,13 +19,11 @@ export function AreaVisibilityHotkeysFooter({
     const areaToKey: Record<string, string> = {
       player: "P",
       footer: "F",
+      settings: "S",
       leftSidebar: "L",
       rightSidebar: "R",
       center: "C",
       visualizer: "V",
-      // Legacy mappings
-      header: "H",
-      stage: "S",
     };
 
     // Find which area changed
@@ -61,13 +59,11 @@ export function AreaVisibilityHotkeysFooter({
           const areaMap: Record<string, string> = {
             p: "player",
             f: "footer",
+            s: "settings",
             l: "leftSidebar",
             r: "rightSidebar",
             c: "center",
             v: "visualizer",
-            // Legacy mappings
-            h: "header",
-            s: "stage",
           };
           const area = areaMap[areaKey] as AreaType | undefined;
           const isAreaVisible = area ? visibility[area] : false;

@@ -17,6 +17,7 @@ import { Queue } from "@/components/player/Queue";
 import { Tracklist } from "@/components/Tracklist";
 import { DarkModeToggle } from "@/components/DarkModeToggle";
 import { Lists } from "@/components/Lists";
+import { Settings } from "@/components/Settings";
 
 const meta = {
   title: "Stories/Hotkeys",
@@ -1132,6 +1133,7 @@ function VisualizerWithTableLayout() {
   const visibilityHook = useAreaVisibility({
     player: true,
     footer: true,
+    settings: true,
     leftSidebar: true,
     rightSidebar: true,
     center: true,
@@ -1160,6 +1162,10 @@ function VisualizerWithTableLayout() {
             render: <Tracklist />,
             focusable: visibility.center,
             visible: visibility.center,
+          }}
+          settings={{
+            render: <Settings />,
+            visible: visibility.settings,
           }}
           footer={{
             render: (

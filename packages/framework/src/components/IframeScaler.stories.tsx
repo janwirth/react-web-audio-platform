@@ -1,15 +1,15 @@
-import type { Meta, StoryObj } from '@storybook/react';
-import { IframeScaler } from '@/fixture-viewer-app/IframeScaler';
-import { Column } from '@/components/Column';
-import { Row } from '@/components/Row';
+import type { Meta, StoryObj } from "@storybook/react";
+import { IframeScaler } from "@/components/IframeScaler";
+import { Column } from "@/components/Column";
+import { Row } from "@/components/Row";
 
 const meta = {
-  title: 'Components/IframeScaler',
+  title: "Components/IframeScaler",
   component: IframeScaler,
   parameters: {
-    layout: 'centered',
+    layout: "centered",
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
 } satisfies Meta<typeof IframeScaler>;
 
 export default meta;
@@ -17,7 +17,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    src: 'https://example.com',
+    src: "https://example.com",
     targetWidth: 400,
     targetHeight: 300,
     zoom: 1,
@@ -26,7 +26,7 @@ export const Default: Story = {
 
 export const ScaledDown: Story = {
   args: {
-    src: 'https://example.com',
+    src: "https://example.com",
     targetWidth: 200,
     targetHeight: 150,
     zoom: 0.5,
@@ -35,7 +35,7 @@ export const ScaledDown: Story = {
 
 export const ScaledUp: Story = {
   args: {
-    src: 'https://example.com',
+    src: "https://example.com",
     targetWidth: 600,
     targetHeight: 400,
     zoom: 1.5,
@@ -77,6 +77,3 @@ export const MultipleScalers: Story = {
     </Column>
   ),
 };
-
-
-

@@ -34,6 +34,7 @@ export function normalizeArea(
 interface GridLayoutState {
   hasPlayer: boolean;
   hasFooter: boolean;
+  hasSettings: boolean;
   hasVisualizer: boolean;
   hasLeftSidebar: boolean;
   hasCenter: boolean;
@@ -44,6 +45,7 @@ export function computeGridTemplateAreas(state: GridLayoutState): string[] {
   const {
     hasPlayer,
     hasFooter,
+    hasSettings,
     hasVisualizer,
     hasLeftSidebar,
     hasCenter,
@@ -53,6 +55,7 @@ export function computeGridTemplateAreas(state: GridLayoutState): string[] {
   // 4-character area names
   const PLAY = "play";
   const FOOT = "foot";
+  const SETT = "sett";
   const VIZZ = "vizz";
   const LEFT = "left";
   const CENT = "cent";
@@ -135,6 +138,13 @@ export function computeGridTemplateAreas(state: GridLayoutState): string[] {
 
     row += '"';
     rows.push(row);
+  }
+
+  // Settings row (if exists, spans full width, above footer)
+  if (hasSettings) {
+    rows.push(
+      `"${SETT} ${SETT} ${SETT} ${SETT} ${SETT} ${SETT} ${SETT} ${SETT} ${SETT} ${SETT} ${SETT} ${SETT}"`
+    );
   }
 
   // Footer row
@@ -259,6 +269,7 @@ export function useGridLayoutHotkeys({
 interface UseGridLayoutConfigProps {
   player?: React.ReactNode | AreaConfig;
   footer?: React.ReactNode | AreaConfig;
+  settings?: React.ReactNode | AreaConfig;
   leftSidebar?: React.ReactNode | AreaConfig;
   rightSidebar?: React.ReactNode | AreaConfig;
   center?: React.ReactNode | AreaConfig;
@@ -271,6 +282,7 @@ interface UseGridLayoutConfigProps {
 export function useGridLayoutConfig({
   player,
   footer,
+  settings,
   leftSidebar,
   rightSidebar,
   center,
@@ -282,6 +294,7 @@ export function useGridLayoutConfig({
   // Normalize all areas - support both new and legacy prop names
   const playerConfig = normalizeArea(player ?? header);
   const footerConfig = normalizeArea(footer);
+  const settingsConfig = normalizeArea(settings);
   const leftSidebarConfig = normalizeArea(leftSidebar);
   const rightSidebarConfig = normalizeArea(rightSidebar);
   const centerConfig = normalizeArea(center);
@@ -289,6 +302,7 @@ export function useGridLayoutConfig({
 
   const hasPlayer = playerConfig?.visible ?? false;
   const hasFooter = footerConfig?.visible ?? false;
+  const hasSettings = settingsConfig?.visible ?? false;
   const hasVisualizer = visualizerConfig?.visible ?? false;
   const hasLeftSidebar = leftSidebarConfig?.visible ?? false;
   const hasCenter = centerConfig?.visible ?? false;
@@ -298,13 +312,14 @@ export function useGridLayoutConfig({
   const gridTemplateAreas = computeGridTemplateAreas({
     hasPlayer,
     hasFooter,
+    hasSettings,
     hasVisualizer,
     hasLeftSidebar,
     hasCenter,
     hasRightSidebar,
   });
 
-  // Build grid template rows: auto for player/footer, 1fr for content rows
+  // Build grid template rows: auto for player/footer/settings, 1fr for content rows
   // Split main content into two equal parts if visualizer exists
   const rows: string[] = [];
 
@@ -320,11 +335,13 @@ export function useGridLayoutConfig({
     rows.push("repeat(12, 1fr)");
   }
 
+  if (hasSettings) rows.push("auto");
   if (hasFooter) rows.push("auto");
 
   return {
     playerConfig,
     footerConfig,
+    settingsConfig,
     leftSidebarConfig,
     rightSidebarConfig,
     centerConfig,
@@ -334,6 +351,7 @@ export function useGridLayoutConfig({
     stageConfig: visualizerConfig,
     hasPlayer,
     hasFooter,
+    hasSettings,
     hasVisualizer,
     hasLeftSidebar,
     hasCenter,

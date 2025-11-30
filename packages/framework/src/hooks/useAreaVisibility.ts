@@ -1,11 +1,12 @@
 import { useState, useCallback, useMemo } from "react";
 import { useHotkeys, createHotkeyBinding, HotkeyBinding } from "./useHotkeys";
 
-export type AreaType = "player" | "footer" | "leftSidebar" | "rightSidebar" | "center" | "visualizer" | "header" | "stage"; // header and stage are legacy
+export type AreaType = "player" | "footer" | "settings" | "leftSidebar" | "rightSidebar" | "center" | "visualizer" | "header" | "stage"; // header and stage are legacy
 
 export interface AreaVisibilityState {
   player: boolean;
   footer: boolean;
+  settings: boolean;
   leftSidebar: boolean;
   rightSidebar: boolean;
   center: boolean;
@@ -42,6 +43,7 @@ export function useAreaVisibility(
   const [visibility, setVisibility] = useState<AreaVisibilityState>({
     player: playerValue,
     footer: initialVisibility.footer ?? true,
+    settings: initialVisibility.settings ?? true,
     leftSidebar: initialVisibility.leftSidebar ?? true,
     rightSidebar: initialVisibility.rightSidebar ?? true,
     center: initialVisibility.center ?? true,
@@ -94,13 +96,11 @@ export function useAreaVisibility(
     () => [
       createHotkeyBinding("p", () => toggleArea("player"), "[P]layer"),
       createHotkeyBinding("f", () => toggleArea("footer"), "[F]ooter"),
+      createHotkeyBinding("s", () => toggleArea("settings"), "[S]ettings"),
       createHotkeyBinding("l", () => toggleArea("leftSidebar"), "[L]eft"),
       createHotkeyBinding("r", () => toggleArea("rightSidebar"), "[R]ight"),
       createHotkeyBinding("c", () => toggleArea("center"), "[C]enter"),
       createHotkeyBinding("v", () => toggleArea("visualizer"), "[V]isualizer"),
-      // Legacy hotkeys for backward compatibility
-      createHotkeyBinding("h", () => toggleArea("header"), "[H]eader (legacy)"),
-      createHotkeyBinding("s", () => toggleArea("stage"), "[S]tage (legacy)"),
     ],
     [toggleArea]
   );
