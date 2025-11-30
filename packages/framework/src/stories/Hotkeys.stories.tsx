@@ -1137,7 +1137,7 @@ function VisualizerWithTableLayout() {
     leftSidebar: true,
     rightSidebar: true,
     center: true,
-    visualizer: true,
+    visualizer: false,
   });
   const { visibility } = visibilityHook;
 
