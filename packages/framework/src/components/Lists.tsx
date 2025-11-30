@@ -125,9 +125,9 @@ export function Lists() {
 
   return (
     <div className="grow flex flex-col h-full">
-      <div className="text-black dark:text-white font-mono text-xs p-2 border-b border-black dark:border-white opacity-60">
+      {/* <div className="text-black dark:text-white font-mono text-xs p-2 border-b border-black dark:border-white opacity-60">
         {tracks.length} tracks in "{activeTag}"
-      </div>
+      </div> */}
       <TableVirtualizer
         ref={tableVirtualizerRef}
         items={items}

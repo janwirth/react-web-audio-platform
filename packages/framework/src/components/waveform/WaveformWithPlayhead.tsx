@@ -29,10 +29,10 @@ export function WaveformWithPlayhead({
   };
 
   return (
-    <div className="flex-1 relative">
+    <div className="flex-1 relative cursor-pointer">
       {player.playheadPosition !== null && (
         <div
-          className="w-[1%] min-w-0.5 h-full absolute bottom-[-10%] z-10 transition-all dark:bg-red-500/5 backdrop-invert-100 bg-black/10 opacity-05"
+          className="w-[1%] min-w-0.5 h-full absolute bottom-[-10%] z-10 transition-all dark:bg-red-500/5 backdrop-invert-100 bg-black/10 pointer-none"
           style={{ width: `${player.playheadPosition * 100}%` }}
         ></div>
       )}
@@ -45,6 +45,7 @@ export function WaveformWithPlayhead({
         height={height}
         className="cursor-pointer"
       />
+      <div className="h-0.25 bg-gray-500 w-full"></div>
     </div>
   );
 }

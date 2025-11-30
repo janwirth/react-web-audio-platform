@@ -321,12 +321,12 @@ export function Waveform({
       <div ref={wrapperRef} style={{ width: "100%" }}>
         <canvas
           ref={canvasRef}
+          height={height}
           style={{
             width: "100%",
             height: `${height}px`,
             objectFit: "fill",
             display: "block",
-            padding: "1rem",
             textAlign: "center",
           }}
           onClick={handleClick}
@@ -340,12 +340,12 @@ export function Waveform({
       <div ref={wrapperRef} style={{ width: "100%" }}>
         <canvas
           ref={canvasRef}
+          height={height}
           style={{
             width: "100%",
             height: `${height}px`,
             objectFit: "fill",
             display: "block",
-            padding: "1rem",
             textAlign: "center",
             color: "#ff4444",
           }}
