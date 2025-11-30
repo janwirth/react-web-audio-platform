@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useAtom, useSetAtom } from "jotai";
 import {
   usePlayerContext,
   useCurrentPlayback,
   queueAtom,
   currentQueueIndexAtom,
+  activeUrlAtom,
 } from "./Player";
 import { MiniSpectro } from "../visualizer/MiniSpectro";
 import { Row } from "../Row";
@@ -102,7 +103,11 @@ export function PlayerUI() {
   const remainingTime = duration > 0 ? duration - currentTime : 0;
   return (
     <Row className="items-center gap-5 px-2">
-      <Controls isPlaying={isPlaying} handlePlayPause={handlePlayPause} />
+      <Controls
+        isPlaying={isPlaying}
+        handlePlayPause={handlePlayPause}
+        audioRef={audioRef}
+      />
       <CurrentTrackInfo />
       <Duration
         currentTime={currentTime}
@@ -200,13 +205,58 @@ const Duration = ({
 const Controls = ({
   isPlaying,
   handlePlayPause,
+  audioRef,
 }: {
   isPlaying: boolean;
   handlePlayPause: () => void;
+  audioRef: React.RefObject<HTMLAudioElement | null>;
 }) => {
+  const [queue] = useAtom(queueAtom);
+  const [currentIndex, setCurrentQueueIndex] = useAtom(currentQueueIndexAtom);
+  const setActiveUrl = useSetAtom(activeUrlAtom);
+
+  const handleNext = useCallback(() => {
+    if (currentIndex < queue.length - 1) {
+      const nextIndex = currentIndex + 1;
+      const nextItem = queue[nextIndex];
+      if (nextItem?.audioUrl && audioRef.current) {
+        setCurrentQueueIndex(nextIndex);
+        setActiveUrl(nextItem.audioUrl);
+        audioRef.current.src = nextItem.audioUrl;
+        audioRef.current.load();
+        audioRef.current.play().catch(console.error);
+      }
+    }
+  }, [currentIndex, queue, audioRef, setCurrentQueueIndex, setActiveUrl]);
+
+  const handlePrev = useCallback(() => {
+    if (currentIndex > 0) {
+      const prevIndex = currentIndex - 1;
+      const prevItem = queue[prevIndex];
+      if (prevItem?.audioUrl && audioRef.current) {
+        setCurrentQueueIndex(prevIndex);
+        setActiveUrl(prevItem.audioUrl);
+        audioRef.current.src = prevItem.audioUrl;
+        audioRef.current.load();
+        audioRef.current.play().catch(console.error);
+      }
+    }
+  }, [currentIndex, queue, audioRef, setCurrentQueueIndex, setActiveUrl]);
+
+  const canGoNext = currentIndex < queue.length - 1;
+  const canGoPrev = currentIndex > 0;
+
   return (
     <>
-      <PreviousIcon className="w-4 h-4 ml-0.5" onClick={() => {}} />
+      <button
+        onClick={handlePrev}
+        disabled={!canGoPrev}
+        className="flex items-center justify-center text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-all cursor-pointer disabled:cursor-not-allowed h-full aspect-square hover:bg-gray-200 dark:hover:bg-gray-700"
+        aria-label="Previous track"
+        style={{ opacity: canGoPrev ? 1 : 0.5 }}
+      >
+        <PreviousIcon className="w-4 h-4" />
+      </button>
       <button
         onClick={handlePlayPause}
         className="flex items-center justify-center text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 p-1 w-7 h-7 -mx-2"
@@ -232,7 +282,15 @@ const Controls = ({
           </svg>
         )}
       </button>
-      <NextIcon className="w-4 h-4 mr-2" onClick={() => {}} />
+      <button
+        onClick={handleNext}
+        disabled={!canGoNext}
+        className="flex items-center justify-center text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-all cursor-pointer disabled:cursor-not-allowed h-full aspect-square hover:bg-gray-200 dark:hover:bg-gray-700"
+        aria-label="Next track"
+        style={{ opacity: canGoNext ? 1 : 0.5 }}
+      >
+        <NextIcon className="w-4 h-4" />
+      </button>
     </>
   );
 };
