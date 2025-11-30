@@ -83,7 +83,7 @@ function TrackItemRenderer({
         {_index}
       </div>
       {item.coverUrl && (
-        <div className="w-12 h-12 shrink-0">
+        <div className="w-12 h-12 shrink-0 p-1">
           <img
             src={item.coverUrl}
             alt={item.name}
@@ -108,6 +108,7 @@ function TrackItemRenderer({
             allItems={allItems}
             url={item.audioUrl}
             colorPalette={colorPalette}
+            height={12}
           />
         )}
       </div>
@@ -207,6 +208,10 @@ export const Tracklist = forwardRef<TracklistHandle, TracklistProps>(
       [play, items]
     );
 
+    const handleSelectedIndexClamp = useCallback((clampedIndex: number) => {
+      setCursorIndex(clampedIndex);
+    }, []);
+
     return (
       <div className={`grow flex flex-col ${className}`}>
         <TableVirtualizer
@@ -226,6 +231,7 @@ export const Tracklist = forwardRef<TracklistHandle, TracklistProps>(
           )}
           onEnter={handleEnter}
           selectedIndex={cursorIndex}
+          onSelectedIndexClamp={handleSelectedIndexClamp}
         />
       </div>
     );

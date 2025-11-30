@@ -1,4 +1,10 @@
-import { useImperativeHandle, forwardRef, useCallback } from "react";
+import {
+  useImperativeHandle,
+  forwardRef,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 import { useAtomValue } from "jotai";
 import { useVirtualList } from "../hooks/useVirtualList";
 import { debugViewAtom } from "../atoms/debugView";
@@ -17,6 +23,7 @@ interface TableVirtualizerProps<T> {
   onFocus?: () => void;
   onEnter?: (item: T, index: number) => void;
   selectedIndex?: number;
+  onSelectedIndexClamp?: (clampedIndex: number) => void;
   className?: string;
 }
 
@@ -45,6 +52,7 @@ export const TableVirtualizer = forwardRef<
     onFocus,
     onEnter,
     selectedIndex,
+    onSelectedIndexClamp,
     className = "",
   },
   ref
@@ -88,6 +96,55 @@ export const TableVirtualizer = forwardRef<
 
   // Track scroll finish events
   useScrollFinish(scrollableRef, onScrollFinish);
+
+  // Track previous fully visible range to detect scroll changes
+  const prevFullyVisibleRangeRef = useRef<{
+    start: number;
+    end: number;
+  } | null>(null);
+
+  // Clamp selectedIndex to fully visible range (without overscan) when scrolling
+  useEffect(() => {
+    if (
+      selectedIndex === undefined ||
+      !onSelectedIndexClamp ||
+      items.length === 0
+    ) {
+      return;
+    }
+
+    const fullyVisibleRange = getFullyVisibleRange();
+    const clampedIndex = Math.max(0, Math.min(items.length - 1, selectedIndex));
+
+    // Check if the visible range has changed (scrolling happened)
+    const rangeChanged =
+      !prevFullyVisibleRangeRef.current ||
+      prevFullyVisibleRangeRef.current.start !== fullyVisibleRange.start ||
+      prevFullyVisibleRangeRef.current.end !== fullyVisibleRange.end;
+
+    // Update the ref for next comparison
+    prevFullyVisibleRangeRef.current = fullyVisibleRange;
+
+    // Only clamp if scrolling happened and selectedIndex is outside the fully visible range
+    if (
+      rangeChanged &&
+      (clampedIndex < fullyVisibleRange.start ||
+        clampedIndex > fullyVisibleRange.end)
+    ) {
+      // Clamp to the nearest fully visible index
+      const clampedToVisible = Math.max(
+        fullyVisibleRange.start,
+        Math.min(fullyVisibleRange.end, clampedIndex)
+      );
+      onSelectedIndexClamp(clampedToVisible);
+    }
+  }, [
+    scrollTop,
+    selectedIndex,
+    onSelectedIndexClamp,
+    items.length,
+    getFullyVisibleRange,
+  ]);
 
   // Handle vertical scrollbar
   const handleVerticalScroll = useCallback(

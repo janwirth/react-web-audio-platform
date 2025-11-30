@@ -22,7 +22,7 @@ export function useQueue() {
   return { initQueue };
 }
 
-const ITEM_HEIGHT = 32;
+const ITEM_HEIGHT = 20;
 const OVERSCAN = 3;
 
 export function Queue() {
@@ -155,6 +155,10 @@ export function Queue() {
     [playItemAtIndex]
   );
 
+  const handleSelectedIndexClamp = useCallback((clampedIndex: number) => {
+    setSelectedIndex(clampedIndex);
+  }, []);
+
   const isPanelFocused = useIsPanelFocused("rightSidebar");
 
   const renderItem = useCallback(
@@ -230,6 +234,7 @@ export function Queue() {
           renderItem={renderItem}
           onEnter={handleEnter}
           selectedIndex={selectedIndex}
+          onSelectedIndexClamp={handleSelectedIndexClamp}
           className="flex-1 min-h-0"
         />
       )}

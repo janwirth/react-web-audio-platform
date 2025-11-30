@@ -27,7 +27,7 @@ function ListItemRenderer({
 }) {
   return (
     <div
-      className="font-mono text-sm relative flex items-center px-2 py-1 hover:opacity-60 transition-opacity cursor-pointer"
+      className="p-2 text-xs relative"
       style={{
         backgroundColor: isSelected
           ? "rgba(128, 128, 128, 0.15)"
@@ -36,9 +36,18 @@ function ListItemRenderer({
       onClick={onClick}
     >
       {isSelected && isPanelFocused && (
-        <div className="w-1.5 h-1.5 rounded-full bg-red-500 mr-2 shrink-0" />
+        <>
+          <div className="w-3 h-3 rounded-full bg-red-500 shrink-0 absolute animate-ping left-1 blur-[2px]" />
+          <div className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0 absolute left-1" />
+        </>
       )}
-      <div className="text-black dark:text-white flex items-center gap-2">
+      <div
+        className={`flex items-center gap-2 font-mono ${
+          isSelected
+            ? "text-black dark:text-white font-bold"
+            : "text-gray-500 dark:text-gray-400 font-normal"
+        }`}
+      >
         {item.emoji && <span>{item.emoji}</span>}
         <span>{item.name}</span>
       </div>
@@ -47,7 +56,7 @@ function ListItemRenderer({
 }
 
 export function Lists() {
-  const { tags, activeTag, setActiveTag, tracks } = useData();
+  const { tags, activeTag, setActiveTag } = useData();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const tableVirtualizerRef = useRef<TableVirtualizerHandle>(null);
   const isPanelFocused = useIsPanelFocused("leftSidebar");
@@ -123,6 +132,17 @@ export function Lists() {
     arrowDown: moveDown,
   });
 
+  const handleSelectedIndexClamp = useCallback(
+    (clampedIndex: number) => {
+      setSelectedIndex(clampedIndex);
+      const tag = tags[clampedIndex];
+      if (tag) {
+        setActiveTag(tag.name);
+      }
+    },
+    [tags, setActiveTag]
+  );
+
   return (
     <div className="grow flex flex-col h-full">
       {/* <div className="text-black dark:text-white font-mono text-xs p-2 border-b border-black dark:border-white opacity-60">
@@ -143,6 +163,7 @@ export function Lists() {
           />
         )}
         selectedIndex={selectedIndex}
+        onSelectedIndexClamp={handleSelectedIndexClamp}
         className="flex-1"
       />
     </div>
