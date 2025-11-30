@@ -9,8 +9,8 @@ import {
 // Re-export for backward compatibility
 export type { AreaConfig };
 
-function getHighlightablePanelClasses(): string {
-  return "pt-1 text-black dark:text-white dark:border-white flex relative";
+function getFocusablePanelClasses(): string {
+  return "pt-3 text-black dark:text-white dark:border-white flex relative";
 }
 
 function ActivePanelIndicator({ isActive }: { isActive: boolean }) {
@@ -60,7 +60,7 @@ export function GridLayout({
 
   return (
     <div
-      className="w-full h-full font-mono"
+      className="w-full h-full font-mono gap-2"
       style={{
         display: "grid",
         gridTemplateColumns: "repeat(12, 1fr)",
@@ -96,7 +96,7 @@ export function GridLayout({
       {/* Left Sidebar - spans bottom half of main content if stage exists, otherwise full height */}
       {config.leftSidebarConfig?.visible && (
         <div
-          className={getHighlightablePanelClasses()}
+          className={getFocusablePanelClasses()}
           style={{
             gridArea: "left",
           }}
@@ -109,7 +109,7 @@ export function GridLayout({
       {/* Center - bottom half of main content if stage exists, otherwise full height */}
       {config.centerConfig?.visible && (
         <main
-          className={getHighlightablePanelClasses()}
+          className={getFocusablePanelClasses()}
           style={{
             gridArea: "cent",
           }}
@@ -122,7 +122,7 @@ export function GridLayout({
       {/* Right Sidebar - spans bottom half of main content if stage exists, otherwise full height */}
       {config.rightSidebarConfig?.visible && (
         <div
-          className={getHighlightablePanelClasses()}
+          className={getFocusablePanelClasses()}
           style={{
             gridArea: "rght",
           }}

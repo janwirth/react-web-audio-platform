@@ -18,6 +18,7 @@ import { HotkeyDebuggerSection } from "@/components/HotkeyDebuggerSection";
 import { CenterAreaContent } from "@/layout-app/Data";
 import { Queue } from "@/components/player/Queue";
 import { Tracklist } from "@/components/Tracklist";
+import { DarkModeToggle } from "@/components/DarkModeToggle";
 
 const meta = {
   title: "Stories/Hotkeys",
@@ -1160,7 +1161,11 @@ function VisualizerWithTableLayout() {
           }}
           footer={{
             render: (
-              <AreaVisibilityHotkeysFooter visibilityHook={visibilityHook} />
+              <div className="flex items-center justify-between w-full">
+                <AreaVisibilityHotkeysFooter visibilityHook={visibilityHook} />
+
+                <DarkModeToggle></DarkModeToggle>
+              </div>
             ),
             visible: visibility.footer,
           }}

@@ -162,6 +162,11 @@ export function useVirtualList<T>(
     if (!container || !scrollable) return;
 
     const handleWheel = (e: WheelEvent) => {
+      // Ignore zoom gestures (Ctrl/Cmd + wheel) - let browser handle them
+      if (e.ctrlKey || e.metaKey) {
+        return;
+      }
+
       e.preventDefault();
 
       // Focus scrollable container on scroll

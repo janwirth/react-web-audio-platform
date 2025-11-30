@@ -46,8 +46,8 @@ input::-moz-focus-inner {
 .stripe-indicator {
   background-image: repeating-linear-gradient(
     45deg,
-    black,
-    black 2px,
+    gray,
+    gray 2px,
     white 2px,
     white 4px
   );

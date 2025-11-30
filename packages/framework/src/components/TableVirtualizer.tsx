@@ -15,8 +15,6 @@ interface TableVirtualizerProps<T> {
   onScroll?: (scrollTop: number) => void;
   onScrollFinish?: () => void;
   onFocus?: () => void;
-  onEnter?: (item: T, index: number) => void;
-  selectedIndex?: number;
   className?: string;
 }
 
@@ -28,7 +26,6 @@ export interface TableVirtualizerHandle {
   scrollToIndexIfNeeded: (index: number) => void;
   getVisibleRange: () => { start: number; end: number };
   getFullyVisibleRange: () => { start: number; end: number };
-  triggerEnter?: () => void;
 }
 
 export const TableVirtualizer = forwardRef<
@@ -43,8 +40,6 @@ export const TableVirtualizer = forwardRef<
     onScroll,
     onScrollFinish,
     onFocus,
-    onEnter,
-    selectedIndex,
     className = "",
   },
   ref
@@ -89,37 +84,6 @@ export const TableVirtualizer = forwardRef<
   // Track scroll finish events
   useScrollFinish(scrollableRef, onScrollFinish);
 
-  // Expose method to trigger enter action (called from event bus)
-  useImperativeHandle(
-    ref,
-    () => ({
-      scrollByRows,
-      scrollToTop,
-      scrollToBottom,
-      scrollToIndex,
-      scrollToIndexIfNeeded,
-      getVisibleRange,
-      getFullyVisibleRange,
-      triggerEnter: () => {
-        if (onEnter && selectedIndex !== undefined && selectedIndex >= 0 && selectedIndex < items.length) {
-          onEnter(items[selectedIndex], selectedIndex);
-        }
-      },
-    }),
-    [
-      scrollByRows,
-      scrollToTop,
-      scrollToBottom,
-      scrollToIndex,
-      scrollToIndexIfNeeded,
-      getVisibleRange,
-      getFullyVisibleRange,
-      onEnter,
-      selectedIndex,
-      items,
-    ]
-  );
-
   // Handle vertical scrollbar
   const handleVerticalScroll = useCallback(
     (offset: number) => {
@@ -139,6 +103,28 @@ export const TableVirtualizer = forwardRef<
     [scrollableRef]
   );
 
+  // Expose scroll methods via ref
+  useImperativeHandle(
+    ref,
+    () => ({
+      scrollByRows,
+      scrollToTop,
+      scrollToBottom,
+      scrollToIndex,
+      scrollToIndexIfNeeded,
+      getVisibleRange,
+      getFullyVisibleRange,
+    }),
+    [
+      scrollByRows,
+      scrollToTop,
+      scrollToBottom,
+      scrollToIndex,
+      scrollToIndexIfNeeded,
+      getVisibleRange,
+      getFullyVisibleRange,
+    ]
+  );
 
   return (
     <div
