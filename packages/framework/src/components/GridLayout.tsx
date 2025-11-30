@@ -16,7 +16,8 @@ function getFocusablePanelClasses(): string {
 function ActivePanelIndicator({ isActive }: { isActive: boolean }) {
   if (!isActive) return null;
   return (
-    <div className="absolute top-0 left-0 right-0 h-2 z-10 stripe-indicator" />
+    <></>
+    // <div className="absolute top-0 left-0 right-0 h-2 z-10 stripe-indicator" />
   );
 }
 

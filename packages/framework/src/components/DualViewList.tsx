@@ -13,6 +13,7 @@ import { CoverFlowV2 } from "./coverflowV2";
 import { Waveform, WaveformWithPlayhead } from "./waveform";
 import { useAudioItems } from "@/hooks/useAudioItems";
 import { QueueItem } from "./player/Player";
+import { useIsPanelFocused } from "@/hooks/usePanelEvent";
 
 export interface DualViewListItem {
   id: string | number;
@@ -47,11 +48,13 @@ function RenderItemComponent({
   index,
   allItems,
   isSelected,
+  isPanelFocused,
 }: {
   item: DualViewListItem;
   _index: number;
   allItems: QueueItem[];
   isSelected: boolean;
+  isPanelFocused: boolean;
 }) {
   console.log("item", item);
   return (
@@ -63,13 +66,8 @@ function RenderItemComponent({
           : "transparent",
       }}
     >
-      {isSelected && (
-        <div
-          className="w-1.5 h-1.5 rounded-full absolute -left-2"
-          style={{
-            backgroundColor: "currentColor",
-          }}
-        />
+      {isSelected && isPanelFocused && (
+        <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
       )}
       <div className="text-gray-500 dark:text-gray-400 w-12">#{item.id}</div>
       {item.coverUrl && (
@@ -120,6 +118,7 @@ export const DualViewList = forwardRef<DualViewListHandle, DualViewListProps>(
     const tableVirtualizerRef = useRef<TableVirtualizerHandle>(null);
     const coverFlowRef = useRef<CoverFlowRef>(null);
     const prevShowCoverflowRef = useRef(showCoverflow);
+    const isPanelFocused = useIsPanelFocused("center");
 
     // Transform audioItems to DualViewListItem format
     const items = useMemo<DualViewListItem[]>(() => {
@@ -245,6 +244,7 @@ export const DualViewList = forwardRef<DualViewListHandle, DualViewListProps>(
               index={index}
               allItems={items}
               isSelected={index === cursorIndex}
+              isPanelFocused={isPanelFocused}
             />
           )}
         />

@@ -46,14 +46,16 @@ export function useLayoutHotkeys({
 
   const handleArrowUp = useCallback(() => {
     if (!eventBus) return;
-    // Emit event to the currently focused panel
-    eventBus.emit(state.focusedArea, "arrowUp");
+    // Map layout-app focus areas to panel IDs
+    const panelId = state.focusedArea === "center" ? "center" : "rightSidebar";
+    eventBus.emit(panelId, "arrowUp");
   }, [state.focusedArea, eventBus]);
 
   const handleArrowDown = useCallback(() => {
     if (!eventBus) return;
-    // Emit event to the currently focused panel
-    eventBus.emit(state.focusedArea, "arrowDown");
+    // Map layout-app focus areas to panel IDs
+    const panelId = state.focusedArea === "center" ? "center" : "rightSidebar";
+    eventBus.emit(panelId, "arrowDown");
   }, [state.focusedArea, eventBus]);
 
   const hotkeys = useMemo<HotkeyConfig[]>(

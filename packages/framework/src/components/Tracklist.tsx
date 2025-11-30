@@ -9,7 +9,7 @@ import {
 import { TableVirtualizer, TableVirtualizerHandle } from "./TableVirtualizer";
 import { WaveformWithPlayhead } from "./waveform";
 import { QueueItem, usePlayer } from "./player/Player";
-import { usePanelEvent } from "@/hooks/usePanelEvent";
+import { usePanelEvent, useIsPanelFocused } from "@/hooks/usePanelEvent";
 import { useAtomValue } from "jotai";
 import {
   tracksAtom,
@@ -55,12 +55,14 @@ function TrackItemRenderer({
   allItems,
   isSelected,
   colorPalette,
+  isPanelFocused,
 }: {
   item: TracklistItem;
   index: number;
   allItems: QueueItem[];
   isSelected: boolean;
   colorPalette?: ReturnType<typeof generateOklchPalette>;
+  isPanelFocused: boolean;
 }) {
   return (
     <div
@@ -71,13 +73,8 @@ function TrackItemRenderer({
           : "transparent",
       }}
     >
-      {isSelected && (
-        <div
-          className="w-1.5 h-1.5 rounded-full absolute -left-2"
-          style={{
-            backgroundColor: "currentColor",
-          }}
-        />
+      {isSelected && isPanelFocused && (
+        <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
       )}
       <div className="p-1 text-xs text-gray-500 dark:text-gray-400">
         {_index}
@@ -121,6 +118,7 @@ export const Tracklist = forwardRef<TracklistHandle, TracklistProps>(
     const [cursorIndex, setCursorIndex] = useState(INITIAL_CURSOR_INDEX);
     const tableVirtualizerRef = useRef<TableVirtualizerHandle>(null);
     const { isDark } = useColorScheme();
+    const isPanelFocused = useIsPanelFocused("center");
 
     // Get color settings from atoms
     const hue = useAtomValue(hueAtom);
@@ -227,6 +225,7 @@ export const Tracklist = forwardRef<TracklistHandle, TracklistProps>(
               allItems={items}
               isSelected={index === cursorIndex}
               colorPalette={colorPalette}
+              isPanelFocused={isPanelFocused}
             />
           )}
           onEnter={handleEnter}

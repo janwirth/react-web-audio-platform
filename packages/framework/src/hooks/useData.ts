@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { atom, useAtom } from "jotai";
 import z from "zod";
+import { useDebouncedTrailingHook } from "../components/waveform/hooks/useDebouncedTrailingHook";
 
 const BASE_URL = "http://192.168.178.48:3000";
 
@@ -162,6 +163,9 @@ export function useData() {
   const [loading, setLoading] = useAtom(loadingAtom);
   const [error, setError] = useAtom(errorAtom);
 
+  // Debounce activeTag to prevent rapid API calls when switching tags
+  const debouncedActiveTag = useDebouncedTrailingHook(activeTag, 300);
+
   // Fetch tags - try /tags endpoint first, fallback to extracting from /tracks
   useEffect(() => {
     const fetchTags = async () => {
@@ -241,14 +245,14 @@ export function useData() {
     fetchTags();
   }, []);
 
-  // Fetch tracks by tag when activeTag changes
+  // Fetch tracks by tag when debouncedActiveTag changes
   useEffect(() => {
-    if (!activeTag) return;
+    if (!debouncedActiveTag) return;
 
     const fetchTracksByTag = async () => {
       try {
         setLoading(true);
-        const encodedTag = encodeURIComponent(activeTag);
+        const encodedTag = encodeURIComponent(debouncedActiveTag);
         const response = await fetch(`${BASE_URL}/tracks/by_tag/${encodedTag}`);
         if (!response.ok) {
           throw new Error(`API error: ${response.status}`);
@@ -297,7 +301,7 @@ export function useData() {
     };
 
     fetchTracksByTag();
-  }, [activeTag]);
+  }, [debouncedActiveTag]);
 
   return {
     tags,

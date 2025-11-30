@@ -169,6 +169,7 @@ export function useGridLayoutFocus({
   rightSidebarConfig,
 }: UseGridLayoutFocusProps) {
   const [focusedArea, setFocusedArea] = useState<FocusableArea | null>(null);
+  const eventBus = usePanelEventBus();
 
   // Build list of focusable areas in order
   const focusableAreas = useMemo(() => {
@@ -184,9 +185,18 @@ export function useGridLayoutFocus({
   // Set initial focus to first focusable area
   useEffect(() => {
     if (focusableAreas.length > 0 && focusedArea === null) {
-      setFocusedArea(focusableAreas[0]);
+      const initialFocus = focusableAreas[0];
+      setFocusedArea(initialFocus);
+      eventBus?.setFocusedPanel(initialFocus);
     }
-  }, [focusableAreas, focusedArea]);
+  }, [focusableAreas, focusedArea, eventBus]);
+
+  // Notify event bus when focus changes
+  useEffect(() => {
+    if (focusedArea) {
+      eventBus?.setFocusedPanel(focusedArea);
+    }
+  }, [focusedArea, eventBus]);
 
   // Navigate left
   const navigateLeft = useCallback(() => {

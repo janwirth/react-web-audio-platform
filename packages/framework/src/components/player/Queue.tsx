@@ -8,7 +8,7 @@ import {
 } from "./Player";
 import { usePlayerContext } from "./Player";
 import { TableVirtualizer, TableVirtualizerHandle } from "../TableVirtualizer";
-import { usePanelEvent } from "../../hooks/usePanelEvent";
+import { usePanelEvent, useIsPanelFocused } from "../../hooks/usePanelEvent";
 
 export function useQueue() {
   const setQueue = useSetAtom(queueAtom);
@@ -186,6 +186,8 @@ export function Queue() {
   const canGoNext = currentIndex < queue.length - 1;
   const canGoPrev = currentIndex > 0;
 
+  const isPanelFocused = useIsPanelFocused("rightSidebar");
+
   const renderItem = useCallback(
     (item: QueueItem, index: number) => {
       let opacity = 1;
@@ -213,7 +215,7 @@ export function Queue() {
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, index)}
           onDragEnd={handleDragEnd}
-          className="cursor-pointer select-none py-1 px-2 rounded transition-opacity font-mono text-xs"
+          className="cursor-pointer select-none py-1 px-2 rounded transition-opacity font-mono text-xs relative flex items-center gap-2"
           style={{
             opacity,
             backgroundColor:
@@ -222,17 +224,12 @@ export function Queue() {
                 : "transparent",
           }}
         >
-          <div className="flex items-center gap-2">
-            {isSelected && (
-              <div
-                className="w-1.5 h-1.5 rounded-full"
-                style={{ backgroundColor: "currentColor" }}
-              />
-            )}
-            <span>
-              {index + 1}. {item.title}
-            </span>
-          </div>
+          {isSelected && isPanelFocused && (
+            <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+          )}
+          <span>
+            {index + 1}. {item.title}
+          </span>
         </div>
       );
     },
@@ -241,6 +238,7 @@ export function Queue() {
       dragOverIndex,
       currentIndex,
       selectedIndex,
+      isPanelFocused,
       handleClick,
       handleDragStart,
       handleDragOver,

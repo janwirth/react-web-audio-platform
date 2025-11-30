@@ -1,11 +1,11 @@
-import { useReducer, useRef, useCallback, useState } from "react";
+import { useReducer, useRef, useCallback, useState, useEffect } from "react";
 import { useAtom } from "jotai";
 import { HotkeysBar } from "../components/HotkeysBar";
 import { TableVirtualizerHandle } from "../components/TableVirtualizer";
 import { TabsBar } from "../components/TabsBar";
 import { State, Update } from "./LayoutState";
 import { useLayoutHotkeys } from "../hooks/useLayoutHotkeys";
-import { PanelEventBusProvider } from "../hooks/usePanelEvent";
+import { PanelEventBusProvider, usePanelEventBus } from "../hooks/usePanelEvent";
 import { defaultTabs, CenterAreaContent } from "./Data";
 import { DarkModeToggle } from "../components/DarkModeToggle";
 import { AudioContextProvider } from "../components/audio-context";
@@ -31,11 +31,21 @@ function LayoutAppContent() {
   const [state, dispatch] = useReducer(Update, initialState);
   const [debugView, setDebugView] = useAtom(debugViewAtom);
   const [showVisualizer, setShowVisualizer] = useState(false);
+  const eventBus = usePanelEventBus();
 
   const leftSidebarRef = useRef<HTMLDivElement>(null);
   const centerRef = useRef<HTMLDivElement>(null);
   const rightSidebarRef = useRef<HTMLDivElement>(null);
   const centerVirtualizerRef = useRef<TableVirtualizerHandle>(null);
+
+  // Sync focus state with event bus
+  useEffect(() => {
+    if (eventBus) {
+      // Map layout-app focus areas to panel IDs
+      const panelId = state.focusedArea === "center" ? "center" : "rightSidebar";
+      eventBus.setFocusedPanel(panelId);
+    }
+  }, [state.focusedArea, eventBus]);
 
   const toggleVisualizer = useCallback(() => {
     setShowVisualizer((prev) => !prev);

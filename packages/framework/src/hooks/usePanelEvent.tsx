@@ -1,4 +1,4 @@
-import { useEffect, useRef, useContext, createContext, ReactNode } from "react";
+import { useEffect, useRef, useContext, createContext, ReactNode, useState } from "react";
 
 type PanelId = string;
 
@@ -11,11 +11,16 @@ interface PanelEventHandlers {
 interface PanelEventBus {
   subscribe: (panelId: PanelId, handlers: PanelEventHandlers) => () => void;
   emit: (panelId: PanelId, event: "arrowUp" | "arrowDown" | "enter") => void;
+  setFocusedPanel: (panelId: PanelId | null) => void;
+  getFocusedPanel: () => PanelId | null;
+  onFocusChange: (callback: (panelId: PanelId | null) => void) => () => void;
 }
 
 // Create the event bus
 class EventBus implements PanelEventBus {
   private listeners: Map<PanelId, PanelEventHandlers> = new Map();
+  private focusedPanel: PanelId | null = null;
+  private focusChangeListeners: Set<(panelId: PanelId | null) => void> = new Set();
 
   subscribe(panelId: PanelId, handlers: PanelEventHandlers): () => void {
     this.listeners.set(panelId, handlers);
@@ -33,6 +38,22 @@ class EventBus implements PanelEventBus {
         handler();
       }
     }
+  }
+
+  setFocusedPanel(panelId: PanelId | null): void {
+    this.focusedPanel = panelId;
+    this.focusChangeListeners.forEach((callback) => callback(panelId));
+  }
+
+  getFocusedPanel(): PanelId | null {
+    return this.focusedPanel;
+  }
+
+  onFocusChange(callback: (panelId: PanelId | null) => void): () => void {
+    this.focusChangeListeners.add(callback);
+    return () => {
+      this.focusChangeListeners.delete(callback);
+    };
   }
 }
 
@@ -86,5 +107,30 @@ export function usePanelEvent(
 // Hook to get the event bus for emitting events
 export function usePanelEventBus(): PanelEventBus | null {
   return useContext(PanelEventBusContext);
+}
+
+// Hook to check if a panel is currently focused
+export function useIsPanelFocused(panelId: PanelId): boolean {
+  const eventBus = useContext(PanelEventBusContext);
+  const [isFocused, setIsFocused] = useState<boolean>(() => {
+    return eventBus?.getFocusedPanel() === panelId || false;
+  });
+
+  useEffect(() => {
+    if (!eventBus) return;
+
+    const updateFocus = (focusedPanelId: PanelId | null) => {
+      setIsFocused(focusedPanelId === panelId);
+    };
+
+    // Set initial state
+    updateFocus(eventBus.getFocusedPanel());
+
+    // Subscribe to focus changes
+    const unsubscribe = eventBus.onFocusChange(updateFocus);
+    return unsubscribe;
+  }, [eventBus, panelId]);
+
+  return isFocused;
 }
 

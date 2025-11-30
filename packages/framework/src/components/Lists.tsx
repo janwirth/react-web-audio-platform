@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback, useMemo, useEffect } from "react";
 import { TableVirtualizer, TableVirtualizerHandle } from "./TableVirtualizer";
 import { useData } from "@/hooks/useData";
-import { usePanelEvent } from "@/hooks/usePanelEvent";
+import { usePanelEvent, useIsPanelFocused } from "@/hooks/usePanelEvent";
 
 const ITEM_HEIGHT = 32;
 const OVERSCAN = 3;
@@ -17,11 +17,13 @@ function ListItemRenderer({
   index: _index,
   isSelected,
   onClick,
+  isPanelFocused,
 }: {
   item: ListItem;
   index: number;
   isSelected: boolean;
   onClick: () => void;
+  isPanelFocused: boolean;
 }) {
   return (
     <div
@@ -33,13 +35,8 @@ function ListItemRenderer({
       }}
       onClick={onClick}
     >
-      {isSelected && (
-        <div
-          className="w-1.5 h-1.5 rounded-full absolute -left-2"
-          style={{
-            backgroundColor: "currentColor",
-          }}
-        />
+      {isSelected && isPanelFocused && (
+        <div className="w-1.5 h-1.5 rounded-full bg-red-500 mr-2 shrink-0" />
       )}
       <div className="text-black dark:text-white flex items-center gap-2">
         {item.emoji && <span>{item.emoji}</span>}
@@ -53,6 +50,7 @@ export function Lists() {
   const { tags, activeTag, setActiveTag, tracks } = useData();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const tableVirtualizerRef = useRef<TableVirtualizerHandle>(null);
+  const isPanelFocused = useIsPanelFocused("leftSidebar");
 
   // Convert tags to ListItem format
   const items = useMemo<ListItem[]>(() => {
@@ -141,6 +139,7 @@ export function Lists() {
             index={index}
             isSelected={index === selectedIndex}
             onClick={() => handleItemClick(index)}
+            isPanelFocused={isPanelFocused}
           />
         )}
         selectedIndex={selectedIndex}
