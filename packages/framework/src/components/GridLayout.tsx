@@ -1,14 +1,13 @@
-import { ReactNode, useState, useMemo, useCallback, useEffect } from "react";
-import { useHotkeys, createHotkeyBinding } from "@/hooks/useHotkeys";
-import { usePanelEventBus } from "@/hooks/usePanelEvent";
+import { ReactNode } from "react";
+import {
+  AreaConfig,
+  useGridLayoutConfig,
+  useGridLayoutFocus,
+  useGridLayoutHotkeys,
+} from "@/hooks/useGridLayout";
 
-type FocusableArea = "leftSidebar" | "center" | "rightSidebar";
-
-export interface AreaConfig {
-  render: ReactNode;
-  focusable?: boolean;
-  visible?: boolean;
-}
+// Re-export for backward compatibility
+export type { AreaConfig };
 
 function getHighlightablePanelClasses(isFocused: boolean): string {
   const baseClasses = "text-black dark:text-white dark:border-white flex";
@@ -17,27 +16,6 @@ function getHighlightablePanelClasses(isFocused: boolean): string {
     : "";
 
   return [baseClasses, focusClasses].filter(Boolean).join(" ");
-}
-
-function normalizeArea(
-  area: ReactNode | AreaConfig | undefined
-): { render: ReactNode; focusable: boolean; visible: boolean } | null {
-  if (!area) return null;
-
-  if (typeof area === "object" && "render" in area) {
-    return {
-      render: area.render,
-      focusable: area.focusable ?? false,
-      visible: area.visible ?? true,
-    };
-  }
-
-  // Legacy API: ReactNode
-  return {
-    render: area,
-    focusable: false,
-    visible: true,
-  };
 }
 
 export interface GridLayoutProps {
@@ -57,107 +35,26 @@ export function GridLayout({
   center,
   stage,
 }: GridLayoutProps) {
-  const [focusedArea, setFocusedArea] = useState<FocusableArea | null>(null);
-  const eventBus = usePanelEventBus();
-
-  // Normalize all areas
-  const headerConfig = normalizeArea(header);
-  const footerConfig = normalizeArea(footer);
-  const leftSidebarConfig = normalizeArea(leftSidebar);
-  const rightSidebarConfig = normalizeArea(rightSidebar);
-  const centerConfig = normalizeArea(center);
-  const stageConfig = normalizeArea(stage);
-
-  // Build list of focusable areas in order
-  const focusableAreas = useMemo(() => {
-    const areas: FocusableArea[] = [];
-    if (leftSidebarConfig?.focusable && leftSidebarConfig?.visible)
-      areas.push("leftSidebar");
-    if (centerConfig?.focusable && centerConfig?.visible) areas.push("center");
-    if (rightSidebarConfig?.focusable && rightSidebarConfig?.visible)
-      areas.push("rightSidebar");
-    return areas;
-  }, [leftSidebarConfig, centerConfig, rightSidebarConfig]);
-
-  // Set initial focus to first focusable area
-  useEffect(() => {
-    if (focusableAreas.length > 0 && focusedArea === null) {
-      setFocusedArea(focusableAreas[0]);
-    }
-  }, [focusableAreas, focusedArea]);
-
-  // Navigate left
-  const navigateLeft = useCallback(() => {
-    if (focusableAreas.length === 0) return;
-    const currentIndex = focusedArea ? focusableAreas.indexOf(focusedArea) : -1;
-    if (currentIndex > 0) {
-      setFocusedArea(focusableAreas[currentIndex - 1]);
-    }
-  }, [focusableAreas, focusedArea]);
-
-  // Navigate right
-  const navigateRight = useCallback(() => {
-    if (focusableAreas.length === 0) return;
-    const currentIndex = focusedArea ? focusableAreas.indexOf(focusedArea) : -1;
-    if (currentIndex < focusableAreas.length - 1) {
-      setFocusedArea(focusableAreas[currentIndex + 1]);
-    }
-  }, [focusableAreas, focusedArea]);
-
-  // Create hotkey bindings for arrow keys and enter
-  const arrowKeyBindings = useMemo(
-    () => [
-      createHotkeyBinding("arrowleft", navigateLeft, "Navigate left"),
-      createHotkeyBinding("arrowright", navigateRight, "Navigate right"),
-      createHotkeyBinding(
-        "arrowup",
-        () => {
-          if (!eventBus || !focusedArea) return;
-          eventBus.emit(focusedArea, "arrowUp");
-        },
-        "Scroll up / Move selection up"
-      ),
-      createHotkeyBinding(
-        "arrowdown",
-        () => {
-          if (!eventBus || !focusedArea) return;
-          eventBus.emit(focusedArea, "arrowDown");
-        },
-        "Scroll down / Move selection down"
-      ),
-      createHotkeyBinding(
-        "enter",
-        () => {
-          if (!eventBus || !focusedArea) return;
-          eventBus.emit(focusedArea, "enter");
-        },
-        "Activate / Select item"
-      ),
-    ],
-    [navigateLeft, navigateRight, eventBus, focusedArea]
-  );
-
-  // Register arrow key hotkeys
-  useHotkeys(arrowKeyBindings, {
-    preventDefault: true,
-    enableOnFormTags: true,
+  const config = useGridLayoutConfig({
+    header,
+    footer,
+    leftSidebar,
+    rightSidebar,
+    center,
+    stage,
   });
-  const hasHeader = headerConfig?.visible ?? false;
-  const hasFooter = footerConfig?.visible ?? false;
-  const hasStage = stageConfig?.visible ?? false;
 
-  // Build grid template rows: auto for header/footer, 1fr for content rows
-  // Split main content into two equal parts if stage exists
-  const rows: string[] = [];
-  if (hasHeader) rows.push("auto");
+  const { focusedArea, navigateLeft, navigateRight } = useGridLayoutFocus({
+    leftSidebarConfig: config.leftSidebarConfig,
+    centerConfig: config.centerConfig,
+    rightSidebarConfig: config.rightSidebarConfig,
+  });
 
-  if (hasStage) {
-    rows.push("repeat(6, 1fr)", "repeat(6, 1fr)");
-  } else {
-    rows.push("repeat(12, 1fr)");
-  }
-
-  if (hasFooter) rows.push("auto");
+  useGridLayoutHotkeys({
+    navigateLeft,
+    navigateRight,
+    focusedArea,
+  });
 
   return (
     <div
@@ -165,144 +62,84 @@ export function GridLayout({
       style={{
         display: "grid",
         gridTemplateColumns: "repeat(12, 1fr)",
-        gridTemplateRows: rows.join(" "),
+        gridTemplateRows: config.gridTemplateRows,
+        gridTemplateAreas: config.gridTemplateAreas.join(" "),
         height: "100vh",
       }}
     >
       {/* Header - full width, auto height */}
-      {hasHeader && headerConfig && (
+      {config.hasHeader && config.headerConfig && (
         <div
           className="border-black dark:border-white flex items-center text-black dark:text-white"
           style={{
-            gridColumn: "1 / -1",
-            gridRow: "1",
+            gridArea: "head",
           }}
         >
-          {headerConfig.render}
+          {config.headerConfig.render}
         </div>
       )}
 
       {/* Stage - top half of main content, full width, above center/sidebars */}
-      {hasStage && stageConfig && (
+      {config.hasStage && config.stageConfig && (
         <div
           className="border-black dark:border-white text-black dark:text-white "
           style={{
-            gridColumn: "1 / -1",
-            gridRow: hasHeader
-              ? hasFooter
-                ? "2 / 8"
-                : "2 / 8"
-              : hasFooter
-              ? "1 / 7"
-              : "1 / 7",
+            gridArea: "stag",
           }}
         >
-          {stageConfig.render}
+          {config.stageConfig.render}
         </div>
       )}
 
       {/* Left Sidebar - spans bottom half of main content if stage exists, otherwise full height */}
-      {leftSidebarConfig?.visible && (
+      {config.leftSidebarConfig?.visible && (
         <div
           className={getHighlightablePanelClasses(
             focusedArea === "leftSidebar"
           )}
           style={{
-            gridColumn: "1 / 3",
-            gridRow: hasHeader
-              ? hasStage
-                ? hasFooter
-                  ? "8 / -2"
-                  : "8 / -1"
-                : hasFooter
-                ? "2 / -2"
-                : "2 / -1"
-              : hasStage
-              ? hasFooter
-                ? "7 / -2"
-                : "7 / -1"
-              : hasFooter
-              ? "1 / -2"
-              : "1 / -1",
+            gridArea: "left",
           }}
         >
-          {leftSidebarConfig.render}
+          {config.leftSidebarConfig.render}
         </div>
       )}
 
       {/* Center - bottom half of main content if stage exists, otherwise full height */}
-      {centerConfig?.visible && (
+      {config.centerConfig?.visible && (
         <main
           className={getHighlightablePanelClasses(focusedArea === "center")}
           style={{
-            // backgroundColor: "red",
-            gridColumn: leftSidebarConfig?.visible
-              ? rightSidebarConfig?.visible
-                ? "3 / 10"
-                : "3 / -1"
-              : rightSidebarConfig?.visible
-              ? "1 / 10"
-              : "1 / -1",
-            gridRow: hasHeader
-              ? hasStage
-                ? hasFooter
-                  ? "8 / -2"
-                  : "8 / -1"
-                : hasFooter
-                ? "2 / -2"
-                : "2 / -1"
-              : hasStage
-              ? hasFooter
-                ? "7 / -2"
-                : "7 / -1"
-              : hasFooter
-              ? "1 / -2"
-              : "1 / -1",
+            gridArea: "cent",
           }}
         >
-          {centerConfig.render}
+          {config.centerConfig.render}
         </main>
       )}
 
       {/* Right Sidebar - spans bottom half of main content if stage exists, otherwise full height */}
-      {rightSidebarConfig?.visible && (
+      {config.rightSidebarConfig?.visible && (
         <div
           className={getHighlightablePanelClasses(
             focusedArea === "rightSidebar"
           )}
           style={{
-            gridColumn: "10 / -1",
-            gridRow: hasHeader
-              ? hasStage
-                ? hasFooter
-                  ? "8 / -2"
-                  : "8 / -1"
-                : hasFooter
-                ? "2 / -2"
-                : "2 / -1"
-              : hasStage
-              ? hasFooter
-                ? "7 / -2"
-                : "7 / -1"
-              : hasFooter
-              ? "1 / -2"
-              : "1 / -1",
+            gridArea: "rght",
           }}
         >
-          {rightSidebarConfig.render}
+          {config.rightSidebarConfig.render}
         </div>
       )}
 
       {/* Footer - full width, auto height */}
-      {hasFooter && footerConfig && (
+      {config.hasFooter && config.footerConfig && (
         <div
           className="border-black dark:border-white flex items-center text-black dark:text-white"
           style={{
-            gridColumn: "1 / -1",
-            gridRow: "-1",
+            gridArea: "foot",
           }}
         >
-          {footerConfig.render}
+          {config.footerConfig.render}
         </div>
       )}
     </div>
