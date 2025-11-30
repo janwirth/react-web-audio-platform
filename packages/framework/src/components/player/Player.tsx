@@ -6,10 +6,12 @@ import React, {
   useCallback,
   useState,
   ReactNode,
+  useMemo,
 } from "react";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { atomFamily } from "jotai/utils";
 import { DualViewListItem } from "../DualViewList";
+import { useHotkeys, createHotkeyBinding } from "../../hooks/useHotkeys";
 
 interface PlayerContextValue {
   audioRef: React.RefObject<HTMLAudioElement | null>;
@@ -231,6 +233,31 @@ export const Player: React.FC<PlayerProps> = ({ children }) => {
       audio.removeEventListener("loadedmetadata", updatePositionState);
     };
   }, []);
+
+  // Space key handler for play/pause
+  const handleSpaceKey = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio || !activeUrl) return; // Only respond if something is loaded
+
+    if (audio.paused) {
+      audio.play().catch(console.error);
+    } else {
+      audio.pause();
+    }
+  }, [activeUrl]);
+
+  // Register space key hotkey
+  const spaceKeyBindings = useMemo(
+    () => [
+      createHotkeyBinding("space", handleSpaceKey, "Play / Pause"),
+    ],
+    [handleSpaceKey]
+  );
+
+  useHotkeys(spaceKeyBindings, {
+    preventDefault: true,
+    enableOnFormTags: false,
+  });
 
   return (
     <PlayerContext.Provider value={{ audioRef }}>
