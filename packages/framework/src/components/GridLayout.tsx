@@ -21,28 +21,37 @@ function ActivePanelIndicator({ isActive }: { isActive: boolean }) {
 }
 
 export interface GridLayoutProps {
-  header?: ReactNode | AreaConfig;
+  player?: ReactNode | AreaConfig;
   footer?: ReactNode | AreaConfig;
   leftSidebar?: ReactNode | AreaConfig;
   rightSidebar?: ReactNode | AreaConfig;
   center?: ReactNode | AreaConfig;
+  visualizer?: ReactNode | AreaConfig;
+  // Legacy props for backward compatibility
+  header?: ReactNode | AreaConfig;
   stage?: ReactNode | AreaConfig;
 }
 
 export function GridLayout({
-  header,
+  player,
   footer,
   leftSidebar,
   rightSidebar,
   center,
+  visualizer,
+  // Legacy props
+  header,
   stage,
 }: GridLayoutProps) {
   const config = useGridLayoutConfig({
-    header,
+    player,
     footer,
     leftSidebar,
     rightSidebar,
     center,
+    visualizer,
+    // Legacy props
+    header,
     stage,
   });
 
@@ -69,31 +78,31 @@ export function GridLayout({
         height: "100vh",
       }}
     >
-      {/* Header - full width, auto height */}
-      {config.hasHeader && config.headerConfig && (
-        <div
-          className="border-black dark:border-white flex items-center text-black dark:text-white"
-          style={{
-            gridArea: "head",
-          }}
-        >
-          {config.headerConfig.render}
-        </div>
-      )}
-
-      {/* Stage - top half of main content, full width, above center/sidebars */}
-      {config.hasStage && config.stageConfig && (
+      {/* Visualizer - top half of main content, full width, above player and center/sidebars */}
+      {config.hasVisualizer && config.visualizerConfig && (
         <div
           className="border-black dark:border-white text-black dark:text-white "
           style={{
-            gridArea: "stag",
+            gridArea: "vizz",
           }}
         >
-          {config.stageConfig.render}
+          {config.visualizerConfig.render}
         </div>
       )}
 
-      {/* Left Sidebar - spans bottom half of main content if stage exists, otherwise full height */}
+      {/* Player - full width, auto height, below visualizer */}
+      {config.hasPlayer && config.playerConfig && (
+        <div
+          className="border-black dark:border-white flex items-center text-black dark:text-white"
+          style={{
+            gridArea: "play",
+          }}
+        >
+          {config.playerConfig.render}
+        </div>
+      )}
+
+      {/* Left Sidebar - spans bottom half of main content if visualizer exists, otherwise full height */}
       {config.leftSidebarConfig?.visible && (
         <div
           className={getFocusablePanelClasses()}
@@ -106,7 +115,7 @@ export function GridLayout({
         </div>
       )}
 
-      {/* Center - bottom half of main content if stage exists, otherwise full height */}
+      {/* Center - bottom half of main content if visualizer exists, otherwise full height */}
       {config.centerConfig?.visible && (
         <main
           className={getFocusablePanelClasses()}
@@ -119,7 +128,7 @@ export function GridLayout({
         </main>
       )}
 
-      {/* Right Sidebar - spans bottom half of main content if stage exists, otherwise full height */}
+      {/* Right Sidebar - spans bottom half of main content if visualizer exists, otherwise full height */}
       {config.rightSidebarConfig?.visible && (
         <div
           className={getFocusablePanelClasses()}

@@ -974,7 +974,7 @@ function HotkeyTesterInGridLayout() {
   return (
     <PanelEventBusProvider>
       <GridLayout
-        header={{
+        player={{
           render: (
             <div className="text-black dark:text-white">
               Hotkey Testing in GridLayout
@@ -1019,25 +1019,25 @@ export const InGridLayout: Story = {
 
 function AreaVisibilityHotkeys() {
   const visibilityHook = useAreaVisibility({
-    header: true,
+    player: true,
     footer: true,
     leftSidebar: true,
     rightSidebar: true,
     center: true,
-    stage: true,
+    visualizer: true,
   });
   const { visibility } = visibilityHook;
 
   return (
     <PanelEventBusProvider>
       <GridLayout
-        header={{
+        player={{
           render: (
             <div className="text-black dark:text-white font-mono">
               Area Visibility Hotkeys
             </div>
           ),
-          visible: visibility.header,
+          visible: visibility.player,
         }}
         footer={{
           render: (
@@ -1079,12 +1079,12 @@ function AreaVisibilityHotkeys() {
                 Use hotkeys to toggle visibility of different layout areas:
               </p>
               <div className="space-y-2 text-xs mb-6">
-                <p>• Press H to toggle Header</p>
+                <p>• Press P to toggle Player</p>
                 <p>• Press F to toggle Footer</p>
                 <p>• Press L to toggle Left Sidebar</p>
                 <p>• Press R to toggle Right Sidebar</p>
                 <p>• Press C to toggle Center</p>
-                <p>• Press S to toggle Stage</p>
+                <p>• Press V to toggle Visualizer</p>
               </div>
               <div className="text-xs opacity-60">
                 <p>
@@ -1097,16 +1097,16 @@ function AreaVisibilityHotkeys() {
           focusable: visibility.center,
           visible: visibility.center,
         }}
-        stage={{
+        visualizer={{
           render: (
             <div className="text-black dark:text-white font-mono p-4">
-              <div className="text-sm font-bold mb-2">Stage Area</div>
+              <div className="text-sm font-bold mb-2">Visualizer Area</div>
               <div className="text-xs opacity-60">
-                Press S to toggle visibility
+                Press V to toggle visibility
               </div>
             </div>
           ),
-          visible: visibility.stage,
+          visible: visibility.visualizer,
         }}
       />
     </PanelEventBusProvider>
@@ -1130,12 +1130,12 @@ const sampleTableItems = Array.from({ length: 100 }, (_, i) => ({
 
 function VisualizerWithTableLayout() {
   const visibilityHook = useAreaVisibility({
-    header: true,
+    player: true,
     footer: true,
     leftSidebar: true,
     rightSidebar: true,
     center: true,
-    stage: true,
+    visualizer: true,
   });
   const { visibility } = visibilityHook;
 
@@ -1143,14 +1143,18 @@ function VisualizerWithTableLayout() {
     <PanelEventBusProvider>
       <Player>
         <GridLayout
-          header={{
+          visualizer={{
+            render: <Visualizer height={400} />,
+            visible: visibility.visualizer,
+          }}
+          player={{
             render: (
               <div className="px-2 py-1 w-full">
                 {" "}
                 <PlayerUI />
               </div>
             ),
-            visible: visibility.header,
+            visible: visibility.player,
           }}
           center={{
             render: <Tracklist />,
@@ -1176,10 +1180,6 @@ function VisualizerWithTableLayout() {
             render: <Queue></Queue>,
             focusable: visibility.rightSidebar,
             visible: visibility.rightSidebar,
-          }}
-          stage={{
-            render: <Visualizer height={400} />,
-            visible: visibility.stage,
           }}
         />
       </Player>

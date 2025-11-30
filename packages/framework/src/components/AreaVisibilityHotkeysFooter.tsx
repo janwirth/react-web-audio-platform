@@ -16,12 +16,15 @@ export function AreaVisibilityHotkeysFooter({
   // Track visibility changes to detect which hotkey was pressed
   useEffect(() => {
     const prev = prevVisibilityRef.current;
-    const areaToKey: Record<keyof typeof visibility, string> = {
-      header: "H",
+    const areaToKey: Record<string, string> = {
+      player: "P",
       footer: "F",
       leftSidebar: "L",
       rightSidebar: "R",
       center: "C",
+      visualizer: "V",
+      // Legacy mappings
+      header: "H",
       stage: "S",
     };
 
@@ -56,11 +59,14 @@ export function AreaVisibilityHotkeysFooter({
           const isActive = activeHotkey === displayKey;
           const areaKey = displayKey.toLowerCase();
           const areaMap: Record<string, string> = {
-            h: "header",
+            p: "player",
             f: "footer",
             l: "leftSidebar",
             r: "rightSidebar",
             c: "center",
+            v: "visualizer",
+            // Legacy mappings
+            h: "header",
             s: "stage",
           };
           const area = areaMap[areaKey] as AreaType | undefined;

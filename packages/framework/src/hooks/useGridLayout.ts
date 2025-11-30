@@ -32,9 +32,9 @@ export function normalizeArea(
 }
 
 interface GridLayoutState {
-  hasHeader: boolean;
+  hasPlayer: boolean;
   hasFooter: boolean;
-  hasStage: boolean;
+  hasVisualizer: boolean;
   hasLeftSidebar: boolean;
   hasCenter: boolean;
   hasRightSidebar: boolean;
@@ -42,18 +42,18 @@ interface GridLayoutState {
 
 export function computeGridTemplateAreas(state: GridLayoutState): string[] {
   const {
-    hasHeader,
+    hasPlayer,
     hasFooter,
-    hasStage,
+    hasVisualizer,
     hasLeftSidebar,
     hasCenter,
     hasRightSidebar,
   } = state;
 
   // 4-character area names
-  const HEAD = "head";
+  const PLAY = "play";
   const FOOT = "foot";
-  const STAG = "stag";
+  const VIZZ = "vizz";
   const LEFT = "left";
   const CENT = "cent";
   const RGHT = "rght";
@@ -61,48 +61,46 @@ export function computeGridTemplateAreas(state: GridLayoutState): string[] {
 
   const rows: string[] = [];
 
-  // Header row
-  if (hasHeader) {
+  // Visualizer row (if exists, spans full width) - comes first
+  if (hasVisualizer) {
     rows.push(
-      `"${HEAD} ${HEAD} ${HEAD} ${HEAD} ${HEAD} ${HEAD} ${HEAD} ${HEAD} ${HEAD} ${HEAD} ${HEAD} ${HEAD}"`
+      `"${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ}"`
+    );
+    rows.push(
+      `"${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ}"`
+    );
+    rows.push(
+      `"${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ}"`
+    );
+    rows.push(
+      `"${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ}"`
+    );
+    rows.push(
+      `"${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ}"`
+    );
+    rows.push(
+      `"${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ}"`
     );
   }
 
-  // Stage row (if exists, spans full width)
-  if (hasStage) {
+  // Player row (if exists, spans full width) - comes after visualizer
+  if (hasPlayer) {
     rows.push(
-      `"${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG}"`
-    );
-    rows.push(
-      `"${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG}"`
-    );
-    rows.push(
-      `"${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG}"`
-    );
-    rows.push(
-      `"${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG}"`
-    );
-    rows.push(
-      `"${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG}"`
-    );
-    rows.push(
-      `"${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG} ${STAG}"`
+      `"${PLAY} ${PLAY} ${PLAY} ${PLAY} ${PLAY} ${PLAY} ${PLAY} ${PLAY} ${PLAY} ${PLAY} ${PLAY} ${PLAY}"`
     );
   }
 
-  // Main content row(s) - bottom half if stage exists, otherwise full height
-  const contentRowCount = hasStage ? 6 : 12;
+  // Main content row(s) - bottom half if visualizer exists, otherwise full height
+  const contentRowCount = hasVisualizer ? 6 : 12;
   for (let i = 0; i < contentRowCount; i++) {
     let row = '"';
 
-    // Left sidebar: columns 1-2 (2 columns)
+    // Left sidebar: columns 1-2 (2 columns) - only if visible
     if (hasLeftSidebar) {
       row += `${LEFT} ${LEFT} `;
-    } else {
-      row += `${EMPT} ${EMPT} `;
     }
 
-    // Center: columns 3-9 (7 columns) if both sidebars, otherwise spans remaining
+    // Center: spans remaining columns based on sidebar visibility
     if (hasCenter) {
       if (hasLeftSidebar && hasRightSidebar) {
         // Center spans columns 3-9 (7 columns)
@@ -111,10 +109,10 @@ export function computeGridTemplateAreas(state: GridLayoutState): string[] {
         // Center spans columns 3-12 (10 columns)
         row += `${CENT} ${CENT} ${CENT} ${CENT} ${CENT} ${CENT} ${CENT} ${CENT} ${CENT} ${CENT} `;
       } else if (hasRightSidebar) {
-        // Center spans columns 1-9 (9 columns)
+        // Center spans columns 1-9 (9 columns) - full width minus right sidebar
         row += `${CENT} ${CENT} ${CENT} ${CENT} ${CENT} ${CENT} ${CENT} ${CENT} ${CENT} `;
       } else {
-        // Center spans full width (12 columns)
+        // Center spans full width (12 columns) - no sidebars
         row += `${CENT} ${CENT} ${CENT} ${CENT} ${CENT} ${CENT} ${CENT} ${CENT} ${CENT} ${CENT} ${CENT} ${CENT} `;
       }
     } else {
@@ -130,11 +128,9 @@ export function computeGridTemplateAreas(state: GridLayoutState): string[] {
       row += `${EMPT} `.repeat(centerCols);
     }
 
-    // Right sidebar: columns 10-12 (3 columns)
+    // Right sidebar: columns 10-12 (3 columns) - only if visible
     if (hasRightSidebar) {
       row += `${RGHT} ${RGHT} ${RGHT}`;
-    } else {
-      row += `${EMPT} ${EMPT} ${EMPT}`;
     }
 
     row += '"';
@@ -261,54 +257,65 @@ export function useGridLayoutHotkeys({
 }
 
 interface UseGridLayoutConfigProps {
-  header?: React.ReactNode | AreaConfig;
+  player?: React.ReactNode | AreaConfig;
   footer?: React.ReactNode | AreaConfig;
   leftSidebar?: React.ReactNode | AreaConfig;
   rightSidebar?: React.ReactNode | AreaConfig;
   center?: React.ReactNode | AreaConfig;
+  visualizer?: React.ReactNode | AreaConfig;
+  // Legacy props for backward compatibility
+  header?: React.ReactNode | AreaConfig;
   stage?: React.ReactNode | AreaConfig;
 }
 
 export function useGridLayoutConfig({
-  header,
+  player,
   footer,
   leftSidebar,
   rightSidebar,
   center,
+  visualizer,
+  // Legacy props
+  header,
   stage,
 }: UseGridLayoutConfigProps) {
-  // Normalize all areas
-  const headerConfig = normalizeArea(header);
+  // Normalize all areas - support both new and legacy prop names
+  const playerConfig = normalizeArea(player ?? header);
   const footerConfig = normalizeArea(footer);
   const leftSidebarConfig = normalizeArea(leftSidebar);
   const rightSidebarConfig = normalizeArea(rightSidebar);
   const centerConfig = normalizeArea(center);
-  const stageConfig = normalizeArea(stage);
+  const visualizerConfig = normalizeArea(visualizer ?? stage);
 
-  const hasHeader = headerConfig?.visible ?? false;
+  const hasPlayer = playerConfig?.visible ?? false;
   const hasFooter = footerConfig?.visible ?? false;
-  const hasStage = stageConfig?.visible ?? false;
+  const hasVisualizer = visualizerConfig?.visible ?? false;
   const hasLeftSidebar = leftSidebarConfig?.visible ?? false;
   const hasCenter = centerConfig?.visible ?? false;
   const hasRightSidebar = rightSidebarConfig?.visible ?? false;
 
   // Compute grid template areas based on state
   const gridTemplateAreas = computeGridTemplateAreas({
-    hasHeader,
+    hasPlayer,
     hasFooter,
-    hasStage,
+    hasVisualizer,
     hasLeftSidebar,
     hasCenter,
     hasRightSidebar,
   });
 
-  // Build grid template rows: auto for header/footer, 1fr for content rows
-  // Split main content into two equal parts if stage exists
+  // Build grid template rows: auto for player/footer, 1fr for content rows
+  // Split main content into two equal parts if visualizer exists
   const rows: string[] = [];
-  if (hasHeader) rows.push("auto");
 
-  if (hasStage) {
-    rows.push("repeat(6, 1fr)", "repeat(6, 1fr)");
+  if (hasVisualizer) {
+    rows.push("repeat(6, 1fr)");
+  }
+
+  if (hasPlayer) rows.push("auto");
+
+  if (hasVisualizer) {
+    rows.push("repeat(6, 1fr)");
   } else {
     rows.push("repeat(12, 1fr)");
   }
@@ -316,21 +323,25 @@ export function useGridLayoutConfig({
   if (hasFooter) rows.push("auto");
 
   return {
-    headerConfig,
+    playerConfig,
     footerConfig,
     leftSidebarConfig,
     rightSidebarConfig,
     centerConfig,
-    stageConfig,
-    hasHeader,
+    visualizerConfig,
+    // Legacy exports for backward compatibility
+    headerConfig: playerConfig,
+    stageConfig: visualizerConfig,
+    hasPlayer,
     hasFooter,
-    hasStage,
+    hasVisualizer,
     hasLeftSidebar,
     hasCenter,
     hasRightSidebar,
+    // Legacy exports for backward compatibility
+    hasHeader: hasPlayer,
+    hasStage: hasVisualizer,
     gridTemplateAreas,
     gridTemplateRows: rows.join(" "),
   };
 }
-
-

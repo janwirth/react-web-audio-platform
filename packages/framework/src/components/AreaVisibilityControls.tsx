@@ -18,11 +18,11 @@ export function AreaVisibilityControls({
   // Map hotkey info to area configs
   const areaConfigs: AreaConfig[] = [
     {
-      key: "header",
-      label: "Header",
-      hotkeyInfo: hotkeyInfo.find((h) => h.key === "H") || {
-        key: "H",
-        description: "[H]eader",
+      key: "player",
+      label: "Player",
+      hotkeyInfo: hotkeyInfo.find((h) => h.key === "P") || {
+        key: "P",
+        description: "[P]layer",
       },
     },
     {
@@ -58,11 +58,11 @@ export function AreaVisibilityControls({
       },
     },
     {
-      key: "stage",
-      label: "Stage",
-      hotkeyInfo: hotkeyInfo.find((h) => h.key === "S") || {
-        key: "S",
-        description: "[S]tage",
+      key: "visualizer",
+      label: "Visualizer",
+      hotkeyInfo: hotkeyInfo.find((h) => h.key === "V") || {
+        key: "V",
+        description: "[V]isualizer",
       },
     },
   ];

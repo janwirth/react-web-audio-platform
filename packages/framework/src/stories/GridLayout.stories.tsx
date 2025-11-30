@@ -20,22 +20,22 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    header: { render: "Header", visible: true },
+    player: { render: "Player", visible: true },
     footer: { render: "Footer", visible: true },
     leftSidebar: { render: "Left Sidebar", visible: true },
     rightSidebar: { render: "Right Sidebar", visible: true },
     center: { render: "Center Content", visible: true },
-    stage: { render: "Stage", visible: true },
+    visualizer: { render: "Visualizer", visible: true },
   },
 };
 
 export const EmptyCenter: Story = {
   args: {
-    header: { render: "Header", visible: true },
+    player: { render: "Player", visible: true },
     footer: { render: "Footer", visible: true },
     leftSidebar: { render: "Left Sidebar", visible: true },
     rightSidebar: { render: "Right Sidebar", visible: true },
-    stage: { render: "Stage", visible: true },
+    visualizer: { render: "Visualizer", visible: true },
   },
 };
 
@@ -45,9 +45,9 @@ export const OnlyCenter: Story = {
   },
 };
 
-export const HeaderAndFooter: Story = {
+export const PlayerAndFooter: Story = {
   args: {
-    header: { render: "Header", visible: true },
+    player: { render: "Player", visible: true },
     footer: { render: "Footer", visible: true },
     center: { render: "Center Content", visible: true },
   },
@@ -68,9 +68,9 @@ function GridLayoutWithHotkeys() {
   return (
     <PanelEventBusProvider>
       <GridLayout
-        header={{
-          render: "Header",
-          visible: visibility.header,
+        player={{
+          render: "Player",
+          visible: visibility.player,
         }}
         footer={{
           render: <AreaVisibilityControls visibilityHook={visibilityHook} />,
@@ -109,9 +109,9 @@ function GridLayoutWithHotkeys() {
           focusable: visibility.center,
           visible: visibility.center,
         }}
-        stage={{
-          render: "Stage",
-          visible: visibility.stage,
+        visualizer={{
+          render: "Visualizer",
+          visible: visibility.visualizer,
         }}
       />
     </PanelEventBusProvider>
@@ -129,9 +129,9 @@ function GridLayoutWithAreaVisibility() {
   return (
     <PanelEventBusProvider>
       <GridLayout
-        header={{
-          render: "Header",
-          visible: visibility.header,
+        player={{
+          render: "Player",
+          visible: visibility.player,
         }}
         footer={{
           render: <AreaVisibilityControls visibilityHook={visibilityHook} />,
@@ -152,9 +152,9 @@ function GridLayoutWithAreaVisibility() {
           focusable: visibility.center,
           visible: visibility.center,
         }}
-        stage={{
-          render: "Stage",
-          visible: visibility.stage,
+        visualizer={{
+          render: "Visualizer",
+          visible: visibility.visualizer,
         }}
       />
     </PanelEventBusProvider>
