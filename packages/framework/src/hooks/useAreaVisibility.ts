@@ -1,7 +1,16 @@
 import { useState, useCallback, useMemo } from "react";
 import { useHotkeys, createHotkeyBinding, HotkeyBinding } from "./useHotkeys";
 
-export type AreaType = "player" | "footer" | "settings" | "leftSidebar" | "rightSidebar" | "center" | "visualizer" | "header" | "stage"; // header and stage are legacy
+export type AreaType =
+  | "player"
+  | "footer"
+  | "settings"
+  | "leftSidebar"
+  | "rightSidebar"
+  | "center"
+  | "visualizer"
+  | "header"
+  | "stage"; // header and stage are legacy
 
 export interface AreaVisibilityState {
   player: boolean;
@@ -37,9 +46,11 @@ export function useAreaVisibility(
   initialVisibility: Partial<AreaVisibilityState> = {}
 ): UseAreaVisibilityReturn {
   // Support both new and legacy prop names
-  const playerValue = initialVisibility.player ?? initialVisibility.header ?? true;
-  const visualizerValue = initialVisibility.visualizer ?? initialVisibility.stage ?? true;
-  
+  const playerValue =
+    initialVisibility.player ?? initialVisibility.header ?? true;
+  const visualizerValue =
+    initialVisibility.visualizer ?? initialVisibility.stage ?? true;
+
   const [visibility, setVisibility] = useState<AreaVisibilityState>({
     player: playerValue,
     footer: initialVisibility.footer ?? true,
@@ -56,7 +67,8 @@ export function useAreaVisibility(
   const toggleArea = useCallback((area: AreaType) => {
     setVisibility((prev) => {
       // Map legacy area types to new ones
-      const mappedArea = area === "header" ? "player" : area === "stage" ? "visualizer" : area;
+      const mappedArea =
+        area === "header" ? "player" : area === "stage" ? "visualizer" : area;
       const newState = {
         ...prev,
         [mappedArea]: !prev[mappedArea as keyof AreaVisibilityState],
@@ -75,7 +87,8 @@ export function useAreaVisibility(
   const setAreaVisibility = useCallback((area: AreaType, visible: boolean) => {
     setVisibility((prev) => {
       // Map legacy area types to new ones
-      const mappedArea = area === "header" ? "player" : area === "stage" ? "visualizer" : area;
+      const mappedArea =
+        area === "header" ? "player" : area === "stage" ? "visualizer" : area;
       const newState = {
         ...prev,
         [mappedArea]: visible,
@@ -95,7 +108,7 @@ export function useAreaVisibility(
   const hotkeyBindings = useMemo<HotkeyBinding[]>(
     () => [
       createHotkeyBinding("p", () => toggleArea("player"), "[P]layer"),
-      createHotkeyBinding("f", () => toggleArea("footer"), "[F]ooter"),
+      createHotkeyBinding("f", () => toggleArea("footer"), "[?] help"),
       createHotkeyBinding("s", () => toggleArea("settings"), "[S]ettings"),
       createHotkeyBinding("l", () => toggleArea("leftSidebar"), "[L]eft"),
       createHotkeyBinding("r", () => toggleArea("rightSidebar"), "[R]ight"),
@@ -110,10 +123,11 @@ export function useAreaVisibility(
 
   // Create hotkey info for display
   const hotkeyInfo = useMemo<AreaHotkeyInfo[]>(
-    () => hotkeyBindings.map((binding) => ({
-      key: binding.displayKey || binding.code.replace("Key", ""),
-      description: binding.description,
-    })),
+    () =>
+      hotkeyBindings.map((binding) => ({
+        key: binding.displayKey || binding.code.replace("Key", ""),
+        description: binding.description,
+      })),
     [hotkeyBindings]
   );
 
@@ -125,4 +139,3 @@ export function useAreaVisibility(
     hotkeyInfo,
   };
 }
-

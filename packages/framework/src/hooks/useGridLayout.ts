@@ -65,22 +65,8 @@ export function computeGridTemplateAreas(state: GridLayoutState): string[] {
   const rows: string[] = [];
 
   // Visualizer row (if exists, spans full width) - comes first
+  // When visualizer is open, it takes up most space (1fr) and player shrinks to content
   if (hasVisualizer) {
-    rows.push(
-      `"${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ}"`
-    );
-    rows.push(
-      `"${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ}"`
-    );
-    rows.push(
-      `"${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ}"`
-    );
-    rows.push(
-      `"${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ}"`
-    );
-    rows.push(
-      `"${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ}"`
-    );
     rows.push(
       `"${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ} ${VIZZ}"`
     );
@@ -93,8 +79,9 @@ export function computeGridTemplateAreas(state: GridLayoutState): string[] {
     );
   }
 
-  // Main content row(s) - bottom half if visualizer exists, otherwise full height
-  const contentRowCount = hasVisualizer ? 6 : 12;
+  // Main content row(s) - when visualizer is open, don't allocate content rows
+  // (visualizer and player take up the space)
+  const contentRowCount = hasVisualizer ? 0 : 12;
   for (let i = 0; i < contentRowCount; i++) {
     let row = '"';
 
@@ -318,54 +305,78 @@ export function useGridLayoutConfig({
   const hasCenter = centerConfig?.visible ?? false;
   const hasRightSidebar = rightSidebarConfig?.visible ?? false;
 
+  // When visualizer is open, show only player and visualizer (hide other components)
+  const finalHasSettings = hasVisualizer ? false : hasSettings;
+  const finalHasLeftSidebar = hasVisualizer ? false : hasLeftSidebar;
+  const finalHasCenter = hasVisualizer ? false : hasCenter;
+  const finalHasRightSidebar = hasVisualizer ? false : hasRightSidebar;
+
+  // Update config objects to reflect visibility when visualizer is open
+  const finalSettingsConfig =
+    hasVisualizer && settingsConfig
+      ? { ...settingsConfig, visible: false }
+      : settingsConfig;
+  const finalLeftSidebarConfig =
+    hasVisualizer && leftSidebarConfig
+      ? { ...leftSidebarConfig, visible: false }
+      : leftSidebarConfig;
+  const finalCenterConfig =
+    hasVisualizer && centerConfig
+      ? { ...centerConfig, visible: false }
+      : centerConfig;
+  const finalRightSidebarConfig =
+    hasVisualizer && rightSidebarConfig
+      ? { ...rightSidebarConfig, visible: false }
+      : rightSidebarConfig;
+
   // Compute grid template areas based on state
   const gridTemplateAreas = computeGridTemplateAreas({
     hasPlayer,
     hasFooter,
-    hasSettings,
+    hasSettings: finalHasSettings,
     hasVisualizer,
-    hasLeftSidebar,
-    hasCenter,
-    hasRightSidebar,
+    hasLeftSidebar: finalHasLeftSidebar,
+    hasCenter: finalHasCenter,
+    hasRightSidebar: finalHasRightSidebar,
   });
 
   // Build grid template rows: auto for player/footer/settings, 1fr for content rows
-  // Split main content into two equal parts if visualizer exists
+  // When visualizer is open, only show visualizer and player (player shrinks to content)
   const rows: string[] = [];
 
   if (hasVisualizer) {
-    rows.push("repeat(6, 1fr)");
+    // Visualizer takes up most of the space (expands to fill available space)
+    rows.push("1fr");
   }
 
   if (hasPlayer) rows.push("auto");
 
-  if (hasVisualizer) {
-    rows.push("repeat(6, 1fr)");
-  } else {
+  if (!hasVisualizer) {
+    // When visualizer is not open, allocate space for content rows
     rows.push("repeat(12, 1fr)");
   }
 
-  if (hasSettings) rows.push("auto");
+  if (finalHasSettings) rows.push("auto");
   if (hasFooter) rows.push("auto");
 
   return {
     playerConfig,
     footerConfig,
-    settingsConfig,
-    leftSidebarConfig,
-    rightSidebarConfig,
-    centerConfig,
+    settingsConfig: finalSettingsConfig,
+    leftSidebarConfig: finalLeftSidebarConfig,
+    rightSidebarConfig: finalRightSidebarConfig,
+    centerConfig: finalCenterConfig,
     visualizerConfig,
     // Legacy exports for backward compatibility
     headerConfig: playerConfig,
     stageConfig: visualizerConfig,
     hasPlayer,
     hasFooter,
-    hasSettings,
+    hasSettings: finalHasSettings,
     hasVisualizer,
-    hasLeftSidebar,
-    hasCenter,
-    hasRightSidebar,
+    hasLeftSidebar: finalHasLeftSidebar,
+    hasCenter: finalHasCenter,
+    hasRightSidebar: finalHasRightSidebar,
     // Legacy exports for backward compatibility
     hasHeader: hasPlayer,
     hasStage: hasVisualizer,

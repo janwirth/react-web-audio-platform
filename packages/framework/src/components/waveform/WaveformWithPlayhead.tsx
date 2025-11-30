@@ -33,7 +33,7 @@ export function WaveformWithPlayhead({
       {player.playheadPosition !== null && (
         <div
           className="w-[1%] min-w-0.5 h-full absolute bottom-[-10%] z-10 transition-all dark:bg-white/10 backdrop-invert-100 bg-black/10"
-          style={{ left: `${player.playheadPosition * 99}%` }}
+          style={{ width: `${player.playheadPosition * 100}%` }}
         ></div>
       )}
       <Waveform
@@ -43,6 +43,7 @@ export function WaveformWithPlayhead({
         colorPalette={colorPalette}
         cachedRenderData={cachedRenderData}
         height={height}
+        className="cursor-pointer"
       />
     </div>
   );

@@ -74,7 +74,10 @@ function TrackItemRenderer({
       }}
     >
       {isSelected && isPanelFocused && (
-        <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+        <>
+          <div className="w-3 h-3 rounded-full bg-red-500 shrink-0 absolute animate-ping left-1 blur-[2px]" />
+          <div className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0 absolute left-1" />
+        </>
       )}
       <div className="p-1 text-xs text-gray-500 dark:text-gray-400">
         {_index}
@@ -112,6 +115,18 @@ function TrackItemRenderer({
   );
 }
 
+export const useColorPalette = () => {
+  const hue = useAtomValue(hueAtom);
+  const saturation = useAtomValue(saturationAtom);
+  const hueSpread = useAtomValue(hueSpreadAtom);
+  const contrast = useAtomValue(contrastAtom);
+  const lightness = useAtomValue(lightnessAtom);
+  return useMemo(
+    () => generateOklchPalette(hue, saturation, hueSpread, contrast, lightness),
+    [hue, saturation, hueSpread, contrast, lightness]
+  );
+};
+
 export const Tracklist = forwardRef<TracklistHandle, TracklistProps>(
   function Tracklist({ className = "" }, ref) {
     const tracks = useAtomValue(tracksAtom);
@@ -119,26 +134,7 @@ export const Tracklist = forwardRef<TracklistHandle, TracklistProps>(
     const tableVirtualizerRef = useRef<TableVirtualizerHandle>(null);
     const { isDark } = useColorScheme();
     const isPanelFocused = useIsPanelFocused("center");
-
-    // Get color settings from atoms
-    const hue = useAtomValue(hueAtom);
-    const saturation = useAtomValue(saturationAtom);
-    const hueSpread = useAtomValue(hueSpreadAtom);
-    const contrast = useAtomValue(contrastAtom);
-    const lightness = useAtomValue(lightnessAtom);
-
-    // Generate color palette from settings
-    const colorPalette = useMemo(
-      () =>
-        generateOklchPalette(
-          hue,
-          saturation,
-          hueSpread,
-          isDark ? -contrast : contrast,
-          lightness
-        ),
-      [hue, saturation, hueSpread, contrast, lightness, isDark]
-    );
+    const colorPalette = useColorPalette();
 
     // Transform tracks to TracklistItem format
     const items = useMemo<TracklistItem[]>(() => {

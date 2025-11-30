@@ -1081,7 +1081,7 @@ function AreaVisibilityHotkeys() {
               </p>
               <div className="space-y-2 text-xs mb-6">
                 <p>• Press P to toggle Player</p>
-                <p>• Press F to toggle Footer</p>
+                <p>• Press F to toggle ? help</p>
                 <p>• Press L to toggle Left Sidebar</p>
                 <p>• Press R to toggle Right Sidebar</p>
                 <p>• Press C to toggle Center</p>
@@ -1133,7 +1133,7 @@ function VisualizerWithTableLayout() {
   const visibilityHook = useAreaVisibility({
     player: true,
     footer: true,
-    settings: true,
+    settings: false,
     leftSidebar: true,
     rightSidebar: true,
     center: true,

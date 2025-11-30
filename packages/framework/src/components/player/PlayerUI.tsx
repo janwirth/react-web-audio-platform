@@ -1,6 +1,11 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { usePlayerContext, useCurrentPlayback } from "./Player";
 import { MiniSpectro } from "../visualizer/MiniSpectro";
+import { Row } from "../Row";
+import { NextIcon, PreviousIcon } from "./Icons";
+import { WaveformWithPlayhead } from "../waveform";
+import { useColorPalette } from "../Tracklist";
+import { HorizontalSlider } from "../inputs/HorizontalSlider";
 
 // Format seconds to MM:SS or HH:MM:SS
 const formatTime = (seconds: number): string => {
@@ -18,111 +23,12 @@ const formatTime = (seconds: number): string => {
   return `${minutes}:${secs.toString().padStart(2, "0")}`;
 };
 
-interface HorizontalSliderProps {
-  value: number;
-  min: number;
-  max: number;
-  onChange: (value: number) => void;
-  className?: string;
-}
-
-function HorizontalSlider({
-  value,
-  min,
-  max,
-  onChange,
-  className = "",
-}: HorizontalSliderProps) {
-  const sliderRef = useRef<HTMLDivElement>(null);
-  const isDraggingRef = useRef(false);
-  const onChangeRef = useRef(onChange);
-  const rafRef = useRef<number | null>(null);
-
-  useEffect(() => {
-    onChangeRef.current = onChange;
-  }, [onChange]);
-
-  const updateValue = useCallback(
-    (clientX: number) => {
-      if (!sliderRef.current) return;
-      const rect = sliderRef.current.getBoundingClientRect();
-      const clickX = clientX - rect.left;
-      const percentage = clickX / rect.width;
-      let newValue = min + (max - min) * percentage;
-      newValue = Math.max(min, Math.min(max, newValue));
-      onChangeRef.current(newValue);
-    },
-    [min, max]
-  );
-
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!isDraggingRef.current) return;
-
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-      }
-
-      rafRef.current = requestAnimationFrame(() => {
-        updateValue(e.clientX);
-      });
-    };
-
-    const handleMouseUp = () => {
-      isDraggingRef.current = false;
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-        rafRef.current = null;
-      }
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
-      }
-    };
-  }, [updateValue]);
-
-  const percentage = ((value - min) / (max - min)) * 100;
-
-  return (
-    <div
-      ref={sliderRef}
-      className={`relative h-2 cursor-pointer select-none ${className}`}
-      onMouseDown={(e) => {
-        isDraggingRef.current = true;
-        updateValue(e.clientX);
-      }}
-      onClick={(e) => {
-        if (!isDraggingRef.current) {
-          updateValue(e.clientX);
-        }
-      }}
-    >
-      <div
-        className="absolute h-full w-full opacity-20"
-        style={{ backgroundColor: "currentColor" }}
-      />
-      <div
-        className="absolute h-full opacity-60"
-        style={{ width: `${percentage}%`, backgroundColor: "currentColor" }}
-      />
-    </div>
-  );
-}
-
 export function PlayerUI() {
   const { audioRef } = usePlayerContext();
   const playback = useCurrentPlayback();
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [volume, setVolume] = useState(1);
-  const [isSeeking, setIsSeeking] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
   // Update current time and playing state
@@ -131,9 +37,7 @@ export function PlayerUI() {
     if (!audio) return;
 
     const updateTime = () => {
-      if (!isSeeking) {
-        setCurrentTime(audio.currentTime);
-      }
+      setCurrentTime(audio.currentTime);
     };
 
     const updateDuration = () => {
@@ -165,26 +69,7 @@ export function PlayerUI() {
       audio.removeEventListener("pause", updatePlayingState);
       audio.removeEventListener("ended", updatePlayingState);
     };
-  }, [audioRef, isSeeking]);
-
-  const handleProgressChange = useCallback(
-    (value: number) => {
-      if (!playback || !duration) return;
-
-      setIsSeeking(true);
-      const percentage = value / 100; // Convert 0-100 to 0-1
-      setCurrentTime(percentage * duration);
-
-      // Use seekTo from useCurrentPlayback
-      playback.seekTo(percentage);
-
-      // Reset seeking flag after a short delay
-      setTimeout(() => {
-        setIsSeeking(false);
-      }, 100);
-    },
-    [playback, duration]
-  );
+  }, [audioRef]);
 
   const handleVolumeChange = useCallback(
     (value: number) => {
@@ -208,61 +93,17 @@ export function PlayerUI() {
     }
   }, [audioRef]);
 
-  const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
-
+  const remainingTime = duration > 0 ? duration - currentTime : 0;
   return (
-    <div className="flex items-center flex-wrap gap-2">
+    <Row className="items-center gap-5 px-2">
+      <Controls isPlaying={isPlaying} handlePlayPause={handlePlayPause} />
+      <Duration
+        currentTime={currentTime}
+        duration={duration}
+        remainingTime={remainingTime}
+        playback={playback}
+      />
       {/* Play/Pause Button */}
-      {playback && <MiniSpectro size={16} />}
-      {playback && (
-        <button
-          onClick={handlePlayPause}
-          className="flex items-center justify-center text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 p-1 w-7 h-7"
-          aria-label={isPlaying ? "Pause" : "Play"}
-        >
-          {isPlaying ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-5 h-5"
-            >
-              <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
-            </svg>
-          ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-5 h-5"
-            >
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          )}
-        </button>
-      )}
-
-      {/* Progress Scrubber */}
-      <span className="text-xs font-mono text-gray-600 dark:text-gray-400 text-right font-black">
-        {duration > 0 ? formatTime(currentTime) : "-:--"}
-      </span>
-      <div className="flex-1">
-        <HorizontalSlider
-          value={progressPercentage}
-          min={0}
-          max={100}
-          onChange={handleProgressChange}
-          className="h-3"
-        />
-      </div>
-      <span className="text-xs font-mono text-gray-600 dark:text-gray-400">
-        {duration > 0 ? formatTime(duration) : "-:--"}
-      </span>
-
-      {/* Volume Control */}
-      {/* <span className="text-xs font-mono text-gray-600 min-w-[60px]">
-        Volume:
-      </span> */}
       <div className="w-[100px]">
         <HorizontalSlider
           value={volume * 100}
@@ -271,9 +112,86 @@ export function PlayerUI() {
           onChange={(value) => handleVolumeChange(value / 100)}
         />
       </div>
-      {/* <span className="text-xs font-mono text-gray-600 min-w-[40px]">
-        {Math.round(volume * 100)}%
-      </span> */}
-    </div>
+      {playback && (
+        <>
+          {/* Progress Scrubber */}
+          <MiniSpectro size={16} />
+        </>
+      )}
+    </Row>
   );
 }
+const Duration = ({
+  currentTime,
+  duration,
+  remainingTime,
+  playback,
+}: {
+  currentTime: number;
+  duration: number;
+  remainingTime: number;
+  playback: ReturnType<typeof useCurrentPlayback>;
+}) => {
+  const colorPalette = useColorPalette();
+  return (
+    <Row className="flex flex-1 w-full items-center justify-center gap-2">
+      <span className="text-xs font-mono text-gray-600 dark:text-gray-400 text-right font-black">
+        {duration > 0 ? formatTime(currentTime) : "-:--"}
+      </span>
+      <div className="w-100">
+        {playback?.url ? (
+          <WaveformWithPlayhead
+            url={playback.url}
+            colorPalette={colorPalette}
+            height={8}
+          />
+        ) : (
+          <div className="h-1 bg-gray-500 w-full"></div>
+        )}
+      </div>
+      <span className="text-xs font-mono text-gray-600 dark:text-gray-400">
+        {duration > 0 ? formatTime(remainingTime) : "-:--"}
+      </span>
+    </Row>
+  );
+};
+
+const Controls = ({
+  isPlaying,
+  handlePlayPause,
+}: {
+  isPlaying: boolean;
+  handlePlayPause: () => void;
+}) => {
+  return (
+    <>
+      <PreviousIcon className="w-4 h-4 ml-0.5" onClick={() => {}} />
+      <button
+        onClick={handlePlayPause}
+        className="flex items-center justify-center text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700 p-1 w-7 h-7 -mx-2"
+        aria-label={isPlaying ? "Pause" : "Play"}
+      >
+        {isPlaying ? (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="w-4.5 h-4.5"
+          >
+            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z" />
+          </svg>
+        ) : (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            className="w-5 h-5"
+          >
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        )}
+      </button>
+      <NextIcon className="w-4 h-4 mr-2" onClick={() => {}} />
+    </>
+  );
+};
