@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { usePlayerContext } from "../player/Player";
+import { usePlayerContext } from "../../media/player/Player";
 import { useColorScheme } from "../../hooks/useColorScheme";
 
 const DEFAULT_SIZE = 32;

@@ -7,7 +7,7 @@ import {
   contrastAtom,
   lightnessAtom,
 } from "@/hooks/useData";
-import { ColorPicker } from "./inputs/ColorPicker";
+import { ColorPicker } from "../ui/inputs/ColorPicker";
 
 const STORAGE_KEY_PREFIX = "waveform-color-settings-";
 
@@ -65,4 +65,3 @@ export function Settings() {
     </div>
   );
 }
-

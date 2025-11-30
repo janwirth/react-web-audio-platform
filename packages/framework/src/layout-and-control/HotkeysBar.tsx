@@ -1,5 +1,5 @@
 import { useHotkeys, createHotkeyBinding } from "@/hooks/useHotkeys";
-import { usePlayerContext } from "./player/Player";
+import { usePlayerContext } from "../media/player/Player";
 import { useCallback, useMemo } from "react";
 
 export interface HotkeyConfig {

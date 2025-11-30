@@ -7,8 +7,8 @@ import {
   useMemo,
 } from "react";
 import { TableVirtualizer, TableVirtualizerHandle } from "./TableVirtualizer";
-import { WaveformWithPlayhead } from "./waveform";
-import { QueueItem, usePlayer } from "./player/Player";
+import { WaveformWithPlayhead } from "../media/waveform";
+import { QueueItem, usePlayer } from "../media/player/Player";
 import { usePanelEvent, useIsPanelFocused } from "@/hooks/usePanelEvent";
 import { useAtomValue } from "jotai";
 import {
@@ -19,7 +19,7 @@ import {
   contrastAtom,
   lightnessAtom,
 } from "@/hooks/useData";
-import { generateOklchPalette } from "./waveform/lib/color-palettes";
+import { generateOklchPalette } from "../media/waveform/lib/color-palettes";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { FocusIndicator } from "./FocusIndicator";
 

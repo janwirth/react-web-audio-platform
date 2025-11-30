@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { type QueueItem } from "@/components/player/Player";
+import { type QueueItem } from "@/media/player/Player";
 import z from "zod";
 
 const TrackApiSchema = z.object({

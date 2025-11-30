@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { atom, useAtom } from "jotai";
 import z from "zod";
-import { useDebouncedTrailingHook } from "../components/waveform/hooks/useDebouncedTrailingHook";
+import { useDebouncedTrailingHook } from "../media/waveform/hooks/useDebouncedTrailingHook";
 
 const BASE_URL = "http://192.168.178.48:3000";
 

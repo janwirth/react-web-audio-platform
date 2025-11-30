@@ -10,9 +10,9 @@ import {
 import { TableVirtualizer, TableVirtualizerHandle } from "./TableVirtualizer";
 import { CoverFlowRef } from "./CoverFlow";
 import { CoverFlowV2 } from "./coverflowV2";
-import { Waveform, WaveformWithPlayhead } from "./waveform";
+import { Waveform, WaveformWithPlayhead } from "../media/waveform";
 import { useAudioItems } from "@/hooks/useAudioItems";
-import { QueueItem } from "./player/Player";
+import { QueueItem } from "../media/player/Player";
 import { useIsPanelFocused } from "@/hooks/usePanelEvent";
 
 export interface DualViewListItem {

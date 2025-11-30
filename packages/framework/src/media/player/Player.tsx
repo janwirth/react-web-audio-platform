@@ -10,7 +10,7 @@ import React, {
 } from "react";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { atomFamily } from "jotai/utils";
-import { DualViewListItem } from "../DualViewList";
+import { DualViewListItem } from "../../components/DualViewList";
 import { useHotkeys, createHotkeyBinding } from "../../hooks/useHotkeys";
 
 interface PlayerContextValue {
@@ -248,9 +248,7 @@ export const Player: React.FC<PlayerProps> = ({ children }) => {
 
   // Register space key hotkey
   const spaceKeyBindings = useMemo(
-    () => [
-      createHotkeyBinding("space", handleSpaceKey, "Play / Pause"),
-    ],
+    () => [createHotkeyBinding("space", handleSpaceKey, "Play / Pause")],
     [handleSpaceKey]
   );
 

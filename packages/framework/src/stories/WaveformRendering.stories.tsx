@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { Column } from "@/components/Column";
-import { Waveform } from "@/components/waveform";
-import { AudioContextProvider } from "@/components/audio-context";
+import { Waveform } from "@/media/waveform";
+import { AudioContextProvider } from "@/media/audio-context";
 
 const audioUrl = "http://localhost:3001/audio/track1.mp3";
 
@@ -39,4 +39,3 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-

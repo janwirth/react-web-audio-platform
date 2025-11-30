@@ -6,12 +6,12 @@ import {
   queueAtom,
   currentQueueIndexAtom,
 } from "./Player";
-import { MiniSpectro } from "../visualizer/MiniSpectro";
+import { MiniSpectro } from "../../components/visualizer/MiniSpectro";
 import { Row } from "../Row";
 import { WaveformWithPlayhead } from "../waveform";
 import { PlayerControls } from "./PlayerControls";
-import { useColorPalette } from "../Tracklist";
-import { HorizontalSlider } from "../inputs/HorizontalSlider";
+import { useColorPalette } from "../../components/Tracklist";
+import { HorizontalSlider } from "../../ui/inputs/HorizontalSlider";
 
 // Format seconds to MM:SS or HH:MM:SS
 const formatTime = (seconds: number): string => {

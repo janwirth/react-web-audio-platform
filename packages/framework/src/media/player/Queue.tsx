@@ -9,7 +9,7 @@ import {
 import { usePlayerContext } from "./Player";
 import { TableVirtualizer, TableVirtualizerHandle } from "../TableVirtualizer";
 import { usePanelEvent, useIsPanelFocused } from "../../hooks/usePanelEvent";
-import { FocusIndicator } from "../FocusIndicator";
+import { FocusIndicator } from "../../components/FocusIndicator";
 
 export function useQueue() {
   const setQueue = useSetAtom(queueAtom);

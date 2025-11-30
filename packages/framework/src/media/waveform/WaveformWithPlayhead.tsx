@@ -1,6 +1,6 @@
 import { Waveform, WaveformRenderData } from "./Waveform";
 import type { ColorPalette } from "./lib/canvas-renderer";
-import { useTrack, type QueueItem } from "@/components/player/Player";
+import { useTrack, type QueueItem } from "@/media/player/Player";
 
 interface WaveformWithPlayheadProps {
   url: string;

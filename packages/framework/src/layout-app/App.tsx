@@ -8,10 +8,10 @@ import { useLayoutHotkeys } from "../hooks/useLayoutHotkeys";
 import { PanelEventBusProvider, usePanelEventBus } from "../hooks/usePanelEvent";
 import { defaultTabs, CenterAreaContent } from "./Data";
 import { DarkModeToggle } from "../components/DarkModeToggle";
-import { AudioContextProvider } from "../components/audio-context";
-import { Queue } from "@/components/player/Queue";
-import { Player } from "@/components/player/Player";
-import { PlayerUI } from "@/components/player/PlayerUI";
+import { AudioContextProvider } from "../media/audio-context";
+import { Queue } from "@/media/player/Queue";
+import { Player } from "@/media/player/Player";
+import { PlayerUI } from "@/media/player/PlayerUI";
 import { debugViewAtom } from "../atoms/debugView";
 import { Visualizer } from "@/components/visualizer/Visualizer";
 
