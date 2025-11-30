@@ -9,7 +9,6 @@ import {
 import { usePlayerContext } from "./Player";
 import { TableVirtualizer, TableVirtualizerHandle } from "../TableVirtualizer";
 import { usePanelEvent, useIsPanelFocused } from "../../hooks/usePanelEvent";
-import { WaveformWithPlayhead } from "../waveform/WaveformWithPlayhead";
 
 export function useQueue() {
   const setQueue = useSetAtom(queueAtom);
@@ -23,7 +22,7 @@ export function useQueue() {
   return { initQueue };
 }
 
-const ITEM_HEIGHT = 80;
+const ITEM_HEIGHT = 32;
 const OVERSCAN = 3;
 
 export function Queue() {
@@ -185,7 +184,7 @@ export function Queue() {
           onDragLeave={handleDragLeave}
           onDrop={(e) => handleDrop(e, index)}
           onDragEnd={handleDragEnd}
-          className="cursor-pointer select-none py-1 px-2 rounded transition-opacity font-mono text-xs relative flex flex-col gap-1"
+          className="cursor-pointer select-none py-1 px-2 rounded transition-opacity font-mono text-xs relative flex items-center gap-2 whitespace-nowrap overflow-hidden"
           style={{
             opacity,
             backgroundColor:
@@ -194,23 +193,12 @@ export function Queue() {
                 : "transparent",
           }}
         >
-          <div className="flex items-center gap-2">
-            {isSelected && isPanelFocused && (
-              <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-            )}
-            <span>
-              {index + 1}. {item.title}
-            </span>
-          </div>
-          {isCurrent && item.audioUrl && (
-            <div className="w-full">
-              <WaveformWithPlayhead
-                url={item.audioUrl}
-                height={32}
-                allItems={queue}
-              />
-            </div>
+          {isSelected && isPanelFocused && (
+            <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
           )}
+          <span className="truncate">
+            {index + 1}. {item.title}
+          </span>
         </div>
       );
     },
@@ -220,7 +208,6 @@ export function Queue() {
       currentIndex,
       selectedIndex,
       isPanelFocused,
-      queue,
       handleClick,
       handleDragStart,
       handleDragOver,

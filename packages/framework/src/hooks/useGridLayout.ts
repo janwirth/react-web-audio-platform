@@ -203,10 +203,21 @@ export function useGridLayoutFocus({
     }
   }, [focusableAreas, focusedArea]);
 
+  // Focus a specific area
+  const focusArea = useCallback(
+    (area: FocusableArea) => {
+      if (focusableAreas.includes(area)) {
+        setFocusedArea(area);
+      }
+    },
+    [focusableAreas]
+  );
+
   return {
     focusedArea,
     navigateLeft,
     navigateRight,
+    focusArea,
   };
 }
 

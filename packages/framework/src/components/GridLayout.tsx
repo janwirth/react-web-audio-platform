@@ -59,11 +59,12 @@ export function GridLayout({
     stage,
   });
 
-  const { focusedArea, navigateLeft, navigateRight } = useGridLayoutFocus({
-    leftSidebarConfig: config.leftSidebarConfig,
-    centerConfig: config.centerConfig,
-    rightSidebarConfig: config.rightSidebarConfig,
-  });
+  const { focusedArea, navigateLeft, navigateRight, focusArea } =
+    useGridLayoutFocus({
+      leftSidebarConfig: config.leftSidebarConfig,
+      centerConfig: config.centerConfig,
+      rightSidebarConfig: config.rightSidebarConfig,
+    });
 
   useGridLayoutHotkeys({
     navigateLeft,
@@ -113,6 +114,16 @@ export function GridLayout({
           style={{
             gridArea: "left",
           }}
+          onClick={() => {
+            if (config.leftSidebarConfig?.focusable) {
+              focusArea("leftSidebar");
+            }
+          }}
+          onWheel={() => {
+            if (config.leftSidebarConfig?.focusable) {
+              focusArea("leftSidebar");
+            }
+          }}
         >
           <ActivePanelIndicator isActive={focusedArea === "leftSidebar"} />
           {config.leftSidebarConfig.render}
@@ -126,6 +137,16 @@ export function GridLayout({
           style={{
             gridArea: "cent",
           }}
+          onClick={() => {
+            if (config.centerConfig?.focusable) {
+              focusArea("center");
+            }
+          }}
+          onWheel={() => {
+            if (config.centerConfig?.focusable) {
+              focusArea("center");
+            }
+          }}
         >
           <ActivePanelIndicator isActive={focusedArea === "center"} />
           {config.centerConfig.render}
@@ -138,6 +159,16 @@ export function GridLayout({
           className={getFocusablePanelClasses()}
           style={{
             gridArea: "rght",
+          }}
+          onClick={() => {
+            if (config.rightSidebarConfig?.focusable) {
+              focusArea("rightSidebar");
+            }
+          }}
+          onWheel={() => {
+            if (config.rightSidebarConfig?.focusable) {
+              focusArea("rightSidebar");
+            }
           }}
         >
           <ActivePanelIndicator isActive={focusedArea === "rightSidebar"} />
