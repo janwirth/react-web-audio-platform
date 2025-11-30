@@ -15,6 +15,8 @@ interface TableVirtualizerProps<T> {
   onScroll?: (scrollTop: number) => void;
   onScrollFinish?: () => void;
   onFocus?: () => void;
+  onEnter?: (item: T, index: number) => void;
+  selectedIndex?: number;
   className?: string;
 }
 
@@ -26,6 +28,7 @@ export interface TableVirtualizerHandle {
   scrollToIndexIfNeeded: (index: number) => void;
   getVisibleRange: () => { start: number; end: number };
   getFullyVisibleRange: () => { start: number; end: number };
+  triggerEnter?: () => void;
 }
 
 export const TableVirtualizer = forwardRef<
@@ -40,6 +43,8 @@ export const TableVirtualizer = forwardRef<
     onScroll,
     onScrollFinish,
     onFocus,
+    onEnter,
+    selectedIndex,
     className = "",
   },
   ref
@@ -103,6 +108,18 @@ export const TableVirtualizer = forwardRef<
     [scrollableRef]
   );
 
+  // Handle Enter key press
+  const triggerEnter = useCallback(() => {
+    if (
+      onEnter &&
+      selectedIndex !== undefined &&
+      selectedIndex >= 0 &&
+      selectedIndex < items.length
+    ) {
+      onEnter(items[selectedIndex], selectedIndex);
+    }
+  }, [onEnter, selectedIndex, items]);
+
   // Expose scroll methods via ref
   useImperativeHandle(
     ref,
@@ -114,6 +131,7 @@ export const TableVirtualizer = forwardRef<
       scrollToIndexIfNeeded,
       getVisibleRange,
       getFullyVisibleRange,
+      triggerEnter: onEnter ? triggerEnter : undefined,
     }),
     [
       scrollByRows,
@@ -123,6 +141,8 @@ export const TableVirtualizer = forwardRef<
       scrollToIndexIfNeeded,
       getVisibleRange,
       getFullyVisibleRange,
+      triggerEnter,
+      onEnter,
     ]
   );
 
