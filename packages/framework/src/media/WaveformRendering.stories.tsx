@@ -20,7 +20,7 @@ function WaveformRendering() {
 }
 
 const meta = {
-  title: "Stories/WaveformRendering",
+  title: "Stories/Media/WaveformRendering",
   component: WaveformRendering,
   parameters: {
     layout: "fullscreen",

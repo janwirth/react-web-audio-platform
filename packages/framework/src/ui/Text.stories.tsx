@@ -39,7 +39,7 @@ function SmallText({
 }
 
 const meta = {
-  title: 'Components/Text',
+  title: 'Stories/Ui/Text',
   parameters: {
     layout: 'fullscreen',
   },

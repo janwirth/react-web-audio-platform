@@ -139,7 +139,7 @@ function PlayerStory() {
 }
 
 const meta = {
-  title: "Stories/PlayerStory",
+  title: "Stories/Media/PlayerStory",
   component: PlayerStory,
   parameters: {
     layout: "fullscreen",

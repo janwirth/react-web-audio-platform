@@ -792,7 +792,7 @@ function RowsColumnsMosaicWithPlayer() {
 }
 
 const meta = {
-  title: "Stories/RowsColumnsMosaic",
+  title: "Stories/Ui/RowsColumnsMosaic",
   component: RowsColumnsMosaic,
   parameters: {
     layout: "fullscreen",

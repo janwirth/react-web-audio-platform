@@ -3,7 +3,7 @@ import { Column } from "@/ui/Column";
 import { Waveform } from "@/media/waveform";
 
 const meta = {
-  title: "Waveform/WaveformRendering",
+  title: "Stories/Media/Waveform/WaveformRendering",
   component: Waveform,
   parameters: {
     layout: "fullscreen",

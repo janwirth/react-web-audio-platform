@@ -3,7 +3,7 @@ import { Column } from '@/ui/Column';
 import { Row } from '@/ui/Row';
 
 const meta = {
-  title: 'Components/ColumnsRows',
+  title: 'Stories/Ui/ColumnsRows',
   parameters: {
     layout: 'fullscreen',
   },

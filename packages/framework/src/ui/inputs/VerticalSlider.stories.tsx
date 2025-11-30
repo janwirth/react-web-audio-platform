@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { VerticalSlider } from './VerticalSlider';
 
 const meta = {
-  title: 'Components/Inputs/VerticalSlider',
+  title: 'Stories/Ui/Inputs/VerticalSlider',
   component: VerticalSlider,
   parameters: {
     layout: 'centered',

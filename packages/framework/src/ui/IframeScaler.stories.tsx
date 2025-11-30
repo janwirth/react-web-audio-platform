@@ -4,7 +4,7 @@ import { Column } from "@/ui/Column";
 import { Row } from "@/ui/Row";
 
 const meta = {
-  title: "Components/IframeScaler",
+  title: "Stories/Ui/IframeScaler",
   component: IframeScaler,
   parameters: {
     layout: "centered",

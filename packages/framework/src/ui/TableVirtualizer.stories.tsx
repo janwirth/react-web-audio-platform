@@ -151,7 +151,7 @@ function TableVirtualizer() {
 }
 
 const meta = {
-  title: "Stories/TableVirtualizer",
+  title: "Stories/Ui/TableVirtualizer",
   component: TableVirtualizer,
   parameters: {
     layout: "fullscreen",

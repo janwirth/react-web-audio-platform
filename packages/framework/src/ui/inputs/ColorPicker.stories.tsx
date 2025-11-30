@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { ColorPicker } from './ColorPicker';
 
 const meta = {
-  title: 'Components/Inputs/ColorPicker',
+  title: 'Stories/Ui/Inputs/ColorPicker',
   component: ColorPicker,
   parameters: {
     layout: 'centered',

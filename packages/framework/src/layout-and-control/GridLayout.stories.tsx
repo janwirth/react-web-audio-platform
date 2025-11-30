@@ -6,7 +6,7 @@ import { useAreaVisibility } from "@/layout-and-control/hooks/useAreaVisibility"
 import { AreaVisibilityControls } from "@/layout-and-control/AreaVisibilityControls";
 
 const meta = {
-  title: "Stories/GridLayout",
+  title: "Stories/LayoutAndControl/GridLayout",
   component: GridLayout,
   parameters: {
     layout: "fullscreen",

@@ -174,7 +174,7 @@ function WaveformControlsStory() {
 }
 
 const meta = {
-  title: "Stories/WaveformControlsStory",
+  title: "Stories/Media/WaveformControlsStory",
   component: WaveformControlsStory,
   parameters: {
     layout: "fullscreen",

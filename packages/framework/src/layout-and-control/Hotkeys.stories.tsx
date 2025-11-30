@@ -20,7 +20,7 @@ import { Lists } from "@/components/Lists";
 import { Settings } from "@/components/Settings";
 
 const meta = {
-  title: "Stories/Hotkeys",
+  title: "Stories/LayoutAndControl/Hotkeys",
   parameters: {
     layout: "centered",
   },
