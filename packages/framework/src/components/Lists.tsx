@@ -2,6 +2,7 @@ import { useRef, useState, useCallback, useMemo, useEffect } from "react";
 import { TableVirtualizer, TableVirtualizerHandle } from "./TableVirtualizer";
 import { useData } from "@/hooks/useData";
 import { usePanelEvent, useIsPanelFocused } from "@/hooks/usePanelEvent";
+import { FocusIndicator } from "./FocusIndicator";
 
 const ITEM_HEIGHT = 32;
 const OVERSCAN = 3;
@@ -35,12 +36,7 @@ function ListItemRenderer({
       }}
       onClick={onClick}
     >
-      {isSelected && isPanelFocused && (
-        <>
-          <div className="w-3 h-3 rounded-full bg-red-500 shrink-0 absolute animate-ping left-1 blur-[2px]" />
-          <div className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0 absolute left-1" />
-        </>
-      )}
+      {isSelected && isPanelFocused && <FocusIndicator variant="ping" />}
       <div
         className={`flex items-center gap-2 font-mono ${
           isSelected

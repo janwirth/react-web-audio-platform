@@ -9,6 +9,7 @@ import {
 import { usePlayerContext } from "./Player";
 import { TableVirtualizer, TableVirtualizerHandle } from "../TableVirtualizer";
 import { usePanelEvent, useIsPanelFocused } from "../../hooks/usePanelEvent";
+import { FocusIndicator } from "../FocusIndicator";
 
 export function useQueue() {
   const setQueue = useSetAtom(queueAtom);
@@ -197,9 +198,7 @@ export function Queue() {
                 : "transparent",
           }}
         >
-          {isSelected && isPanelFocused && (
-            <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-          )}
+          {isSelected && isPanelFocused && <FocusIndicator variant="dot" />}
           <span className="truncate">
             {index + 1}. {item.title}
           </span>

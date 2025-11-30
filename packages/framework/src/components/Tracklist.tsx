@@ -21,6 +21,7 @@ import {
 } from "@/hooks/useData";
 import { generateOklchPalette } from "./waveform/lib/color-palettes";
 import { useColorScheme } from "@/hooks/useColorScheme";
+import { FocusIndicator } from "./FocusIndicator";
 
 export interface TracklistItem {
   id: string | number;
@@ -73,12 +74,7 @@ function TrackItemRenderer({
           : "transparent",
       }}
     >
-      {isSelected && isPanelFocused && (
-        <>
-          <div className="w-3 h-3 rounded-full bg-red-500 shrink-0 absolute animate-ping left-1 blur-[2px]" />
-          <div className="w-2.5 h-2.5 rounded-full bg-red-500 shrink-0 absolute left-1" />
-        </>
-      )}
+      {isSelected && isPanelFocused && <FocusIndicator variant="ping" />}
       <div className="p-1 text-xs text-gray-500 dark:text-gray-400">
         {_index}
       </div>
