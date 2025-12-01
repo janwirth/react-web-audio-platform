@@ -62,6 +62,7 @@ function FocusableWithKeypressLog({
 }) {
   const elementRef = useRef<HTMLDivElement>(null);
   const isFocused = useIsFocused(elementRef);
+  const [counter, setCounter] = useState(0);
 
   useEffect(() => {
     if (autoFocus && elementRef.current) {
@@ -79,9 +80,25 @@ function FocusableWithKeypressLog({
       metaKey: e.metaKey,
     });
     if (e.key === "ArrowUp") {
-      focusElementTo("ArrowUp", elementRef);
+      e.preventDefault();
+      setCounter((prev) => {
+        if (prev === 0) {
+          // Already at min, navigate to next element
+          focusElementTo("ArrowUp", elementRef);
+          return prev;
+        }
+        return prev - 1;
+      });
     } else if (e.key === "ArrowDown") {
-      focusElementTo("ArrowDown", elementRef);
+      e.preventDefault();
+      setCounter((prev) => {
+        if (prev === 5) {
+          // Already at max, navigate to next element
+          focusElementTo("ArrowDown", elementRef);
+          return prev;
+        }
+        return prev + 1;
+      });
     } else if (e.key === "ArrowLeft") {
       focusElementTo("ArrowLeft", elementRef);
     } else if (e.key === "ArrowRight") {
@@ -96,36 +113,91 @@ function FocusableWithKeypressLog({
       className="h-full flex flex-col font-mono p-4 border border-current outline-none relative"
     >
       <div className="text-sm font-semibold mb-2 opacity-100">{label}</div>
-      <div className="text-xs opacity-80 flex-1 flex items-center justify-center">
+      <div className="text-xs opacity-80 flex-1 flex items-center justify-center flex-col gap-2">
+        <div className="text-2xl font-bold opacity-100">{counter}</div>
         {isFocused
           ? "Focused - Press keys to see logs"
           : "Not focused - Click to focus"}
       </div>
-      {isFocused && (
+      {/* {isFocused && (
         <div className="text-xs opacity-60 mt-2">
           Check console for keypress logs
         </div>
-      )}
+      )} */}
       {isFocused && <FocusIndicator></FocusIndicator>}
     </div>
   );
 }
-const FocusableExample = ({ label }: { label: string }) => {
-  return (
-    <div className="h-full flex flex-col font-mono p-4 border border-current">
-      <div className="text-sm font-semibold mb-2 opacity-100">{label}</div>
-    </div>
-  );
-};
 
 function KeypressLogDemo() {
+  const labels = ["A", "B", "C", "D", "E", "F", "G", "H", "I"];
+
   return (
-    <div className="h-screen w-full flex">
-      <div className="flex-1 p-4">
-        <FocusableWithKeypressLog autoFocus={true} label="Focusable A" />
+    <div className="h-screen w-full flex flex-col">
+      {/* First Row */}
+      <div className="flex-1 flex flex-row">
+        <div className="flex-1 p-4">
+          <FocusableWithKeypressLog
+            autoFocus={true}
+            label={`Focusable ${labels[0]}`}
+          />
+        </div>
+        <div className="flex-1 p-4">
+          <FocusableWithKeypressLog
+            autoFocus={false}
+            label={`Focusable ${labels[1]}`}
+          />
+        </div>
+        <div className="flex-1 p-4">
+          <FocusableWithKeypressLog
+            autoFocus={false}
+            label={`Focusable ${labels[2]}`}
+          />
+        </div>
       </div>
-      <div className="flex-1 p-4">
-        <FocusableWithKeypressLog autoFocus={false} label="Focusable B" />
+
+      {/* Second Row */}
+      <div className="flex-1 flex flex-row">
+        <div className="flex-1 p-4">
+          <FocusableWithKeypressLog
+            autoFocus={false}
+            label={`Focusable ${labels[3]}`}
+          />
+        </div>
+        <div className="flex-1 p-4">
+          <FocusableWithKeypressLog
+            autoFocus={false}
+            label={`Focusable ${labels[4]}`}
+          />
+        </div>
+        <div className="flex-1 p-4">
+          <FocusableWithKeypressLog
+            autoFocus={false}
+            label={`Focusable ${labels[5]}`}
+          />
+        </div>
+      </div>
+
+      {/* Third Row */}
+      <div className="flex-1 flex flex-row">
+        <div className="flex-1 p-4">
+          <FocusableWithKeypressLog
+            autoFocus={false}
+            label={`Focusable ${labels[6]}`}
+          />
+        </div>
+        <div className="flex-1 p-4">
+          <FocusableWithKeypressLog
+            autoFocus={false}
+            label={`Focusable ${labels[7]}`}
+          />
+        </div>
+        <div className="flex-1 p-4">
+          <FocusableWithKeypressLog
+            autoFocus={false}
+            label={`Focusable ${labels[8]}`}
+          />
+        </div>
       </div>
     </div>
   );
