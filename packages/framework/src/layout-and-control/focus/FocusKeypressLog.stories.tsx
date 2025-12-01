@@ -58,10 +58,16 @@ function FocusableWithKeypressLog({
   autoFocus,
 }: {
   label: string;
-  autoFocus: true | false;
+  autoFocus: boolean;
 }) {
   const elementRef = useRef<HTMLDivElement>(null);
   const isFocused = useIsFocused(elementRef);
+
+  useEffect(() => {
+    if (autoFocus && elementRef.current) {
+      elementRef.current.focus();
+    }
+  }, [autoFocus]);
 
   useKeydownIfFocussed(elementRef, (e) => {
     console.log(`[${label}] Key pressed:`, {
@@ -87,7 +93,6 @@ function FocusableWithKeypressLog({
     <div
       ref={elementRef}
       tabIndex={0}
-      autoFocus={autoFocus}
       className="h-full flex flex-col font-mono p-4 border border-current outline-none relative"
     >
       <div className="text-sm font-semibold mb-2 opacity-100">{label}</div>
