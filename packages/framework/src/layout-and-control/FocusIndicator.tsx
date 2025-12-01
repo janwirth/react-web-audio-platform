@@ -1,17 +1,17 @@
 import { motion } from "motion/react";
 
 interface FocusIndicatorProps {
-  variant?: "ping" | "dot";
+  variant?: string;
   className?: string;
 }
 
 export function FocusIndicator({
-  variant = "ping",
+  variant = "default",
   className = "",
 }: FocusIndicatorProps) {
   return (
     <motion.div
-      layoutId="focus-indicator"
+      layoutId={`focus-indicator-${variant}`}
       className={`w-1.5 h-1.5 bg-red-500 shrink-0 ${className} absolute`}
       initial={{ scale: 1 }}
       animate={{ scale: [1, 1.5, 1] }}

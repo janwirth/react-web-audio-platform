@@ -114,17 +114,26 @@ function FocusableWithKeypressLog({
     >
       <div className="text-sm font-semibold mb-2 opacity-100">{label}</div>
       <div className="text-xs opacity-80 flex-1 flex items-center justify-center flex-col gap-2">
-        <div className="text-2xl font-bold opacity-100">{counter}</div>
+        <div className="flex flex-col gap-2 w-full items-center">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div
+              key={index}
+              className={`w-full h-0.5 relative flex items-center justify-center ${
+                counter === index
+                  ? "bg-red-700 dark:bg-red-300"
+                  : "bg-gray-200 dark:bg-gray-800"
+              }`}
+            >
+              {isFocused && counter === index && (
+                <FocusIndicator></FocusIndicator>
+              )}
+            </div>
+          ))}
+        </div>
         {isFocused
           ? "Focused - Press keys to see logs"
           : "Not focused - Click to focus"}
       </div>
-      {/* {isFocused && (
-        <div className="text-xs opacity-60 mt-2">
-          Check console for keypress logs
-        </div>
-      )} */}
-      {isFocused && <FocusIndicator></FocusIndicator>}
     </div>
   );
 }
