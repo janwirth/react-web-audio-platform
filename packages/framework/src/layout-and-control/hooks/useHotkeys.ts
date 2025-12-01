@@ -1,4 +1,6 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useRef } from "react";
+
+const ENABLE_LOGGING = false;
 
 export interface HotkeyBinding {
   /** Physical key code (e.g., "KeyH", "KeyL") - layout independent */
@@ -41,7 +43,9 @@ export function useHotkeys(
   // Update handlers map when bindings change
   useEffect(() => {
     handlersMapRef.current.clear();
-    console.log("[useHotkeys] Registering hotkeys:", bindings.length);
+    if (ENABLE_LOGGING) {
+      console.log("[useHotkeys] Registering hotkeys:", bindings.length);
+    }
     bindings.forEach((binding) => {
       // Normalize the code (lowercase, handle modifier combinations)
       const normalizedCode = binding.code.toLowerCase();
@@ -56,11 +60,13 @@ export function useHotkeys(
         handlersMapRef.current.set(normalizedKey, binding.handler);
       }
 
-      console.log(
-        `[useHotkeys] Registered: ${normalizedCode}${
-          binding.key ? ` (key: "${binding.key}")` : ""
-        } -> "${binding.description}"`
-      );
+      if (ENABLE_LOGGING) {
+        console.log(
+          `[useHotkeys] Registered: ${normalizedCode}${
+            binding.key ? ` (key: "${binding.key}")` : ""
+          } -> "${binding.description}"`
+        );
+      }
     });
   }, [bindings]);
 
@@ -111,25 +117,33 @@ export function useHotkeys(
         // For single-letter keys, try matching by logical key (e.key) first for layout-independence
         // This allows "j" to match regardless of physical key position
         if (logicalKey.length === 1 && /[a-z]/.test(logicalKey)) {
-          console.log(
-            `[useHotkeys] Trying to match by logical key: "${logicalKey}"`
-          );
+          if (ENABLE_LOGGING) {
+            console.log(
+              `[useHotkeys] Trying to match by logical key: "${logicalKey}"`
+            );
+          }
           handler = handlersMapRef.current.get(logicalKey);
           if (handler) {
             matchedKey = logicalKey;
-            console.log(`[useHotkeys] Matched by logical key: "${logicalKey}"`);
+            if (ENABLE_LOGGING) {
+              console.log(
+                `[useHotkeys] Matched by logical key: "${logicalKey}"`
+              );
+            }
           } else {
-            console.log(
-              `[useHotkeys] No handler found for logical key: "${logicalKey}"`
-            );
-            // Debug: show what keys are registered
-            const registeredKeys = Array.from(
-              handlersMapRef.current.keys()
-            ).filter((k) => k.length === 1);
-            console.log(
-              `[useHotkeys] Registered single-letter keys:`,
-              registeredKeys
-            );
+            if (ENABLE_LOGGING) {
+              console.log(
+                `[useHotkeys] No handler found for logical key: "${logicalKey}"`
+              );
+              // Debug: show what keys are registered
+              const registeredKeys = Array.from(
+                handlersMapRef.current.keys()
+              ).filter((k) => k.length === 1);
+              console.log(
+                `[useHotkeys] Registered single-letter keys:`,
+                registeredKeys
+              );
+            }
           }
         }
 
@@ -143,16 +157,20 @@ export function useHotkeys(
       }
 
       if (handler) {
-        console.log(
-          `[useHotkeys] Key pressed: ${code}${
-            modifiers.length > 0 ? ` (modifiers: ${modifiers.join("+")})` : ""
-          } -> matched: ${matchedKey}`
-        );
+        if (ENABLE_LOGGING) {
+          console.log(
+            `[useHotkeys] Key pressed: ${code}${
+              modifiers.length > 0 ? ` (modifiers: ${modifiers.join("+")})` : ""
+            } -> matched: ${matchedKey}`
+          );
+        }
         if (preventDefault) {
           e.preventDefault();
         }
         handler();
-        console.log(`[useHotkeys] Handler executed for: ${matchedKey}`);
+        if (ENABLE_LOGGING) {
+          console.log(`[useHotkeys] Handler executed for: ${matchedKey}`);
+        }
       } else {
         // Log unmatched keys for debugging (only if not a common key to reduce noise)
         const commonKeys = [
@@ -183,7 +201,7 @@ export function useHotkeys(
           "keyy",
           "keyz",
         ];
-        if (!commonKeys.includes(code)) {
+        if (!commonKeys.includes(code) && ENABLE_LOGGING) {
           console.log(
             `[useHotkeys] Key pressed but no handler: ${code}${
               modifiers.length > 0 ? ` (modifiers: ${modifiers.join("+")})` : ""
@@ -279,9 +297,11 @@ export function createHotkeyBinding(
   description: string
 ): HotkeyBinding {
   const code = logicalKeyToCode(logicalKey);
-  console.log(
-    `[useHotkeys] createHotkeyBinding: "${logicalKey}" -> code: "${code}" (${description})`
-  );
+  if (ENABLE_LOGGING) {
+    console.log(
+      `[useHotkeys] createHotkeyBinding: "${logicalKey}" -> code: "${code}" (${description})`
+    );
+  }
 
   // Extract display key from logical key
   let displayKey: string | undefined;

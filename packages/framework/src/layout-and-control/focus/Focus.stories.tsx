@@ -214,14 +214,19 @@ function FocusDemoWrapper() {
 
 // Simple content component without scrolling
 function SimpleContent({ label, content }: { label: string; content: string }) {
+  const { isFocused } = useFocus();
+
+  console.log("ISFOCUSED", isFocused);
   return (
     <div
+      tabIndex={0}
       className="h-full flex flex-col"
       style={{
         fontFamily: "monospace",
         padding: "12px",
       }}
     >
+      {isFocused && <div className="text-xs opacity-60 mt-2">Focused</div>}
       <div className="text-sm font-semibold mb-2 opacity-100">{label}</div>
       <div className="text-xs opacity-80 flex-1 flex items-center justify-center">
         {content}
