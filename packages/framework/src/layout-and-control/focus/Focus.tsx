@@ -14,6 +14,7 @@ interface FocusContextValue {
   focusId: string;
   currentlyFocused: HTMLElement | null;
   setCurrentlyFocused: (element: HTMLElement | null) => void;
+  windowHasFocus: boolean;
 }
 
 const FocusContext = createContext<FocusContextValue | null>(null);
@@ -25,9 +26,11 @@ interface FocusableProps {
 const FocusableDebugSection = ({
   isFocused,
   elementTag,
+  windowHasFocus,
 }: {
   isFocused: boolean;
   elementTag: string;
+  windowHasFocus: boolean;
 }) => {
   return (
     <div
@@ -36,13 +39,14 @@ const FocusableDebugSection = ({
     >
       <div>Focusable Debug:</div>
       <div>isFocused: {isFocused ? "true" : "false"}</div>
+      <div>windowHasFocus: {windowHasFocus ? "true" : "false"}</div>
       <div>element: {elementTag}</div>
     </div>
   );
 };
 
 export const Focusable = ({ children }: FocusableProps) => {
-  const { ref, isFocused } = useFocus();
+  const { ref, isFocused, focus, windowHasFocus } = useFocus();
   const elementRef = useRef<HTMLDivElement>(null);
   const [elementTag, setElementTag] = useState<string>("DIV");
 
@@ -53,10 +57,31 @@ export const Focusable = ({ children }: FocusableProps) => {
     }
   }, [ref]);
 
+  const handleClick = () => {
+    if (elementRef.current) {
+      focus();
+    }
+  };
+
+  const handleWheel = () => {
+    if (elementRef.current) {
+      focus();
+    }
+  };
+
   return (
-    <div ref={elementRef} tabIndex={0}>
+    <div
+      ref={elementRef}
+      tabIndex={0}
+      onClick={handleClick}
+      onWheel={handleWheel}
+    >
       {children}
-      <FocusableDebugSection isFocused={isFocused} elementTag={elementTag} />
+      <FocusableDebugSection
+        isFocused={isFocused}
+        elementTag={elementTag}
+        windowHasFocus={windowHasFocus}
+      />
     </div>
   );
 };
@@ -72,17 +97,19 @@ export const useFocus = () => {
   if (!context) {
     return {
       isFocused: false,
+      windowHasFocus: false,
       focus: () => {},
       blur: () => {},
       ref: setRef,
     };
   }
 
-  const { currentlyFocused, setCurrentlyFocused } = context;
+  const { currentlyFocused, setCurrentlyFocused, windowHasFocus } = context;
   const isFocused = elementRef.current === currentlyFocused;
 
   return {
     isFocused,
+    windowHasFocus,
     focus: () => {
       if (elementRef.current) {
         setCurrentlyFocused(elementRef.current);
@@ -295,6 +322,7 @@ export const FocusProvider = ({
         focusId,
         currentlyFocused,
         setCurrentlyFocused,
+        windowHasFocus: hasFocus,
       }}
     >
       <div ref={containerRef}>
