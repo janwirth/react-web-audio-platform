@@ -9,6 +9,8 @@ import {
 } from "react";
 import { useHotkeys } from "../hooks/useHotkeys";
 import { findClosestInDirection } from "../findClosestInDirection";
+import { Row } from "@/ui/Row";
+import { Column } from "@/ui/Column";
 
 interface FocusContextValue {
   focusId: string;
@@ -19,8 +21,15 @@ interface FocusContextValue {
 
 const FocusContext = createContext<FocusContextValue | null>(null);
 
+interface FocusableContextValue {
+  focusableElement: HTMLElement | null;
+}
+
+const FocusableContext = createContext<FocusableContextValue | null>(null);
+
 interface FocusableProps {
   children: React.ReactNode;
+  className?: string;
 }
 
 const FocusableDebugSection = ({
@@ -33,27 +42,29 @@ const FocusableDebugSection = ({
   windowHasFocus: boolean;
 }) => {
   return (
-    <div
-      className="text-xs opacity-60 mt-2 pt-2 border-t border-current"
-      style={{ fontFamily: "monospace" }}
-    >
-      <div>Focusable Debug:</div>
-      <div>isFocused: {isFocused ? "true" : "false"}</div>
-      <div>windowHasFocus: {windowHasFocus ? "true" : "false"}</div>
-      <div>element: {elementTag}</div>
+    <div className="w-full h-full text-xs opacity-60 p-2 font-mono">
+      <div className="pt-2 border-t border-current">
+        <div>Focusable Debug:</div>
+        <div>isFocused: {isFocused ? "true" : "false"}</div>
+        <div>windowHasFocus: {windowHasFocus ? "true" : "false"}</div>
+        <div>element: {elementTag}</div>
+      </div>
     </div>
   );
 };
 
-export const Focusable = ({ children }: FocusableProps) => {
+export const Focusable = ({ children, className }: FocusableProps) => {
   const { ref, isFocused, focus, windowHasFocus } = useFocus();
   const elementRef = useRef<HTMLDivElement>(null);
   const [elementTag, setElementTag] = useState<string>("DIV");
+  const [focusableElement, setFocusableElement] =
+    useState<HTMLDivElement | null>(null);
 
   useEffect(() => {
     ref(elementRef.current);
     if (elementRef.current) {
       setElementTag(elementRef.current.tagName);
+      setFocusableElement(elementRef.current);
     }
   }, [ref]);
 
@@ -70,24 +81,38 @@ export const Focusable = ({ children }: FocusableProps) => {
   };
 
   return (
-    <div
-      ref={elementRef}
-      tabIndex={0}
-      onClick={handleClick}
-      onWheel={handleWheel}
-    >
-      {children}
-      <FocusableDebugSection
-        isFocused={isFocused}
-        elementTag={elementTag}
-        windowHasFocus={windowHasFocus}
-      />
-    </div>
+    <FocusableContext.Provider value={{ focusableElement }}>
+      <div
+        ref={(node) => {
+          elementRef.current = node;
+          ref(node);
+          setFocusableElement(node);
+        }}
+        className={`w-full h-full relative ${className || ""} outline-none`}
+        tabIndex={0}
+        onClick={handleClick}
+        onWheel={handleWheel}
+      >
+        <Column className="w-full h-full">
+          <Row className="w-full flex-1 relative">
+            <Column className="w-full h-full">{children}</Column>
+          </Row>
+          <Column className="w-full h-full">
+            <FocusableDebugSection
+              isFocused={isFocused}
+              elementTag={elementTag}
+              windowHasFocus={windowHasFocus}
+            />
+          </Column>
+        </Column>
+      </div>
+    </FocusableContext.Provider>
   );
 };
 
 export const useFocus = () => {
   const context = useContext(FocusContext);
+  const focusableContext = useContext(FocusableContext);
   const elementRef = useRef<HTMLElement | null>(null);
 
   const setRef = (element: HTMLElement | null) => {
@@ -105,7 +130,20 @@ export const useFocus = () => {
   }
 
   const { currentlyFocused, setCurrentlyFocused, windowHasFocus } = context;
-  const isFocused = elementRef.current === currentlyFocused;
+
+  // Check if the element itself is focused
+  let isFocused = elementRef.current === currentlyFocused;
+
+  // If elementRef is not set, check if we're inside a Focusable container that is focused
+  if (!isFocused && !elementRef.current && focusableContext?.focusableElement) {
+    const focusableElement = focusableContext.focusableElement;
+    // Check if currentlyFocused is the focusable element or a descendant of it
+    if (currentlyFocused) {
+      isFocused =
+        currentlyFocused === focusableElement ||
+        focusableElement.contains(currentlyFocused);
+    }
+  }
 
   return {
     isFocused,
@@ -114,12 +152,24 @@ export const useFocus = () => {
       if (elementRef.current) {
         setCurrentlyFocused(elementRef.current);
         elementRef.current.focus();
+      } else {
+        const focusableElement = focusableContext?.focusableElement;
+        if (focusableElement) {
+          setCurrentlyFocused(focusableElement);
+          focusableElement.focus();
+        }
       }
     },
     blur: () => {
       if (elementRef.current === currentlyFocused) {
         setCurrentlyFocused(null);
         elementRef.current?.blur();
+      } else {
+        const focusableElement = focusableContext?.focusableElement;
+        if (focusableElement && focusableElement === currentlyFocused) {
+          setCurrentlyFocused(null);
+          focusableElement.blur();
+        }
       }
     },
     ref: setRef,
@@ -357,10 +407,7 @@ const FocusProviderDebugSection = ({
   } | null;
 }) => {
   return (
-    <div
-      className="text-xs opacity-60 mt-4 pt-2 border-t border-current"
-      style={{ fontFamily: "monospace" }}
-    >
+    <div className="text-xs opacity-60 mt-4 pt-2 border-t border-current font-mono">
       <div>FocusProvider Debug:</div>
       <div>focusId: {focusId}</div>
       <div>hasFocus: {hasFocus ? "true" : "false"}</div>

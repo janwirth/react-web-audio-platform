@@ -1,8 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { useState, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Row } from "@/ui/Row";
 import { Column } from "@/ui/Column";
 import { Focusable, FocusProvider, useFocus } from "./Focus";
+import { motion } from "motion/react";
 
 const meta = {
   title: "Stories/LayoutAndControl/Focus",
@@ -25,42 +26,22 @@ function Scrollable({ items, label }: ScrollableProps) {
   const [cursor, setCursor] = useState(0);
   const [lastEvent, setLastEvent] = useState<string | null>(null);
 
-  const { isFocused, containerRef } = useFocus({
-    onArrowDown: useCallback(() => {
-      if (cursor >= items.length - 1) {
-        setLastEvent("Arrow Down (overscroll)");
-        return "overscroll-down";
-      } else {
-        setCursor((c) => c + 1);
-        setLastEvent("Arrow Down");
-        return;
-      }
-    }, [cursor, items.length]),
-    onArrowUp: useCallback(() => {
-      if (cursor <= 0) {
-        setLastEvent("Arrow Up (overscroll)");
-        return "overscroll-up";
-      } else {
-        setCursor((c) => c - 1);
-        setLastEvent("Arrow Up");
-        return;
-      }
-    }, [cursor]),
-  });
+  const { isFocused, ref } = useFocus();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    ref(containerRef.current);
+  }, [ref]);
 
   return (
     <div
       ref={containerRef}
-      className="space-y-2 text-xs opacity-80 h-full flex flex-col"
-      style={{
-        fontFamily: "monospace",
-        padding: "12px",
-      }}
+      className="space-y-2 text-xs opacity-80 h-full flex flex-col font-mono p-3"
     >
       {label && (
         <div className="text-sm font-semibold mb-2 opacity-100">{label}</div>
       )}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1">
         {items.map((item, i) => (
           <div
             key={i}
@@ -90,112 +71,40 @@ function FocusDemo() {
   const itemsD = Array.from({ length: 12 }, (_, i) => `Item D-${i + 1}`);
 
   return (
-    <Column className="h-full w-full" style={{ height: "100vh" }}>
+    <Column className="h-screen w-full">
       {/* First Row */}
-      <Row className="flex-1" style={{ minHeight: 0 }}>
-        <Column
-          className="flex-1"
-          style={{
-            minWidth: 0,
-            padding: "10px",
-            overflow: "hidden",
-          }}
-        >
-          <Focusable
-            className="h-full"
-            style={{
-              minHeight: 0,
-            }}
-          >
+      <Row className="flex-1 min-h-0">
+        <Column className="flex-1 min-w-0 p-2.5">
+          <Focusable className="h-full min-h-0">
             <Scrollable items={itemsA} label="List A" />
           </Focusable>
         </Column>
-        <Column
-          className="flex-1"
-          style={{
-            minWidth: 0,
-            padding: "10px",
-            overflow: "hidden",
-          }}
-        >
-          <Focusable
-            className="h-full"
-            style={{
-              minHeight: 0,
-            }}
-          >
+        <Column className="flex-1 min-w-0 p-2.5">
+          <Focusable className="h-full min-h-0">
             <Scrollable items={itemsB} label="List B" />
           </Focusable>
         </Column>
-        <Column
-          className="flex-1"
-          style={{
-            minWidth: 0,
-            padding: "10px",
-            overflow: "hidden",
-          }}
-        >
-          <Focusable
-            className="h-full"
-            style={{
-              minHeight: 0,
-            }}
-          >
+        <Column className="flex-1 min-w-0 p-2.5">
+          <Focusable className="h-full min-h-0">
             <Scrollable items={itemsC} label="List C" />
           </Focusable>
         </Column>
       </Row>
 
       {/* Second Row */}
-      <Row className="flex-1" style={{ minHeight: 0 }}>
-        <Column
-          className="flex-1"
-          style={{
-            minWidth: 0,
-            padding: "10px",
-            overflow: "hidden",
-          }}
-        >
-          <Focusable
-            className="h-full"
-            style={{
-              minHeight: 0,
-            }}
-          >
+      <Row className="flex-1 min-h-0">
+        <Column className="flex-1 min-w-0 p-2.5">
+          <Focusable className="h-full min-h-0">
             <Scrollable items={itemsD} label="List D" />
           </Focusable>
         </Column>
-        <Column
-          className="flex-1"
-          style={{
-            minWidth: 0,
-            padding: "10px",
-            overflow: "hidden",
-          }}
-        >
-          <Focusable
-            className="h-full"
-            style={{
-              minHeight: 0,
-            }}
-          >
+        <Column className="flex-1 min-w-0 p-2.5">
+          <Focusable className="h-full min-h-0">
             <Scrollable items={itemsA} label="List E" />
           </Focusable>
         </Column>
-        <Column
-          className="flex-1"
-          style={{
-            minWidth: 0,
-            padding: "10px",
-            overflow: "hidden",
-          }}
-        >
-          <Focusable
-            className="h-full"
-            style={{
-              minHeight: 0,
-            }}
-          >
+        <Column className="flex-1 min-w-0 p-2.5">
+          <Focusable className="h-full min-h-0">
             <Scrollable items={itemsB} label="List F" />
           </Focusable>
         </Column>
@@ -214,22 +123,23 @@ function FocusDemoWrapper() {
 
 // Simple content component without scrolling
 function SimpleContent({ label, content }: { label: string; content: string }) {
-  const { isFocused } = useFocus();
+  const { isFocused, windowHasFocus } = useFocus();
 
   console.log("ISFOCUSED", isFocused);
   return (
-    <div
-      tabIndex={0}
-      className="h-full flex flex-col"
-      style={{
-        fontFamily: "monospace",
-        padding: "12px",
-      }}
-    >
-      {isFocused && <div className="text-xs opacity-60 mt-2">Focused</div>}
+    <div className="h-full flex flex-col relative font-mono p-3">
       <div className="text-sm font-semibold mb-2 opacity-100">{label}</div>
       <div className="text-xs opacity-80 flex-1 flex items-center justify-center">
         {content}
+        {isFocused && (
+          <motion.div
+            transition={{ duration: 0.15, ease: "circOut" }}
+            layoutId="focus-indicator"
+            className={`absolute top-2 right-2 w-4 h-4 shrink-0 ${
+              windowHasFocus ? "bg-white dark:bg-white" : "bg-gray-500"
+            }`}
+          />
+        )}
       </div>
     </div>
   );
@@ -237,113 +147,52 @@ function SimpleContent({ label, content }: { label: string; content: string }) {
 
 // Focus-only demo with same layout but no scrollable elements
 function FocusOnlyDemo() {
+  const { isFocused, windowHasFocus } = useFocus();
   return (
-    <Column className="h-full w-full" style={{ height: "100vh" }}>
+    <Column className="h-screen w-full relative">
       {/* First Row */}
-      <Row className="flex-1" style={{ minHeight: 0 }}>
-        <Column
-          className="flex-1"
-          style={{
-            minWidth: 0,
-            padding: "10px",
-            overflow: "hidden",
-          }}
-        >
-          <Focusable
-            className="h-full"
-            style={{
-              minHeight: 0,
-            }}
-          >
+      {isFocused && (
+        <motion.div
+          layoutId="focus-indicator"
+          className={`absolute top-2 right-2 w-4 h-4 shrink-0 ${
+            windowHasFocus ? "bg-white" : "bg-black"
+          }`}
+        />
+      )}
+      {isFocused && <div className="text-xs opacity-60 mt-2">Focused</div>}
+
+      <Row className="flex-1 min-h-0">
+        <Column className="flex-1">
+          <Focusable className="h-full min-h-0">
             <SimpleContent label="Panel A" content="Focusable container A" />
           </Focusable>
         </Column>
-        <Column
-          className="flex-1"
-          style={{
-            minWidth: 0,
-            padding: "10px",
-            overflow: "hidden",
-          }}
-        >
-          <Focusable
-            className="h-full"
-            style={{
-              minHeight: 0,
-            }}
-          >
+        <Column className="flex-1 min-w-0 p-2.5">
+          <Focusable className="h-full min-h-0">
             <SimpleContent label="Panel B" content="Focusable container B" />
           </Focusable>
         </Column>
-        <Column
-          className="flex-1"
-          style={{
-            minWidth: 0,
-            padding: "10px",
-            overflow: "hidden",
-          }}
-        >
-          <Focusable
-            className="h-full"
-            style={{
-              minHeight: 0,
-            }}
-          >
+        <Column className="flex-1 min-w-0 p-2.5">
+          <Focusable className="h-full min-h-0">
             <SimpleContent label="Panel C" content="Focusable container C" />
           </Focusable>
         </Column>
       </Row>
 
       {/* Second Row */}
-      <Row className="flex-1" style={{ minHeight: 0 }}>
-        <Column
-          className="flex-1"
-          style={{
-            minWidth: 0,
-            padding: "10px",
-            overflow: "hidden",
-          }}
-        >
-          <Focusable
-            className="h-full"
-            style={{
-              minHeight: 0,
-            }}
-          >
+      <Row className="flex-1 min-h-0">
+        <Column className="flex-1 min-w-0 p-2.5">
+          <Focusable className="h-full min-h-0">
             <SimpleContent label="Panel D" content="Focusable container D" />
           </Focusable>
         </Column>
-        <Column
-          className="flex-1"
-          style={{
-            minWidth: 0,
-            padding: "10px",
-            overflow: "hidden",
-          }}
-        >
-          <Focusable
-            className="h-full"
-            style={{
-              minHeight: 0,
-            }}
-          >
+        <Column className="flex-1 min-w-0 p-2.5">
+          <Focusable className="h-full min-h-0">
             <SimpleContent label="Panel E" content="Focusable container E" />
           </Focusable>
         </Column>
-        <Column
-          className="flex-1"
-          style={{
-            minWidth: 0,
-            padding: "10px",
-            overflow: "hidden",
-          }}
-        >
-          <Focusable
-            className="h-full"
-            style={{
-              minHeight: 0,
-            }}
-          >
+        <Column className="flex-1 min-w-0 p-2.5">
+          <Focusable className="h-full min-h-0">
             <SimpleContent label="Panel F" content="Focusable container F" />
           </Focusable>
         </Column>
