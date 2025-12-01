@@ -16,56 +16,22 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Counter component with overscroll
+// Scrollable component based on HotkeyDebuggerSection
 interface ScrollableProps {
+  items: string[];
   label?: string;
 }
 
-const MAX_VALUE = 5;
+function Scrollable({ items, label }: ScrollableProps) {
+  const [cursor, setCursor] = useState(0);
+  const [lastEvent, setLastEvent] = useState<string | null>(null);
 
-function Scrollable({ label }: ScrollableProps) {
-  const [counter, setCounter] = useState(0);
   const { isFocused, ref } = useFocus();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     ref(containerRef.current);
   }, [ref]);
-
-  useEffect(() => {
-    if (!isFocused || !containerRef.current) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowDown") {
-        if (counter >= MAX_VALUE) {
-          // At max bound, trigger overscroll - don't prevent default
-          // Let FocusProvider handle navigation
-          return;
-        } else {
-          e.preventDefault();
-          e.stopPropagation();
-          setCounter((c) => c + 1);
-        }
-      } else if (e.key === "ArrowUp") {
-        if (counter <= 0) {
-          // At min bound, trigger overscroll - don't prevent default
-          // Let FocusProvider handle navigation
-          return;
-        } else {
-          e.preventDefault();
-          e.stopPropagation();
-          setCounter((c) => c - 1);
-        }
-      }
-    };
-
-    const container = containerRef.current;
-    container.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      container.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isFocused, counter]);
 
   return (
     <div
@@ -75,12 +41,23 @@ function Scrollable({ label }: ScrollableProps) {
       {label && (
         <div className="text-sm font-semibold mb-2 opacity-100">{label}</div>
       )}
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-4xl font-bold">{counter}</div>
+      <div className="flex-1">
+        {items.map((item, i) => (
+          <div
+            key={i}
+            className={`py-1 px-2 ${
+              i === cursor ? "opacity-100" : "opacity-60"
+            } ${i === cursor ? "border-l-2 border-l-current" : ""}`}
+          >
+            {item}
+          </div>
+        ))}
       </div>
-      <div className="text-xs opacity-60 mt-2">
-        Max: {MAX_VALUE} | Arrow Down to increment | Arrow Up to decrement
-      </div>
+      {lastEvent && (
+        <div className="mt-4 pt-2 border-t border-current opacity-40 text-xs">
+          Last event: {lastEvent}
+        </div>
+      )}
       {isFocused && <div className="text-xs opacity-60 mt-2">Focused</div>}
     </div>
   );
@@ -88,23 +65,28 @@ function Scrollable({ label }: ScrollableProps) {
 
 // Main demo with RowsColumnsMosaic-style layout
 function FocusDemo() {
+  const itemsA = Array.from({ length: 20 }, (_, i) => `Item A-${i + 1}`);
+  const itemsB = Array.from({ length: 15 }, (_, i) => `Item B-${i + 1}`);
+  const itemsC = Array.from({ length: 25 }, (_, i) => `Item C-${i + 1}`);
+  const itemsD = Array.from({ length: 12 }, (_, i) => `Item D-${i + 1}`);
+
   return (
     <Column className="h-screen w-full">
       {/* First Row */}
       <Row className="flex-1 min-h-0">
         <Column className="flex-1 min-w-0 p-2.5">
           <Focusable className="h-full min-h-0">
-            <Scrollable label="Counter A" />
+            <Scrollable items={itemsA} label="List A" />
           </Focusable>
         </Column>
         <Column className="flex-1 min-w-0 p-2.5">
           <Focusable className="h-full min-h-0">
-            <Scrollable label="Counter B" />
+            <Scrollable items={itemsB} label="List B" />
           </Focusable>
         </Column>
         <Column className="flex-1 min-w-0 p-2.5">
           <Focusable className="h-full min-h-0">
-            <Scrollable label="Counter C" />
+            <Scrollable items={itemsC} label="List C" />
           </Focusable>
         </Column>
       </Row>
@@ -113,17 +95,17 @@ function FocusDemo() {
       <Row className="flex-1 min-h-0">
         <Column className="flex-1 min-w-0 p-2.5">
           <Focusable className="h-full min-h-0">
-            <Scrollable label="Counter D" />
+            <Scrollable items={itemsD} label="List D" />
           </Focusable>
         </Column>
         <Column className="flex-1 min-w-0 p-2.5">
           <Focusable className="h-full min-h-0">
-            <Scrollable label="Counter E" />
+            <Scrollable items={itemsA} label="List E" />
           </Focusable>
         </Column>
         <Column className="flex-1 min-w-0 p-2.5">
           <Focusable className="h-full min-h-0">
-            <Scrollable label="Counter F" />
+            <Scrollable items={itemsB} label="List F" />
           </Focusable>
         </Column>
       </Row>
