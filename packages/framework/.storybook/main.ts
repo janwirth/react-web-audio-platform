@@ -30,6 +30,9 @@ const config: StorybookConfig = {
       worker: {
         format: "es",
       },
+      optimizeDeps: {
+        exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/util"],
+      },
     });
   },
 };

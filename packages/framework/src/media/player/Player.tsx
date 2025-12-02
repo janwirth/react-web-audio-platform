@@ -41,7 +41,7 @@ const PlayerInternal: React.FC<{
       ? queue[currentQueueIndex]
       : null;
 
-  useQueueAutoPlay();
+  // useQueueAutoPlay();
   useTrackEnded();
 
   useMediaSession({

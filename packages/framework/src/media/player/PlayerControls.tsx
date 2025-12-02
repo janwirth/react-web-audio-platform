@@ -1,7 +1,7 @@
 import { useCallback } from "react";
-import { useAtom, useSetAtom } from "jotai";
-import { queueAtom, currentQueueIndexAtom, activeUrlAtom } from "./Player";
-import { usePlayerContext } from "./context/PlayerContext";
+import { useAtom } from "jotai";
+import { queueAtom, currentQueueIndexAtom } from "./Player";
+import { useQueueNavigation } from "./hooks/useQueueNavigation";
 import { NextIcon, PreviousIcon } from "./Icons";
 import { Row } from "../../ui/Row";
 
@@ -39,35 +39,16 @@ export const PlayerControls = ({
   audioRef: React.RefObject<HTMLAudioElement | null>;
 }) => {
   const [queue] = useAtom(queueAtom);
-  const [currentIndex, setCurrentQueueIndex] = useAtom(currentQueueIndexAtom);
-  const setActiveUrl = useSetAtom(activeUrlAtom);
-  const { setSrc } = usePlayerContext();
+  const [currentIndex] = useAtom(currentQueueIndexAtom);
+  const { goToNext, goToPrevious } = useQueueNavigation();
 
   const handleNext = useCallback(() => {
-    if (currentIndex < queue.length - 1) {
-      const nextIndex = currentIndex + 1;
-      const nextItem = queue[nextIndex];
-      if (nextItem?.audioUrl && audioRef.current) {
-        setCurrentQueueIndex(nextIndex);
-        setActiveUrl(nextItem.audioUrl);
-        setSrc(nextItem.audioUrl);
-        audioRef.current.play().catch(console.error);
-      }
-    }
-  }, [currentIndex, queue, audioRef, setCurrentQueueIndex, setActiveUrl, setSrc]);
+    goToNext(audioRef);
+  }, [goToNext, audioRef]);
 
   const handlePrev = useCallback(() => {
-    if (currentIndex > 0) {
-      const prevIndex = currentIndex - 1;
-      const prevItem = queue[prevIndex];
-      if (prevItem?.audioUrl && audioRef.current) {
-        setCurrentQueueIndex(prevIndex);
-        setActiveUrl(prevItem.audioUrl);
-        setSrc(prevItem.audioUrl);
-        audioRef.current.play().catch(console.error);
-      }
-    }
-  }, [currentIndex, queue, audioRef, setCurrentQueueIndex, setActiveUrl, setSrc]);
+    goToPrevious(audioRef);
+  }, [goToPrevious, audioRef]);
 
   const canGoNext = currentIndex < queue.length - 1;
   const canGoPrev = currentIndex > 0;

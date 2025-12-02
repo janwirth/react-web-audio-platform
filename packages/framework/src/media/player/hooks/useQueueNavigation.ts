@@ -3,6 +3,11 @@ import type React from "react";
 import { useAtom, useSetAtom } from "jotai";
 import { queueAtom, currentQueueIndexAtom, activeUrlAtom } from "../Player";
 import { usePlayerContext } from "../context/PlayerContext";
+import {
+  ensureAudioSource,
+  waitForMetadataAndReady,
+  performPlayFromStart,
+} from "../utils/audioPlaybackUtils";
 
 /**
  * Hook for queue navigation (next/previous track)
@@ -22,8 +27,11 @@ export const useQueueNavigation = () => {
       if (item) {
         setCurrentQueueIndex(index);
         setActiveUrl(item.audioUrl);
-        setSrc(item.audioUrl);
-        audio.play().catch(console.error);
+        ensureAudioSource(audio, item.audioUrl, setSrc);
+
+        waitForMetadataAndReady(audio, () => {
+          performPlayFromStart(audio);
+        });
       }
     },
     [queue, setCurrentQueueIndex, setActiveUrl, setSrc]
