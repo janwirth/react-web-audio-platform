@@ -1,13 +1,16 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useState, useCallback } from "react";
 import { Column } from "@/ui/Column";
-import { Player } from "@/media/player/Player";
-import { PlayerUI } from "@/media/player/PlayerUI";
-import type { QueueItem } from "@/media/player/Player";
 import { useSetAtom } from "jotai";
-import { queueAtom, currentQueueIndexAtom } from "@/media/player/Player";
+import {
+  Player,
+  PlayerUI,
+  Queue,
+  queueAtom,
+  currentQueueIndexAtom,
+  type QueueItem,
+} from "@/media/player";
 import { AudioContextProvider } from "@/media/audio-context";
-import { Queue } from "@/media/player/Queue";
 import {
   useOPFSAudioFiles,
   type OPFSAudioFile,
