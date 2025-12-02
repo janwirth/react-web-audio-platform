@@ -1,7 +1,8 @@
-import { createContext, useContext, useRef } from "react";
+import { createContext, useContext } from "react";
 
 interface PlayerContextValue {
   audioRef: React.RefObject<HTMLAudioElement | null>;
+  setSrc: (url: string) => void;
 }
 
 export const PlayerContext = createContext<PlayerContextValue | null>(null);
@@ -13,4 +14,3 @@ export const usePlayerContext = () => {
   }
   return context;
 };
-

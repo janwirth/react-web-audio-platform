@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import type React from "react";
 import { useAtom, useSetAtom } from "jotai";
 import { queueAtom, currentQueueIndexAtom, activeUrlAtom } from "../Player";
+import { usePlayerContext } from "../context/PlayerContext";
 
 /**
  * Hook for queue navigation (next/previous track)
@@ -10,6 +11,7 @@ export const useQueueNavigation = () => {
   const [queue] = useAtom(queueAtom);
   const [currentQueueIndex, setCurrentQueueIndex] = useAtom(currentQueueIndexAtom);
   const setActiveUrl = useSetAtom(activeUrlAtom);
+  const { setSrc } = usePlayerContext();
 
   const playTrackByIndex = useCallback(
     (index: number, audioRef: React.RefObject<HTMLAudioElement | null>) => {
@@ -20,12 +22,11 @@ export const useQueueNavigation = () => {
       if (item) {
         setCurrentQueueIndex(index);
         setActiveUrl(item.audioUrl);
-        audio.src = item.audioUrl;
-        audio.load();
+        setSrc(item.audioUrl);
         audio.play().catch(console.error);
       }
     },
-    [queue, setCurrentQueueIndex, setActiveUrl]
+    [queue, setCurrentQueueIndex, setActiveUrl, setSrc]
   );
 
   const goToNext = useCallback(

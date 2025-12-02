@@ -6,15 +6,15 @@ import { waitForBuffered, checkIsBuffered } from "./bufferingUtils";
  */
 export const ensureAudioSource = (
   audio: HTMLAudioElement,
-  url: string
+  url: string,
+  setSrc: (url: string) => void
 ): void => {
   const normalizedUrl = normalizeUrl(url);
   const currentSrc = audio.src;
   const normalizedCurrentSrc = normalizeUrl(currentSrc);
 
   if (normalizedCurrentSrc !== normalizedUrl) {
-    audio.src = url;
-    audio.load();
+    setSrc(url);
   }
 };
 

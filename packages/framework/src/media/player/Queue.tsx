@@ -7,8 +7,14 @@ import {
   type QueueItem,
 } from "./Player";
 import { usePlayerContext } from "./Player";
-import { TableVirtualizer, TableVirtualizerHandle } from "../../ui/TableVirtualizer";
-import { usePanelEvent, useIsPanelFocused } from "../../layout-and-control/hooks/usePanelEvent";
+import {
+  TableVirtualizer,
+  TableVirtualizerHandle,
+} from "../../ui/TableVirtualizer";
+import {
+  usePanelEvent,
+  useIsPanelFocused,
+} from "../../layout-and-control/hooks/usePanelEvent";
 import { FocusIndicator } from "../../layout-and-control/FocusIndicator";
 
 export function useQueue() {
@@ -30,7 +36,7 @@ export function Queue() {
   const [queue, setQueue] = useAtom(queueAtom);
   const [currentIndex, setCurrentQueueIndex] = useAtom(currentQueueIndexAtom);
   const setActiveUrl = useSetAtom(activeUrlAtom);
-  const { audioRef } = usePlayerContext();
+  const { audioRef, setSrc } = usePlayerContext();
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(0);
@@ -140,13 +146,12 @@ export function Queue() {
         if (audioUrl) {
           setCurrentQueueIndex(index);
           setActiveUrl(audioUrl);
-          audioRef.current.src = audioUrl;
-          audioRef.current.load();
+          setSrc(audioUrl);
           audioRef.current.play().catch(console.error);
         }
       }
     },
-    [queue, audioRef, setCurrentQueueIndex, setActiveUrl]
+    [queue, audioRef, setCurrentQueueIndex, setActiveUrl, setSrc]
   );
 
   const handleEnter = useCallback(

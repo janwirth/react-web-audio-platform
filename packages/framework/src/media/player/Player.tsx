@@ -1,4 +1,4 @@
-import React, { useRef, ReactNode } from "react";
+import React, { useRef, ReactNode, useCallback } from "react";
 import { atom, useAtom } from "jotai";
 import { atomFamily } from "jotai/utils";
 import { DualViewListItem } from "../../components/DualViewList";
@@ -66,8 +66,20 @@ const PlayerInternal: React.FC<{
 export const Player: React.FC<PlayerProps> = ({ children }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
 
+  const setSrc = useCallback((url: string) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    // TODO: Add file conversion/processing logic here before setting src
+    // For now, this is a placeholder that can be extended for file conversion
+    const processedUrl = url; // Process URL here (e.g., convert file format)
+
+    audio.src = processedUrl;
+    audio.load();
+  }, []);
+
   return (
-    <PlayerContext.Provider value={{ audioRef }}>
+    <PlayerContext.Provider value={{ audioRef, setSrc }}>
       <PlayerInternal audioRef={audioRef} />
       <audio ref={audioRef} crossOrigin="anonymous" />
       {children}

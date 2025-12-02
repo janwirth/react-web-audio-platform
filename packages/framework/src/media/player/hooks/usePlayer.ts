@@ -15,7 +15,7 @@ import {
 import { buildQueueFromTrack } from "../utils/queueUtils";
 
 export const usePlayer = () => {
-  const { audioRef } = usePlayerContext();
+  const { audioRef, setSrc } = usePlayerContext();
   const setActiveUrl = useSetAtom(activeUrlAtom);
   const setQueue = useSetAtom(queueAtom);
   const setCurrentQueueIndex = useSetAtom(currentQueueIndexAtom);
@@ -34,13 +34,13 @@ export const usePlayer = () => {
       }
 
       setActiveUrl(item.audioUrl);
-      ensureAudioSource(audio, item.audioUrl);
+      ensureAudioSource(audio, item.audioUrl, setSrc);
 
       waitForMetadataAndReady(audio, () => {
         performPlayFromStart(audio);
       });
     },
-    [audioRef, setActiveUrl, setQueue, setCurrentQueueIndex]
+    [audioRef, setActiveUrl, setQueue, setCurrentQueueIndex, setSrc]
   );
 
   return {

@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useAtom, useSetAtom } from "jotai";
 import { queueAtom, currentQueueIndexAtom, activeUrlAtom } from "./Player";
+import { usePlayerContext } from "./context/PlayerContext";
 import { NextIcon, PreviousIcon } from "./Icons";
 import { Row } from "../../ui/Row";
 
@@ -40,6 +41,7 @@ export const PlayerControls = ({
   const [queue] = useAtom(queueAtom);
   const [currentIndex, setCurrentQueueIndex] = useAtom(currentQueueIndexAtom);
   const setActiveUrl = useSetAtom(activeUrlAtom);
+  const { setSrc } = usePlayerContext();
 
   const handleNext = useCallback(() => {
     if (currentIndex < queue.length - 1) {
@@ -48,12 +50,11 @@ export const PlayerControls = ({
       if (nextItem?.audioUrl && audioRef.current) {
         setCurrentQueueIndex(nextIndex);
         setActiveUrl(nextItem.audioUrl);
-        audioRef.current.src = nextItem.audioUrl;
-        audioRef.current.load();
+        setSrc(nextItem.audioUrl);
         audioRef.current.play().catch(console.error);
       }
     }
-  }, [currentIndex, queue, audioRef, setCurrentQueueIndex, setActiveUrl]);
+  }, [currentIndex, queue, audioRef, setCurrentQueueIndex, setActiveUrl, setSrc]);
 
   const handlePrev = useCallback(() => {
     if (currentIndex > 0) {
@@ -62,12 +63,11 @@ export const PlayerControls = ({
       if (prevItem?.audioUrl && audioRef.current) {
         setCurrentQueueIndex(prevIndex);
         setActiveUrl(prevItem.audioUrl);
-        audioRef.current.src = prevItem.audioUrl;
-        audioRef.current.load();
+        setSrc(prevItem.audioUrl);
         audioRef.current.play().catch(console.error);
       }
     }
-  }, [currentIndex, queue, audioRef, setCurrentQueueIndex, setActiveUrl]);
+  }, [currentIndex, queue, audioRef, setCurrentQueueIndex, setActiveUrl, setSrc]);
 
   const canGoNext = currentIndex < queue.length - 1;
   const canGoPrev = currentIndex > 0;

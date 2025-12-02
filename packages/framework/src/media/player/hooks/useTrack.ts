@@ -27,7 +27,7 @@ export const useTrack = (
   url: string,
   allItems?: QueueItem[]
 ): UseTrackReturn => {
-  const { audioRef } = usePlayerContext();
+  const { audioRef, setSrc } = usePlayerContext();
   const [activeUrl, setActiveUrl] = useAtom(activeUrlAtom);
   const setQueue = useSetAtom(queueAtom);
   const setCurrentQueueIndex = useSetAtom(currentQueueIndexAtom);
@@ -84,13 +84,13 @@ export const useTrack = (
       }
 
       setActiveUrl(url);
-      ensureAudioSource(audio, url);
+      ensureAudioSource(audio, url, setSrc);
 
       waitForMetadataAndReady(audio, () => {
         performSeekAndPlay(audio, position).catch(console.error);
       });
     },
-    [audioRef, url, setActiveUrl, allItems, setQueue, setCurrentQueueIndex]
+    [audioRef, url, setActiveUrl, allItems, setQueue, setCurrentQueueIndex, setSrc]
   );
 
   const play = useCallback(() => {

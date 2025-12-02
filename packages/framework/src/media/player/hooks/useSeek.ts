@@ -1,6 +1,7 @@
 import { useCallback, useRef } from "react";
 import { normalizeUrl } from "../utils/urlUtils";
 import { checkIsBuffered } from "../utils/bufferingUtils";
+import { usePlayerContext } from "../context/PlayerContext";
 
 /**
  * Hook for seeking to a position in the currently active track
@@ -10,6 +11,7 @@ export const useSeek = (
   activeUrl: string | null
 ) => {
   const seekToRef = useRef<number | null>(null);
+  const { setSrc } = usePlayerContext();
 
   const seekTo = useCallback(
     (position: number) => {
@@ -23,8 +25,7 @@ export const useSeek = (
       const normalizedCurrentSrc = normalizeUrl(currentSrc);
 
       if (normalizedCurrentSrc !== normalizedUrl) {
-        audio.src = activeUrl;
-        audio.load();
+        setSrc(activeUrl);
       }
 
       if (seekToRef.current !== null) {
@@ -108,7 +109,7 @@ export const useSeek = (
 
       performSeek();
     },
-    [audioRef, activeUrl]
+    [audioRef, activeUrl, setSrc]
   );
 
   return seekTo;
