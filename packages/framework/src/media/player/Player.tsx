@@ -66,13 +66,35 @@ const PlayerInternal: React.FC<{
 export const Player: React.FC<PlayerProps> = ({ children }) => {
   const audioRef = useRef<HTMLAudioElement>(null);
 
-  const setSrc = useCallback((url: string) => {
+  const setSrc = useCallback(async (url: string) => {
+    console.log("setSrc", url);
     const audio = audioRef.current;
     if (!audio) return;
 
-    // TODO: Add file conversion/processing logic here before setting src
-    // For now, this is a placeholder that can be extended for file conversion
-    const processedUrl = url; // Process URL here (e.g., convert file format)
+    try {
+      // Fetch URL with HEAD request to check Content-Type header
+      const response = await fetch(url, { method: "HEAD" });
+      const contentType = response.headers.get("Content-Type");
+      console.log("contentType", contentType);
+
+      if (contentType) {
+        // Check if the audio element can play this content type
+        // Returns: "" (empty string) = not supported, "maybe" = might be supported, "probably" = likely supported
+        const canPlay = audio.canPlayType(contentType);
+
+        if (canPlay === "") {
+          alert(`Audio format not supported: ${contentType}`);
+          return;
+        }
+      }
+    } catch (error) {
+      // If HEAD request fails, try to proceed anyway
+      // Some servers don't support HEAD requests
+      console.warn("Failed to check Content-Type:", error);
+    }
+
+    // Process URL here (e.g., convert file format)
+    const processedUrl = url;
 
     audio.src = processedUrl;
     audio.load();
