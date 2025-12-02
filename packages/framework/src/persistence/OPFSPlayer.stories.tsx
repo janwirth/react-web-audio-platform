@@ -183,13 +183,19 @@ function OPFSPlayerStory() {
                           {file.name}
                         </div>
                         <div className="text-xs opacity-70 text-gray-600 dark:text-gray-400">
-                          {formatFileSize(file.size)} • {file.type || "audio"}
+                          {formatFileSize(file.size)} • {file.type || "audio"} •{" "}
+                          {file.canPlay === ""
+                            ? "not supported"
+                            : file.canPlay === "maybe"
+                            ? "maybe supported"
+                            : "supported"}
                         </div>
                       </div>
                       <div className="flex gap-2 ml-4">
                         <button
                           onClick={() => handlePlayFile(file)}
-                          className="px-3 py-1 text-xs border border-black dark:border-white text-black dark:text-white hover:opacity-60 transition-opacity"
+                          disabled={file.canPlay === ""}
+                          className="px-3 py-1 text-xs border border-black dark:border-white text-black dark:text-white hover:opacity-60 transition-opacity disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                           Play
                         </button>
