@@ -11,6 +11,7 @@ import { useHotkeys } from "../hooks/useHotkeys";
 import { findClosestInDirection } from "../findClosestInDirection";
 import { Row } from "@/ui/Row";
 import { Column } from "@/ui/Column";
+import { useHasFocus } from "./focusHooks";
 
 interface FocusContextValue {
   focusId: string;
@@ -429,29 +430,4 @@ const FocusProviderDebugSection = ({
       </div>
     </div>
   );
-};
-
-const useHasFocus = () => {
-  // get the initial state
-  const [focus, setFocus] = useState(document.hasFocus());
-
-  useEffect(() => {
-    // helper functions to update the status
-    const onFocus = () => setFocus(true);
-    const onBlur = () => setFocus(false);
-
-    // assign the listener
-    // update the status on the event
-    window.addEventListener("focus", onFocus);
-    window.addEventListener("blur", onBlur);
-
-    // remove the listener
-    return () => {
-      window.removeEventListener("focus", onFocus);
-      window.removeEventListener("blur", onBlur);
-    };
-  }, []);
-
-  // return the status
-  return focus;
 };
