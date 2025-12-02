@@ -2,7 +2,6 @@ import { useEffect, useRef, useCallback } from "react";
 import { setupCanvas, renderWaveform } from "./lib/canvas-renderer";
 import type { ColorPalette, NormalizationConfig } from "./lib/canvas-renderer";
 import useResizeObserver from "use-resize-observer";
-import { useDebouncedTrailingHook } from "./hooks/useDebouncedTrailingHook";
 import {
   useWaveformRenderData,
   type WaveformRenderData,
@@ -46,25 +45,11 @@ export function Waveform({
   const { width } = useResizeObserver({
     ref: wrapperRef as React.RefObject<Element>,
   });
-  const debounceDelay = 10;
-
-  // Debounce all render params with delay
-  const debouncedWidth = useDebouncedTrailingHook(width, debounceDelay);
-  const debouncedHeight = useDebouncedTrailingHook(height, debounceDelay);
-  const debouncedColorPalette = useDebouncedTrailingHook(
-    colorPalette,
-    debounceDelay
-  );
-  const debouncedNormalizationConfig = useDebouncedTrailingHook(
-    normalizationConfig,
-    debounceDelay
-  );
 
   // Store the latest render function in a ref to avoid triggering effects when it changes
   const handleResizeRef = useRef<
     ((canvasWidth: number, canvasHeight: number) => void) | undefined
   >(undefined);
-  const resizeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleResize = useCallback(
     (canvasWidth: number, canvasHeight: number) => {
@@ -80,18 +65,18 @@ export function Waveform({
       canvas.style.objectFit = "fill";
       canvas.style.display = "block";
 
-      // Render with pre-computed data and debounced params
+      // Render with pre-computed data
       // The renderer handles interpolation for different canvas sizes
       // console.log("rendering waveform", audioUrl);
       renderWaveform(
         canvas,
         renderData.waveformData,
         renderData.spectralData,
-        debouncedColorPalette,
-        debouncedNormalizationConfig
+        colorPalette,
+        normalizationConfig
       );
     },
-    [renderData, debouncedColorPalette, debouncedNormalizationConfig]
+    [renderData, colorPalette, normalizationConfig]
   );
 
   // Keep the ref updated with the latest function
@@ -102,7 +87,7 @@ export function Waveform({
   // Trigger initial render when canvas becomes available and has width
   // This handles the case where renderData is ready but resize observer hasn't fired yet
   useEffect(() => {
-    if (!renderData || debouncedWidth) return; // Skip if we already have debouncedWidth
+    if (!renderData || width) return; // Skip if we already have width
 
     const canvas = canvasRef.current;
     const wrapper = wrapperRef.current;
@@ -112,12 +97,12 @@ export function Waveform({
     const rafId = requestAnimationFrame(() => {
       const canvasWidth = canvas.clientWidth || wrapper.clientWidth;
       if (canvasWidth > 0) {
-        handleResizeRef.current?.(canvasWidth, debouncedHeight);
+        handleResizeRef.current?.(canvasWidth, height);
       }
     });
 
     return () => cancelAnimationFrame(rafId);
-  }, [renderData, debouncedHeight]); // Only depend on renderData and height, not debouncedWidth
+  }, [renderData, height, width]);
 
   const handleClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!onClickAtPercentage) return;
@@ -129,43 +114,21 @@ export function Waveform({
     onClickAtPercentage(percentage);
   };
 
-  // Trigger re-render when debounced params change
-  // Debounce the actual handleResize call to prevent excessive renders
+  // Trigger re-render when params change
   useEffect(() => {
     if (!renderData) return;
 
-    // Use debouncedWidth if available, otherwise fall back to canvas clientWidth
+    // Use width if available, otherwise fall back to canvas clientWidth
     const effectiveWidth =
-      debouncedWidth ??
+      width ??
       canvasRef.current?.clientWidth ??
       wrapperRef.current?.clientWidth;
 
     // If we still don't have a width, wait for it
     if (!effectiveWidth) return;
 
-    // Clear any existing timeout
-    if (resizeTimeoutRef.current) {
-      clearTimeout(resizeTimeoutRef.current);
-    }
-
-    // Debounce the resize call
-    resizeTimeoutRef.current = setTimeout(() => {
-      handleResizeRef.current?.(effectiveWidth, debouncedHeight);
-    }, debounceDelay);
-
-    // Cleanup timeout on unmount or when dependencies change
-    return () => {
-      if (resizeTimeoutRef.current) {
-        clearTimeout(resizeTimeoutRef.current);
-      }
-    };
-  }, [
-    debouncedWidth,
-    debouncedHeight,
-    debouncedColorPalette,
-    debouncedNormalizationConfig,
-    renderData,
-  ]);
+    handleResizeRef.current?.(effectiveWidth, height);
+  }, [width, height, colorPalette, normalizationConfig, renderData]);
 
   if (loading) {
     return (

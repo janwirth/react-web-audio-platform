@@ -7,6 +7,7 @@ import { ColorPicker } from "@/ui/inputs/ColorPicker";
 import { VerticalSlider } from "@/ui/inputs/VerticalSlider";
 import { generateOklchPalette, type ColorPalette } from "@/media/waveform";
 import { useColorScheme } from "@/ui/hooks/useColorScheme";
+import { FPSMeter } from "@overengineering/fps-meter";
 
 const STORAGE_KEY_PREFIX = "waveform-controls-story-";
 
@@ -122,7 +123,7 @@ function WaveformControlsStory() {
           localStorage
         </p>
       </div>
-
+      <FPSMeter />
       {/* Controls */}
       <div className="flex flex-row items-end gap-8">
         <ColorPicker
