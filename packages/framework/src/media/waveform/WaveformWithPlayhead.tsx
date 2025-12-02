@@ -1,4 +1,5 @@
-import { Waveform, WaveformRenderData } from "./Waveform";
+import { Waveform } from "./Waveform";
+import type { WaveformRenderData } from "./hooks/useWaveformRenderData";
 import type { ColorPalette } from "./lib/canvas-renderer";
 import { useTrack, type QueueItem } from "@/media/player/Player";
 
