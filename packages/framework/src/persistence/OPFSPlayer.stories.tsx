@@ -7,6 +7,7 @@ import type { QueueItem } from "@/media/player/Player";
 import { useSetAtom } from "jotai";
 import { queueAtom, currentQueueIndexAtom } from "@/media/player/Player";
 import { AudioContextProvider } from "@/media/audio-context";
+import { Queue } from "@/media/player/Queue";
 
 interface StoredFile {
   id: string;
@@ -148,7 +149,9 @@ function OPFSPlayerStory() {
         }
 
         const opfsFile = await getFileFromOPFS(file.opfsPath, rootRef.current);
+        console.log("opfsFile", opfsFile);
         const url = URL.createObjectURL(opfsFile);
+        console.log("url", url);
 
         const queueItem: QueueItem = {
           id: file.id,
@@ -236,7 +239,10 @@ function OPFSPlayerStory() {
             <PlayerUI />
           </div>
 
-          <div className="flex-1 flex flex-col gap-4" style={{ minHeight: 0 }}>
+          <Column
+            className="flex-1 flex flex-col gap-4"
+            style={{ minHeight: 0 }}
+          >
             <h2 className="text-sm font-bold text-black dark:text-white font-mono">
               Stored Files ({files.length})
             </h2>
@@ -279,7 +285,10 @@ function OPFSPlayerStory() {
                 </div>
               )}
             </div>
-          </div>
+          </Column>
+          <Column>
+            <Queue></Queue>
+          </Column>
         </Column>
       </AudioContextProvider>
     </Player>
@@ -299,4 +308,3 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
-

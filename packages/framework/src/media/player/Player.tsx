@@ -85,6 +85,17 @@ export const Player: React.FC<PlayerProps> = ({ children }) => {
     }
   }, [currentQueueIndex, playTrackByIndex]);
 
+  // Auto-play when queue index changes (e.g., when queue is set externally)
+  useEffect(() => {
+    if (currentQueueIndex >= 0 && currentQueueIndex < queue.length) {
+      const item = queue[currentQueueIndex];
+      if (item && item.audioUrl !== activeUrl) {
+        // Only play if the URL doesn't match (to avoid loops when playTrackByIndex sets it)
+        playTrackByIndex(currentQueueIndex);
+      }
+    }
+  }, [currentQueueIndex, queue, activeUrl, playTrackByIndex]);
+
   // Handle track ending and advance to next in queue
   useEffect(() => {
     const audio = audioRef.current;
