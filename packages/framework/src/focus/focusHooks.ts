@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { findClosestInDirection } from "../findClosestInDirection";
+import { findClosestInDirection } from "../layout-and-control/findClosestInDirection";
 
 export const focusElementTo = (
   direction: "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight",

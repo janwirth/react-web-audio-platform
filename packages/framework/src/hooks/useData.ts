@@ -3,7 +3,7 @@ import { atom, useAtom } from "jotai";
 import z from "zod";
 import { useDebouncedTrailingHook } from "../media/waveform/hooks/useDebouncedTrailingHook";
 
-const BASE_URL = "http://192.168.178.48:3000";
+const BASE_URL = "http://localhost:3000";
 
 const TrackApiSchema = z.object({
   id: z.string(),

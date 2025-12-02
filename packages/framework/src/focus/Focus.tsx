@@ -7,8 +7,8 @@ import {
   useId,
   useMemo,
 } from "react";
-import { useHotkeys } from "../hooks/useHotkeys";
-import { findClosestInDirection } from "../findClosestInDirection";
+import { useHotkeys } from "../layout-and-control/hooks/useHotkeys";
+import { findClosestInDirection } from "../layout-and-control/findClosestInDirection";
 import { Row } from "@/ui/Row";
 import { Column } from "@/ui/Column";
 import { useHasFocus } from "./focusHooks";

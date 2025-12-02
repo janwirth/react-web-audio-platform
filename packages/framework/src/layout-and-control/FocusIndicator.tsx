@@ -12,9 +12,9 @@ export function FocusIndicator({
   return (
     <motion.div
       layoutId={`focus-indicator-${variant}`}
-      className={`w-1.5 h-1.5 bg-red-500 shrink-0 ${className} absolute`}
+      className={`w-1.5 h-1.5 bg-red-500 shrink-0 ${className} absolute border-red-500/50`}
       initial={{ scale: 1 }}
-      animate={{ scale: [1, 2.5, 1] }}
+      animate={{ scale: [1, 1.75, 1] }}
       transition={{
         duration: 0.15,
         ease: "circOut",

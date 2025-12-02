@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { useRef, useState } from "react";
-import { FocusIndicator } from "../FocusIndicator";
-import { Column } from "../../ui/Column";
-import { Row } from "../../ui/Row";
+import { FocusIndicator } from "../layout-and-control/FocusIndicator";
+import { Column } from "../ui/Column";
+import { Row } from "../ui/Row";
 import {
   focusElementTo,
   useIsFocused,
@@ -10,7 +10,7 @@ import {
 } from "./focusHooks";
 
 const meta = {
-  title: "Stories/LayoutAndControl/Focus/KeypressLog",
+  title: "Stories/Focus/KeypressLog",
   parameters: {
     layout: "fullscreen",
   },
