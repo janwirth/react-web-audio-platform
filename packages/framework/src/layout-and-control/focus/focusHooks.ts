@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { findClosestInDirection } from "../findClosestInDirection";
 
 export const focusElementTo = (
@@ -36,8 +36,47 @@ export const useIsFocused = (ref: React.RefObject<HTMLElement | null>) => {
 
 export const useKeydownIfFocussed = (
   ref: React.RefObject<HTMLElement | null>,
-  callback: (e: KeyboardEvent) => void
+  callback: (e: KeyboardEvent) => void,
+  options?: {
+    autoFocus?: boolean;
+  }
 ) => {
+  const hasAutoFocusedRef = useRef(false);
+  const originalTabIndexRef = useRef<string | null>(null);
+
+  // Set tabindex and handle autofocus in a separate effect that runs first
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) return;
+
+    // Store original tabindex value only once
+    if (originalTabIndexRef.current === null) {
+      originalTabIndexRef.current = element.getAttribute("tabindex");
+    }
+
+    // Set tabindex to 0 if not already set
+    if (element.getAttribute("tabindex") === null) {
+      element.setAttribute("tabindex", "0");
+    }
+
+    // Handle autofocus only once on initial mount
+    if (options?.autoFocus && !hasAutoFocusedRef.current) {
+      hasAutoFocusedRef.current = true;
+      element.focus();
+    }
+
+    return () => {
+      // Restore original tabindex on cleanup
+      if (element) {
+        if (originalTabIndexRef.current === null) {
+          element.removeAttribute("tabindex");
+        } else {
+          element.setAttribute("tabindex", originalTabIndexRef.current);
+        }
+      }
+    };
+  }, [ref, options?.autoFocus]);
+
   useEffect(() => {
     const element = ref.current;
     if (!element) return;

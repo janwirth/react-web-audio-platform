@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { FocusIndicator } from "../FocusIndicator";
 import { Column } from "../../ui/Column";
 import { Row } from "../../ui/Row";
@@ -31,52 +31,49 @@ function FocusableWithKeypressLog({
   const isFocused = useIsFocused(elementRef);
   const [counter, setCounter] = useState(0);
 
-  useEffect(() => {
-    if (autoFocus && elementRef.current) {
-      elementRef.current.focus();
-    }
-  }, [autoFocus]);
-
-  useKeydownIfFocussed(elementRef, (e) => {
-    console.log(`[${label}] Key pressed:`, {
-      key: e.key,
-      code: e.code,
-      ctrlKey: e.ctrlKey,
-      shiftKey: e.shiftKey,
-      altKey: e.altKey,
-      metaKey: e.metaKey,
-    });
-    if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setCounter((prev) => {
-        if (prev === 0) {
-          // Already at min, navigate to next element
-          focusElementTo("ArrowUp", elementRef);
-          return prev;
-        }
-        return prev - 1;
+  useKeydownIfFocussed(
+    elementRef,
+    (e) => {
+      console.log(`[${label}] Key pressed:`, {
+        key: e.key,
+        code: e.code,
+        ctrlKey: e.ctrlKey,
+        shiftKey: e.shiftKey,
+        altKey: e.altKey,
+        metaKey: e.metaKey,
       });
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setCounter((prev) => {
-        if (prev === 5) {
-          // Already at max, navigate to next element
-          focusElementTo("ArrowDown", elementRef);
-          return prev;
-        }
-        return prev + 1;
-      });
-    } else if (e.key === "ArrowLeft") {
-      focusElementTo("ArrowLeft", elementRef);
-    } else if (e.key === "ArrowRight") {
-      focusElementTo("ArrowRight", elementRef);
-    }
-  });
+      if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setCounter((prev) => {
+          if (prev === 0) {
+            // Already at min, navigate to next element
+            focusElementTo("ArrowUp", elementRef);
+            return prev;
+          }
+          return prev - 1;
+        });
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setCounter((prev) => {
+          if (prev === 5) {
+            // Already at max, navigate to next element
+            focusElementTo("ArrowDown", elementRef);
+            return prev;
+          }
+          return prev + 1;
+        });
+      } else if (e.key === "ArrowLeft") {
+        focusElementTo("ArrowLeft", elementRef);
+      } else if (e.key === "ArrowRight") {
+        focusElementTo("ArrowRight", elementRef);
+      }
+    },
+    { autoFocus }
+  );
 
   return (
     <Column
       ref={elementRef}
-      tabIndex={0}
       className="font-mono p-4 border border-current outline-none relative"
     >
       <div className="text-sm font-semibold mb-2 opacity-100">{label}</div>
